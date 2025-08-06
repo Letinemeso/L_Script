@@ -31,6 +31,7 @@ namespace LScript
     public:
         void add_variable(const std::string& _name, Variable* _variable);
         Variable* get_variable(const std::string& _name) const;
+        Variable* get_local_variable(const std::string& _name) const;
         [[nodiscard]] Variable* extract_variable(const std::string& _name);
 
         void clear();

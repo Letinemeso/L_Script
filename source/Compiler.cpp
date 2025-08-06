@@ -67,7 +67,7 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
     if(first_word_offset == Unlimited_Size)
         return Unlimited_Size;
 
-    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, first_word_offset, _max_size);
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, true, first_word_offset, _max_size);
     L_ASSERT(after_first_word_offset > first_word_offset);
 
     unsigned int first_word_size = after_first_word_offset - first_word_offset;
@@ -111,6 +111,7 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
 unsigned int Compiler::M_parse_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
 {
     L_ASSERT(_type != Void_Type_Name);  //  variable type cannot be void
+    L_ASSERT(_context.get_local_variable(_name) == nullptr);
 
     Variable* variable = new Variable;
     variable->set_type(_type);
@@ -132,6 +133,9 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     unsigned int after_args_offset = M_skip_until_closer(_source, '(', ')', args_offset + 1);
     L_ASSERT(after_args_offset != Unlimited_Size);
 
+    LDS::Vector<Function::Argument_Data> arguments_data = M_parse_function_arguments_data(_source, args_offset + 1, after_args_offset);
+    std::cout << "Total arguments amount: " << arguments_data.size() << std::endl;
+
     unsigned int body_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_args_offset + 1);
     L_ASSERT(body_offset != Unlimited_Size);
 
@@ -139,6 +143,46 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     L_ASSERT(after_body_offset != Unlimited_Size);
 
     return after_body_offset + 1;
+}
+
+LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const
+{
+    LDS::Vector<Function::Argument_Data> result;
+
+    unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _begin, _end);
+    if(offset + 1 >= _end)
+        return result;
+
+    while(offset < _end)
+    {
+        unsigned int type_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, offset, _end);
+        unsigned int after_type_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, type_offset, _end);
+        L_ASSERT(after_type_offset > type_offset);
+
+        unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_type_offset, _end);
+        unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset, _end);
+        if(after_name_offset == Unlimited_Size)
+            after_name_offset = _end;
+        L_ASSERT(after_name_offset > name_offset);
+
+        std::string type = _source.substr(type_offset, after_type_offset - type_offset);
+        std::string name = _source.substr(name_offset, after_name_offset - name_offset);
+
+        L_ASSERT(LV::Type_Manager::type_is_registered(type));
+
+        result.push({type, name});
+
+        std::cout << "Parsed argument " << name << " with type " << type << std::endl;
+
+        offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset, _end);
+        if(offset >= _end)
+            break;
+
+        L_ASSERT(_source[offset] == ',');
+        ++offset;
+    }
+
+    return result;
 }
 
 
@@ -239,6 +283,11 @@ Compiler::Expression_Goal Compiler::M_function_or_variable_declaration(const std
         return Expression_Goal::Variable_Declaration;
 
     return Expression_Goal::Unknown;
+}
+
+bool Compiler::M_is_existing_variable(const Context& _context, const std::string& _name) const
+{
+    return _context.get_variable(_name) != nullptr;
 }
 
 

@@ -24,14 +24,23 @@ void Context::add_variable(const std::string& _name, Variable* _variable)
 
 Variable* Context::get_variable(const std::string& _name) const
 {
-    Variables_Map::Const_Iterator maybe_variable_it = m_variables.find(_name);
-    if(maybe_variable_it.is_ok())
-        return *maybe_variable_it;
+    Variable* local = get_local_variable(_name);
+    if(local)
+        return local;
 
     if(!m_parent_context)
         return nullptr;
 
     return m_parent_context->get_variable(_name);
+}
+
+Variable* Context::get_local_variable(const std::string& _name) const
+{
+    Variables_Map::Const_Iterator maybe_variable_it = m_variables.find(_name);
+    if(maybe_variable_it.is_ok())
+        return *maybe_variable_it;
+
+    return nullptr;
 }
 
 Variable* Context::extract_variable(const std::string& _name)
