@@ -248,4 +248,6 @@ void Compiler::compile(const std::string& _source) const
     L_ASSERT(m_script_target);
 
     M_parse_global_space(_source);
+
+
 }

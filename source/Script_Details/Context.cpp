@@ -10,8 +10,7 @@ Context::Context()
 
 Context::~Context()
 {
-    for(Variables_Map::Iterator it = m_variables.iterator(); !it.end_reached(); ++it)
-        delete *it;
+    clear();
 }
 
 
@@ -26,10 +25,13 @@ void Context::add_variable(const std::string& _name, Variable* _variable)
 Variable* Context::get_variable(const std::string& _name) const
 {
     Variables_Map::Const_Iterator maybe_variable_it = m_variables.find(_name);
-    if(!maybe_variable_it.is_ok())
+    if(maybe_variable_it.is_ok())
+        return *maybe_variable_it;
+
+    if(!m_parent_context)
         return nullptr;
 
-    return *maybe_variable_it;
+    return m_parent_context->get_variable(_name);
 }
 
 Variable* Context::extract_variable(const std::string& _name)
@@ -42,4 +44,12 @@ Variable* Context::extract_variable(const std::string& _name)
     m_variables.erase(variable_it);
 
     return variable;
+}
+
+
+void Context::clear()
+{
+    for(Variables_Map::Iterator it = m_variables.iterator(); !it.end_reached(); ++it)
+        delete *it;
+    m_variables.clear();
 }
