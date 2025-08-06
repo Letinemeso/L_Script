@@ -58,10 +58,11 @@ namespace LScript
         unsigned int M_skip_until_symbol_met(const std::string& _source, char _symbol, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_until_closer(const std::string& _source, char _opener, char _closer, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
 
-        Expression_Type M_get_expression_type(const std::string& _expression) const;
+        Expression_Type M_get_expression_type(const std::string& _expression, const Context& _context) const;
 
         Expression_Goal M_function_or_variable_declaration(const std::string& _source, unsigned int _offset_after_name) const;
         bool M_is_existing_variable(const Context& _context, const std::string& _name) const;
+        bool M_can_be_variable_name(const std::string& _name) const;
 
     public:
         void compile(const std::string& _source) const;

@@ -4,6 +4,7 @@
 #include <Builder_Stub.h>
 
 #include <Script_Details/Context.h>
+#include <Script_Details/Function.h>
 
 
 namespace LScript
@@ -17,12 +18,25 @@ namespace LScript
     private:
         Context m_global_context;
 
+        using Functions_Map = LDS::Map<std::string, Function*>;
+        Functions_Map m_functions;
+
+    public:
+        Script();
+        ~Script();
+
     public:
         inline Context& global_context() { return m_global_context; }
         inline const Context& global_context() const { return m_global_context; }
 
     public:
-        // void run();
+        void register_function(const std::string& _name, Function* _function);
+        void clear_functions();
+
+        Function* get_function(const std::string& _name) const;
+
+    public:
+        void run();
 
     };
 

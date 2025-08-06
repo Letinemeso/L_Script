@@ -13,6 +13,7 @@ namespace LScript
 
     Compiler::Acceptable_Symbols Empty_Symbols(Max_Symbols, false);
     Compiler::Acceptable_Symbols Variable_Name_Symbols(Max_Symbols, false);
+    Compiler::Acceptable_Symbols Type_Name_Symbols(Max_Symbols, false);
 }
 
 
@@ -37,6 +38,17 @@ Compiler::Compiler()
     for(char i = '0'; i <= '9'; ++i)
         Variable_Name_Symbols[i] = true;
     Variable_Name_Symbols['_'] = true;
+
+    for(char i = 'a'; i <= 'z'; ++i)
+        Type_Name_Symbols[i] = true;
+    for(char i = 'A'; i <= 'Z'; ++i)
+        Type_Name_Symbols[i] = true;
+    for(char i = '0'; i <= '9'; ++i)
+        Type_Name_Symbols[i] = true;
+    Type_Name_Symbols['_'] = true;
+    Type_Name_Symbols[':'] = true;
+    Type_Name_Symbols['<'] = true;
+    Type_Name_Symbols['>'] = true;
 }
 
 Compiler::~Compiler()
@@ -67,7 +79,7 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
     if(first_word_offset == Unlimited_Size)
         return Unlimited_Size;
 
-    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, true, first_word_offset, _max_size);
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
     L_ASSERT(after_first_word_offset > first_word_offset);
 
     unsigned int first_word_size = after_first_word_offset - first_word_offset;
@@ -75,7 +87,7 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
 
     std::cout << "Parsed word: " << first_word << std::endl;
 
-    Expression_Type expression_type = M_get_expression_type(first_word);
+    Expression_Type expression_type = M_get_expression_type(first_word, _context);
 
     if(expression_type == Expression_Type::Type_Name)
         std::cout << "It's a type name" << std::endl;
@@ -141,6 +153,13 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
 
     unsigned int after_body_offset = M_skip_until_closer(_source, '{', '}', body_offset + 1);
     L_ASSERT(after_body_offset != Unlimited_Size);
+
+    L_ASSERT(m_script_target->get_function(_name) == nullptr);
+
+    Function* function = new Function;
+    function->set_expected_arguments_data(arguments_data);
+
+    m_script_target->register_function(_name, function);
 
     return after_body_offset + 1;
 }
@@ -248,7 +267,7 @@ unsigned int Compiler::M_skip_until_closer(const std::string& _source, char _ope
 }
 
 
-Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _expression) const
+Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _expression, const Context& _context) const
 {
     if(_expression == If_Expression)
         return Expression_Type::If;
@@ -263,6 +282,9 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
         return Expression_Type::Type_Name;
     if(LV::Type_Manager::type_is_registered(_expression))
         return Expression_Type::Type_Name;
+
+    if(M_can_be_variable_name(_expression) && _context.get_variable(_expression))
+        return Expression_Type::Existing_Variable;
 
     return Expression_Type::Unknown;
 }
@@ -288,6 +310,17 @@ Compiler::Expression_Goal Compiler::M_function_or_variable_declaration(const std
 bool Compiler::M_is_existing_variable(const Context& _context, const std::string& _name) const
 {
     return _context.get_variable(_name) != nullptr;
+}
+
+bool Compiler::M_can_be_variable_name(const std::string& _name) const
+{
+    for(unsigned int i = 0; i < _name.size(); ++i)
+    {
+        char current_char = _name[i];
+        if(!Variable_Name_Symbols[current_char])
+            return false;
+    }
+    return true;
 }
 
 
