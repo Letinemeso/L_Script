@@ -23,6 +23,7 @@ namespace LScript
 
     public:
         void reset();
+        void set_type(const std::string& _type);
         void set_data(const Strings_Vector& _data);
         void setup(const std::string& _type, const Strings_Vector& _data);
 

@@ -29,6 +29,12 @@ void Variable::reset()
     m_type.clear();
 }
 
+void Variable::set_type(const std::string& _type)
+{
+    reset();
+    m_type = _type;
+}
+
 void Variable::set_data(const Strings_Vector& _data)
 {
     if(m_data)
