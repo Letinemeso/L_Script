@@ -48,6 +48,15 @@ void Variable::set_data(const Strings_Vector& _data)
     LV::Type_Manager::parse(m_type, _data, m_data);
 }
 
+void Variable::set_data(void* _data, unsigned int _raw_size)
+{
+    if(m_data)
+        LV::Type_Manager::clear(m_type, m_data);
+
+    m_data = _data;
+    m_raw_size = _raw_size;
+}
+
 void Variable::setup(const std::string& _type, const Strings_Vector& _data)
 {
     reset();

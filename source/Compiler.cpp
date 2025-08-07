@@ -283,8 +283,6 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_operation_offset < Unlimited_Size);
 
-    // std::cout << "Called " << _name << '.' << operation_name << std::endl;
-
     Extract_Variable* extract_variable_operation = new Extract_Variable;
     extract_variable_operation->set_context(&_compound_statement.context());
     extract_variable_operation->set_variable_name(_name);
@@ -438,6 +436,4 @@ void Compiler::compile(const std::string& _source) const
     L_ASSERT(m_script_target);
 
     M_parse_global_space(_source);
-
-
 }

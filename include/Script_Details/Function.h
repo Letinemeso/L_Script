@@ -21,10 +21,11 @@ namespace LScript
         };
 
         using Arguments = LDS::Vector<Variable*>;
+        using Arguments_Data = LDS::Vector<Argument_Data>;
 
     private:
         std::string m_return_type;
-        LDS::Vector<Argument_Data> m_expected_arguments_data;
+        Arguments_Data m_expected_arguments_data;
 
         Compound_Statement m_compound_statement;        
 
@@ -34,10 +35,13 @@ namespace LScript
 
     public:
         inline void set_return_type(const std::string& _value) { m_return_type = _value; }
-        inline void set_expected_arguments_data(const LDS::Vector<Argument_Data>& _args) { m_expected_arguments_data = _args; }
+        inline void set_expected_arguments_data(const Arguments_Data& _args) { m_expected_arguments_data = _args; }
+        inline void set_expected_arguments_data(Arguments_Data&& _args) { m_expected_arguments_data = (Arguments_Data&&)_args; }
 
         inline Compound_Statement& compound_statement() { return m_compound_statement; }
         inline const Compound_Statement& compound_statement() const { return m_compound_statement; }
+
+        inline const Arguments_Data& expected_arguments_data() const { return m_expected_arguments_data; }
 
     public:
         [[nodiscard]] Variable* call(const Arguments& _args);
