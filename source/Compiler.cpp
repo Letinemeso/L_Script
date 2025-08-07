@@ -2,6 +2,8 @@
 
 #include <Script_Details/Operations/Operation.h>
 #include <Script_Details/Operations/Variable_Creation.h>
+#include <Script_Details/Operations/Extract_Variable.h>
+#include <Script_Details/Operations/Call_Member_Function.h>
 
 using namespace LScript;
 
@@ -11,6 +13,7 @@ namespace LScript
     constexpr const char* If_Expression = "if";
     constexpr const char* For_Expression = "for";
     constexpr const char* While_Expression = "while";
+    constexpr const char* Return_Expression = "return";
 
     constexpr unsigned int Max_Symbols = 0xFF;
 
@@ -86,7 +89,7 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     unsigned int first_word_size = after_first_word_offset - first_word_offset;
     std::string first_word = _source.substr(first_word_offset, first_word_size);
 
-    Expression_Type expression_type = M_get_expression_type(first_word, m_script_target->global_context());
+    Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type == Expression_Type::Type_Name);
 
     unsigned int second_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_first_word_offset);
@@ -102,12 +105,12 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     if(expression_goal == Expression_Goal::Function_Declaration)
         return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset);
     else if(expression_goal == Expression_Goal::Variable_Declaration)
-        return M_parse_variable_declaration(m_script_target->global_context(), _source, first_word, second_word, after_second_word_offset);
+        return M_parse_global_variable_declaration(m_script_target->global_context(), _source, first_word, second_word, after_second_word_offset);
 
     return Unlimited_Size;
 }
 
-unsigned int Compiler::M_parse_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
+unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
 {
     L_ASSERT(_type != Void_Type_Name);  //  variable type cannot be void
     L_ASSERT(_context.get_local_variable(_name) == nullptr);
@@ -144,6 +147,7 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     L_ASSERT(m_script_target->get_function(_name) == nullptr);
 
     Function* function = new Function;
+    function->set_return_type(_type);
     function->set_expected_arguments_data(arguments_data);
 
     M_parse_function_body(*function, _source, body_offset + 1, after_body_offset);
@@ -216,7 +220,7 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     unsigned int first_word_size = after_first_word_offset - first_word_offset;
     std::string first_word = _source.substr(first_word_offset, first_word_size);
 
-    Expression_Type expression_type = M_get_expression_type(first_word, _compound_statement.context());
+    Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type != Expression_Type::Unknown);
 
     if(expression_type == Expression_Type::If)
@@ -234,6 +238,10 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     if(expression_type == Expression_Type::Type_Name)
     {
         return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+    }
+    if(expression_type == Expression_Type::Existing_Variable)
+    {
+        return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
     }
 
     return Unlimited_Size;
@@ -257,11 +265,39 @@ unsigned int Compiler::M_parse_dynamic_declaration(Compound_Statement& _compound
 
     _compound_statement.add_operation(operation);
 
-    unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset);
-    L_ASSERT(semicolon_index != Unlimited_Size);
-    L_ASSERT(_source[semicolon_index] == ';');
+    return M_skip_past_semicolon(_source, after_name_offset, _max_size);
+}
 
-    return semicolon_index + 1;
+unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    L_ASSERT(_source[_offset] == '.');
+
+    unsigned int operation_offset = _offset + 1;
+    unsigned int after_operation_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, operation_offset, _max_size);
+    L_ASSERT(after_operation_offset > operation_offset);
+    std::string operation_name = _source.substr(operation_offset, after_operation_offset - operation_offset);
+
+    unsigned int arguments_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_operation_offset, _max_size);
+    L_ASSERT(_source[arguments_offset] == '(');
+    ++arguments_offset;
+    unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
+    L_ASSERT(after_operation_offset < Unlimited_Size);
+
+    // std::cout << "Called " << _name << '.' << operation_name << std::endl;
+
+    Extract_Variable* extract_variable_operation = new Extract_Variable;
+    extract_variable_operation->set_context(&_compound_statement.context());
+    extract_variable_operation->set_variable_name(_name);
+
+    Call_Member_Function* call_member_function_operation = new Call_Member_Function;
+    call_member_function_operation->set_context(&_compound_statement.context());
+    call_member_function_operation->set_function_name(operation_name);
+
+    call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
+
+    _compound_statement.add_operation(call_member_function_operation);
+
+    return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
 }
 
 
@@ -326,8 +362,17 @@ unsigned int Compiler::M_skip_until_closer(const std::string& _source, char _ope
     return Unlimited_Size;
 }
 
+unsigned int Compiler::M_skip_past_semicolon(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(semicolon_index != Unlimited_Size);
+    L_ASSERT(_source[semicolon_index] == ';');
 
-Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _expression, const Context& _context) const
+    return semicolon_index + 1;
+}
+
+
+Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _expression) const
 {
     if(_expression == If_Expression)
         return Expression_Type::If;
@@ -343,7 +388,10 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
     if(LV::Type_Manager::type_is_registered(_expression))
         return Expression_Type::Type_Name;
 
-    if(M_can_be_variable_name(_expression) && _context.get_variable(_expression))
+    if(m_script_target->get_function(_expression))
+        return Expression_Type::Existing_Function;
+
+    if(M_can_be_variable_name(_expression))
         return Expression_Type::Existing_Variable;
 
     return Expression_Type::Unknown;

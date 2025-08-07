@@ -15,7 +15,7 @@ Function::~Function()
 
 
 
-void Function::call(const Arguments& _args)
+Variable* Function::call(const Arguments& _args)
 {
     L_ASSERT(_args.size() == m_expected_arguments_data.size());
 
@@ -32,7 +32,10 @@ void Function::call(const Arguments& _args)
         m_compound_statement.context().add_variable(m_expected_arguments_data[i].name, variable);
     }
 
-    m_compound_statement.process();
+    Variable* result = m_compound_statement.process();
+    L_ASSERT( (!result && m_return_type == "void") || (result && (result->type() == m_return_type)) );
 
     m_compound_statement.context().clear();
+
+    return result;
 }

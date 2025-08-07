@@ -48,7 +48,8 @@ void Script::run()
     Function* main_func = get_function("main");
     L_ASSERT(main_func);
 
-    main_func->call({});
+    Variable* main_result = main_func->call({});
+    L_ASSERT(!main_result);
 }
 
 

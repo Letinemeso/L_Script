@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Script_Details/Variable.h>
+
 
 namespace LScript
 {
@@ -10,7 +12,7 @@ namespace LScript
         virtual ~Operation() { }
 
     public:
-        virtual void process() = 0;
+        [[nodiscard]] virtual Variable* process() = 0;
 
     };
 

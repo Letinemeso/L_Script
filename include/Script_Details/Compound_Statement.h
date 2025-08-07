@@ -30,7 +30,7 @@ namespace LScript
         void clear_operations();
 
     public:
-        void process();
+        [[nodiscard]] Variable* process();
 
     };
 

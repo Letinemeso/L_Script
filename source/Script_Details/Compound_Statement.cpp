@@ -30,11 +30,15 @@ void Compound_Statement::clear_operations()
 
 
 
-void Compound_Statement::process()
+Variable* Compound_Statement::process()
 {
+    Variable* result = nullptr;
+
     for(Operations_List::Iterator it = m_operations.begin(); !it.end_reached(); ++it)
     {
         Operation* operation = *it;
-        operation->process();
+        result = operation->process();
     }
+
+    return result;
 }

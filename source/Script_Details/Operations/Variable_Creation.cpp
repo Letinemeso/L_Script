@@ -3,7 +3,7 @@
 using namespace LScript;
 
 
-void Variable_Creation::process()
+Variable* Variable_Creation::process()
 {
     L_ASSERT(m_context);
 
@@ -11,4 +11,6 @@ void Variable_Creation::process()
     variable->set_type(m_variable_type);
 
     m_context->add_variable(m_variable_name, variable);
+
+    return nullptr;
 }
