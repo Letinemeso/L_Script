@@ -1,5 +1,8 @@
 #include <Compiler.h>
 
+#include <Script_Details/Operations/Operation.h>
+#include <Script_Details/Operations/Variable_Creation.h>
+
 using namespace LScript;
 
 namespace LScript
@@ -60,17 +63,15 @@ Compiler::~Compiler()
 
 void Compiler::M_parse_global_space(const std::string& _source) const
 {
-    Context& global_context = m_script_target->global_context();
-
     unsigned int offset = 0;
     while(offset < _source.size())
     {
-        offset = M_parse_expression(global_context, _source, offset);
+        offset = M_parse_global_expression(_source, offset);
     }
 }
 
 
-unsigned int Compiler::M_parse_expression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+unsigned int Compiler::M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     if(_max_size == Unlimited_Size)
         _max_size = _source.size();
@@ -85,14 +86,8 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
     unsigned int first_word_size = after_first_word_offset - first_word_offset;
     std::string first_word = _source.substr(first_word_offset, first_word_size);
 
-    std::cout << "Parsed word: " << first_word << std::endl;
-
-    Expression_Type expression_type = M_get_expression_type(first_word, _context);
-
-    if(expression_type == Expression_Type::Type_Name)
-        std::cout << "It's a type name" << std::endl;
-    else if(expression_type == Expression_Type::Unknown)
-        std::cout << "Expression type unknown" << std::endl;
+    Expression_Type expression_type = M_get_expression_type(first_word, m_script_target->global_context());
+    L_ASSERT(expression_type == Expression_Type::Type_Name);
 
     unsigned int second_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_first_word_offset);
     unsigned int after_second_word_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, second_word_offset);
@@ -101,21 +96,13 @@ unsigned int Compiler::M_parse_expression(Context& _context, const std::string& 
     unsigned int next_word_size = after_second_word_offset - second_word_offset;
     std::string second_word = _source.substr(second_word_offset, next_word_size);
 
-    std::cout << "Next parsed word: " << second_word << std::endl;
-
     Expression_Goal expression_goal = M_function_or_variable_declaration(_source, after_second_word_offset);
-    L_ASSERT(expression_goal != Expression_Goal::Unknown);
+    L_ASSERT(expression_goal == Expression_Goal::Function_Declaration || expression_goal == Expression_Goal::Variable_Declaration);
 
     if(expression_goal == Expression_Goal::Function_Declaration)
-    {
-        std::cout << "It's a function declaration" << std::endl;
         return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset);
-    }
     else if(expression_goal == Expression_Goal::Variable_Declaration)
-    {
-        std::cout << "It's a variable declaration" << std::endl;
-        return M_parse_variable_declaration(_context, _source, first_word, second_word, after_second_word_offset);
-    }
+        return M_parse_variable_declaration(m_script_target->global_context(), _source, first_word, second_word, after_second_word_offset);
 
     return Unlimited_Size;
 }
@@ -146,10 +133,10 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     L_ASSERT(after_args_offset != Unlimited_Size);
 
     LDS::Vector<Function::Argument_Data> arguments_data = M_parse_function_arguments_data(_source, args_offset + 1, after_args_offset);
-    std::cout << "Total arguments amount: " << arguments_data.size() << std::endl;
 
     unsigned int body_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_args_offset + 1);
     L_ASSERT(body_offset != Unlimited_Size);
+    L_ASSERT(_source[body_offset] == '{');
 
     unsigned int after_body_offset = M_skip_until_closer(_source, '{', '}', body_offset + 1);
     L_ASSERT(after_body_offset != Unlimited_Size);
@@ -159,10 +146,13 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     Function* function = new Function;
     function->set_expected_arguments_data(arguments_data);
 
+    M_parse_function_body(*function, _source, body_offset + 1, after_body_offset);
+
     m_script_target->register_function(_name, function);
 
     return after_body_offset + 1;
 }
+
 
 LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const
 {
@@ -191,8 +181,6 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
 
         result.push({type, name});
 
-        std::cout << "Parsed argument " << name << " with type " << type << std::endl;
-
         offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset, _end);
         if(offset >= _end)
             break;
@@ -202,6 +190,78 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
     }
 
     return result;
+}
+
+void Compiler::M_parse_function_body(Function& _function, const std::string& _source, unsigned int _begin, unsigned int _end) const
+{
+    unsigned int offset = _begin;
+    while(offset < _end)
+    {
+        offset = M_parse_dynamic_expression(_function.compound_statement(), _source, offset, _end);
+    }
+}
+
+unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    if(_max_size == Unlimited_Size)
+        _max_size = _source.size();
+
+    unsigned int first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    if(first_word_offset == Unlimited_Size)
+        return Unlimited_Size;
+
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
+    L_ASSERT(after_first_word_offset > first_word_offset);
+
+    unsigned int first_word_size = after_first_word_offset - first_word_offset;
+    std::string first_word = _source.substr(first_word_offset, first_word_size);
+
+    Expression_Type expression_type = M_get_expression_type(first_word, _compound_statement.context());
+    L_ASSERT(expression_type != Expression_Type::Unknown);
+
+    if(expression_type == Expression_Type::If)
+    {
+        // return M_parse_if();
+    }
+    if(expression_type == Expression_Type::For)
+    {
+        // return M_parse_for();
+    }
+    if(expression_type == Expression_Type::While)
+    {
+        // return M_parse_while();
+    }
+    if(expression_type == Expression_Type::Type_Name)
+    {
+        return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+    }
+
+    return Unlimited_Size;
+}
+
+unsigned int Compiler::M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset);
+    unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset);
+    L_ASSERT(after_name_offset > name_offset);
+
+    unsigned int next_word_size = after_name_offset - name_offset;
+    std::string name = _source.substr(name_offset, next_word_size);
+
+    L_ASSERT(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration);
+
+    Variable_Creation* operation = new Variable_Creation;
+    operation->set_context(&_compound_statement.context());
+    operation->set_variable_type(_type);
+    operation->set_variable_name(name);
+
+    _compound_statement.add_operation(operation);
+
+    unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset);
+    L_ASSERT(semicolon_index != Unlimited_Size);
+    L_ASSERT(_source[semicolon_index] == ';');
+
+    return semicolon_index + 1;
 }
 
 

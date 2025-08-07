@@ -3,6 +3,7 @@
 #include <Script.h>
 
 #include <Script_Details/Function.h>
+#include <Script_Details/Compound_Statement.h>
 
 
 namespace LScript
@@ -28,9 +29,7 @@ namespace LScript
         {
             Unknown,
             Variable_Declaration,
-            Function_Declaration,
-            Function_Call,
-            Operation_With_Variable
+            Function_Declaration
         };
 
     public:
@@ -49,10 +48,14 @@ namespace LScript
     private:
         void M_parse_global_space(const std::string& _source) const;
 
-        unsigned int M_parse_expression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
+        unsigned int M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_parse_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
         unsigned int M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
+
         LDS::Vector<Function::Argument_Data> M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const;
+        void M_parse_function_body(Function& _function, const std::string& _source, unsigned int _begin, unsigned int _end) const;
+        unsigned int M_parse_dynamic_expression(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        unsigned int M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
         unsigned int M_skip_until_symbol_met(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_until_symbol_met(const std::string& _source, char _symbol, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;

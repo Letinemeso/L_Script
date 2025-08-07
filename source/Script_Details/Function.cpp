@@ -15,7 +15,7 @@ Function::~Function()
 
 
 
-void Function::call(const LDS::Vector<Variable*>& _args)
+void Function::call(const Arguments& _args)
 {
     L_ASSERT(_args.size() == m_expected_arguments_data.size());
 
@@ -29,8 +29,10 @@ void Function::call(const LDS::Vector<Variable*>& _args)
         variable->set_type(_args[i]->type());
         variable->shallow_copy(parameter);
 
-        m_context.add_variable(m_expected_arguments_data[i].name, variable);
+        m_compound_statement.context().add_variable(m_expected_arguments_data[i].name, variable);
     }
 
-    m_context.clear();
+    m_compound_statement.process();
+
+    m_compound_statement.context().clear();
 }

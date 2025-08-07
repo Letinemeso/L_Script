@@ -1,7 +1,11 @@
 #pragma once
 
+#include <Data_Structures/Vector.h>
+
 #include <Script_Details/Variable.h>
 #include <Script_Details/Context.h>
+#include <Script_Details/Compound_Statement.h>
+#include <Script_Details/Operations/Operation.h>
 
 
 namespace LScript
@@ -16,10 +20,12 @@ namespace LScript
             std::string name;
         };
 
-    private:
-        Context m_context;
+        using Arguments = LDS::Vector<Variable*>;
 
+    private:
         LDS::Vector<Argument_Data> m_expected_arguments_data;
+
+        Compound_Statement m_compound_statement;
 
     public:
         Function();
@@ -28,11 +34,11 @@ namespace LScript
     public:
         inline void set_expected_arguments_data(const LDS::Vector<Argument_Data>& _args) { m_expected_arguments_data = _args; }
 
-        inline Context& context() { return m_context; }
-        inline const Context& context() const { return m_context; }
+        inline Compound_Statement& compound_statement() { return m_compound_statement; }
+        inline const Compound_Statement& compound_statement() const { return m_compound_statement; }
 
     public:
-        void call(const LDS::Vector<Variable*>& _args);
+        void call(const Arguments& _args);
 
     };
 
