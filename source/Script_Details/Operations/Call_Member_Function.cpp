@@ -57,8 +57,6 @@ Variable* Call_Member_Function::process()
         argument_types.push(argument->type());
     }
 
-    std::cout << "Trying to call member function.\nowner object type: " << owner_object->type() << "\nmember function name: " << m_function_name << std::endl << std::endl;
-
     Function* function = Integrated_Functions::instance().get_member_function(owner_object->type(), m_function_name, argument_types);
     L_ASSERT(function);
 

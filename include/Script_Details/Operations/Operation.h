@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Script_Details/Variable.h>
+#include <Script_Details/Variables/Variable.h>
 
 
 namespace LScript

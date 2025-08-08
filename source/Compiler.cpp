@@ -1,5 +1,7 @@
 #include <Compiler.h>
 
+#include <Data_Structures/AVL_Tree.h>
+
 #include <Integrated_Functions.h>
 #include <Script_Details/Operations/Operation.h>
 #include <Script_Details/Operations/Variable_Creation.h>
@@ -23,6 +25,9 @@ namespace LScript
     Compiler::Acceptable_Symbols Empty_Symbols(Max_Symbols, false);
     Compiler::Acceptable_Symbols Variable_Name_Symbols(Max_Symbols, false);
     Compiler::Acceptable_Symbols Type_Name_Symbols(Max_Symbols, false);
+
+    using Reserved_Keywords_Tree = LDS::AVL_Tree<std::string>;
+    Reserved_Keywords_Tree Reserved_Keywords;
 }
 
 
@@ -58,6 +63,15 @@ Compiler::Compiler()
     Type_Name_Symbols[':'] = true;
     Type_Name_Symbols['<'] = true;
     Type_Name_Symbols['>'] = true;
+    Type_Name_Symbols['&'] = true;
+
+    Reserved_Keywords.insert(Void_Type_Name);
+    Reserved_Keywords.insert(If_Expression);
+    Reserved_Keywords.insert(For_Expression);
+    Reserved_Keywords.insert(While_Expression);
+    Reserved_Keywords.insert(Return_Expression);
+    Reserved_Keywords.insert("true");
+    Reserved_Keywords.insert("false");
 }
 
 Compiler::~Compiler()
@@ -118,7 +132,7 @@ unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, co
     L_ASSERT(_type != Void_Type_Name);  //  variable type cannot be void
     L_ASSERT(_context.get_local_variable(_name) == nullptr);
 
-    Variable* variable = new Variable;
+    Variable_Container* variable = new Variable_Container;
     variable->set_type(_type);
 
     _context.add_variable(_name, variable);
@@ -172,7 +186,7 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
     while(offset < _end)
     {
         unsigned int type_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, offset, _end);
-        unsigned int after_type_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, type_offset, _end);
+        unsigned int after_type_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, type_offset, _end);
         L_ASSERT(after_type_offset > type_offset);
 
         unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_type_offset, _end);
@@ -183,10 +197,13 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
 
         std::string type = _source.substr(type_offset, after_type_offset - type_offset);
         std::string name = _source.substr(name_offset, after_name_offset - name_offset);
+        bool reference = type[type.size() - 1] == '&';
+        if(reference)
+            type.pop_back();
 
         L_ASSERT(LV::Type_Manager::type_is_registered(type));
 
-        result.push({type, name});
+        result.push({type, name, reference});
 
         offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset, _end);
         if(offset >= _end)
@@ -292,7 +309,7 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_arguments_offset < Unlimited_Size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_compound_statement.context(), _source, arguments_offset, after_arguments_offset);
 
     Extract_Variable* extract_variable_operation = new Extract_Variable;
     extract_variable_operation->set_context(&_compound_statement.context());
@@ -317,10 +334,11 @@ unsigned int Compiler::M_parse_function_call(Compound_Statement& _compound_state
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_arguments_offset < Unlimited_Size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_compound_statement.context(), _source, arguments_offset, after_arguments_offset);
 
     Call_Global_Function* operation = new Call_Global_Function;
     operation->set_function_name(_name);
+    operation->set_script(m_script_target);
     operation->set_arguments_getter_operations((LDS::Vector<Operation*>)argument_getters);
 
     _compound_statement.add_operation(operation);
@@ -328,7 +346,7 @@ unsigned int Compiler::M_parse_function_call(Compound_Statement& _compound_state
     return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
 }
 
-LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
+LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
 {
     LDS::Vector<std::string> arguments = M_parse_passed_arguments(_source, _args_begin, _args_end);
 
@@ -348,11 +366,16 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const s
             if(deduced_type == "std::string")
                 argument = argument.substr(1, argument.size() - 2);
 
-            std::cout << "Deduced type " << deduced_type << " for value " << argument << std::endl;
-
             RValue_Getter* operation = new RValue_Getter;
             operation->variable().set_type(deduced_type);
             operation->variable().set_data(argument);
+            operations.push(operation);
+        }
+        else if(expression_type == Expression_Type::Variable_Name)
+        {
+            Extract_Variable* operation = new Extract_Variable;
+            operation->set_context(&_context);
+            operation->set_variable_name(argument);
             operations.push(operation);
         }
         else
@@ -570,6 +593,9 @@ bool Compiler::M_is_existing_variable(const Context& _context, const std::string
 
 bool Compiler::M_can_be_variable_name(const std::string& _name) const
 {
+    if(Reserved_Keywords.find(_name).is_ok())
+        return false;
+
     for(char c = '0'; c <= '9'; ++c)
     {
         if(_name[0] == c)

@@ -34,6 +34,8 @@ void Call_Global_Function::set_arguments_getter_operations(Arguments_Getter_Oper
 
 Variable* Call_Global_Function::process()
 {
+    L_ASSERT(m_script);
+
     unsigned int arguments_amount = m_arguments_getter_operations.size();
 
     Integrated_Functions::Argument_Types argument_types(arguments_amount);
@@ -47,9 +49,10 @@ Variable* Call_Global_Function::process()
         argument_types.push(argument->type());
     }
 
-    std::cout << "Trying to call global function: " << m_function_name << std::endl << std::endl;
+    Function* function = m_script->get_function(m_function_name);
+    if(!function)
+        function = Integrated_Functions::instance().get_global_function(m_function_name, argument_types);
 
-    Function* function = Integrated_Functions::instance().get_global_function(m_function_name, argument_types);
     L_ASSERT(function);
 
     return function->call(arguments);

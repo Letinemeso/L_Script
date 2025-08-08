@@ -2,7 +2,7 @@
 
 #include <Data_Structures/Vector.h>
 
-#include <Script_Details/Variable.h>
+#include <Script_Details/Variables/Variable.h>
 #include <Script_Details/Context.h>
 #include <Script_Details/Compound_Statement.h>
 #include <Script_Details/Operations/Operation.h>
@@ -18,6 +18,7 @@ namespace LScript
         {
             std::string expected_type;
             std::string name;
+            bool reference = false;
         };
 
         using Arguments = LDS::Vector<Variable*>;

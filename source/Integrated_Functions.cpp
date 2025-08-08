@@ -32,7 +32,7 @@ void Integrated_Functions::M_register_default_global_functions()
         Function* function = new Function;
 
         Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "_what"});
+        arguments_data.push({"int", "_what", false});
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
@@ -64,8 +64,8 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_return_type("void");
 
         Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this"});
-        arguments_data.push({"int", "_value"});
+        arguments_data.push({"int", "this", true});
+        arguments_data.push({"int", "_value", false});
         function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
@@ -89,8 +89,6 @@ void Integrated_Functions::M_register_default_int_functions()
             L_ASSERT(value_raw_data);
 
             *this_raw_data = *value_raw_data;
-
-            std::cout << "set int value " << *value_raw_data << std::endl;
 
             return nullptr;
         });

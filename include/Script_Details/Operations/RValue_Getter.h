@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Script_Details/Operations/Operation.h>
+#include <Script_Details/Variables/Variable_Container.h>
 
 
 namespace LScript
@@ -9,11 +10,11 @@ namespace LScript
     class RValue_Getter : public Operation
     {
     private:
-        Variable m_variable;
+        Variable_Container m_variable;
 
     public:
-        inline Variable& variable() { return m_variable; }
-        inline const Variable& variable() const { return m_variable; }
+        inline Variable_Container& variable() { return m_variable; }
+        inline const Variable_Container& variable() const { return m_variable; }
 
     public:
         Variable* process() override;

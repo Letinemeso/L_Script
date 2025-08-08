@@ -1,5 +1,8 @@
 #include <Script_Details/Function.h>
 
+#include <Script_Details/Variables/Variable_Container.h>
+#include <Script_Details/Variables/Variable_Reference.h>
+
 using namespace LScript;
 
 
@@ -25,9 +28,13 @@ Variable* Function::call(const Arguments& _args)
 
         Variable* parameter = _args[i];
 
-        Variable* variable = new Variable;
-        variable->set_type(_args[i]->type());
-        variable->shallow_copy(parameter);
+        Variable* variable = nullptr;
+        if(m_expected_arguments_data[i].reference)
+            variable = new Variable_Reference;
+        else
+            variable = new Variable_Container;
+
+        variable->assign(parameter);
 
         m_compound_statement.context().add_variable(m_expected_arguments_data[i].name, variable);
     }
