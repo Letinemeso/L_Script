@@ -10,6 +10,9 @@ namespace LScript
 
     class Integrated_Functions
     {
+    public:
+        using Argument_Types = LDS::Vector<std::string>;
+
     private:
         using Functions = LDS::Map<std::string, Function*>;
         using Member_Functions = LDS::Map<std::string, Functions>;
@@ -25,6 +28,7 @@ namespace LScript
         Integrated_Functions(Integrated_Functions&&) = delete;
 
     private:
+        void M_register_default_global_functions();
         void M_register_default_int_functions();
 
     public:
@@ -32,10 +36,15 @@ namespace LScript
 
     private:
         std::string M_construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type = {}) const;
+        std::string M_construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type = {}) const;
 
     public:
         void register_global_function(const std::string& _name, Function* _function);
         void register_member_function(const std::string& _owner_type, const std::string& _name, Function* _function);
+
+    public:
+        Function* get_global_function(const std::string& _name, const Argument_Types& _arg_types) const;
+        Function* get_member_function(const std::string& _owner_type, const std::string& _name, const Argument_Types& _arg_types) const;
 
     };
 

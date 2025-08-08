@@ -26,6 +26,7 @@ namespace LScript
         void reset();
         void set_type(const std::string& _type);
         void set_data(const Strings_Vector& _data);
+        void set_data(const std::string& _data);
         void set_data(void* _data, unsigned int _raw_size);
         void setup(const std::string& _type, const Strings_Vector& _data);
         void shallow_copy(const Variable* _other);

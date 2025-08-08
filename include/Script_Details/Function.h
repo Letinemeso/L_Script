@@ -24,7 +24,7 @@ namespace LScript
         using Arguments_Data = LDS::Vector<Argument_Data>;
 
     private:
-        std::string m_return_type;
+        std::string m_return_type = "void";
         Arguments_Data m_expected_arguments_data;
 
         Compound_Statement m_compound_statement;        

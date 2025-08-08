@@ -48,6 +48,21 @@ void Variable::set_data(const Strings_Vector& _data)
     LV::Type_Manager::parse(m_type, _data, m_data);
 }
 
+void Variable::set_data(const std::string& _data)
+{
+    if(m_data)
+        LV::Type_Manager::clear(m_type, m_data);
+
+    LV::Type_Utility::Allocate_Result allocation_result = LV::Type_Manager::allocate(m_type, 1);
+    m_data = allocation_result.ptr;
+    m_raw_size = allocation_result.size;
+
+    Strings_Vector crutch(1);
+    crutch.push(_data);
+
+    LV::Type_Manager::parse(m_type, crutch, m_data);
+}
+
 void Variable::set_data(void* _data, unsigned int _raw_size)
 {
     if(m_data)

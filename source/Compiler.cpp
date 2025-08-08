@@ -1,9 +1,11 @@
 #include <Compiler.h>
 
+#include <Integrated_Functions.h>
 #include <Script_Details/Operations/Operation.h>
 #include <Script_Details/Operations/Variable_Creation.h>
 #include <Script_Details/Operations/Extract_Variable.h>
 #include <Script_Details/Operations/Call_Member_Function.h>
+#include <Script_Details/Operations/RValue_Getter.h>
 
 using namespace LScript;
 
@@ -239,7 +241,7 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     {
         return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
     }
-    if(expression_type == Expression_Type::Existing_Variable)
+    if(expression_type == Expression_Type::Existing_Variable_Name)
     {
         return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
     }
@@ -283,6 +285,8 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_operation_offset < Unlimited_Size);
 
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, arguments_offset, after_arguments_offset);
+
     Extract_Variable* extract_variable_operation = new Extract_Variable;
     extract_variable_operation->set_context(&_compound_statement.context());
     extract_variable_operation->set_variable_name(_name);
@@ -290,12 +294,118 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     Call_Member_Function* call_member_function_operation = new Call_Member_Function;
     call_member_function_operation->set_context(&_compound_statement.context());
     call_member_function_operation->set_function_name(operation_name);
-
     call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
+    call_member_function_operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
 
     _compound_statement.add_operation(call_member_function_operation);
 
     return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
+}
+
+LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
+{
+    LDS::Vector<std::string> arguments = M_parse_passed_arguments(_source, _args_begin, _args_end);
+
+    if(arguments.size() == 0)
+        return {};
+
+    LDS::Vector<Operation*> operations(arguments.size());
+
+    for(unsigned int i = 0; i < arguments.size(); ++i)
+    {
+        std::string& argument = arguments[i];
+        Expression_Type expression_type = M_get_expression_type(argument);
+
+        if(expression_type == Expression_Type::Unknown)     //  treat this as a possible r-value
+        {
+            std::string deduced_type = M_deduce_rvalue_type(argument);
+            if(deduced_type == "std::string")
+                argument = argument.substr(1, argument.size() - 2);
+
+            std::cout << "Deduced type " << deduced_type << " for value " << argument << std::endl;
+
+            RValue_Getter* operation = new RValue_Getter;
+            operation->variable().set_type(deduced_type);
+            operation->variable().set_data(argument);
+            operations.push(operation);
+        }
+        else
+        {
+            L_ASSERT(false);    //  remove later!
+        }
+    }
+
+    return operations;
+}
+
+LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const
+{
+    unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _begin, _end);
+    if(offset >= _end)
+        return {};
+
+    L_ASSERT(_source[offset] != ',');
+
+    unsigned int amount = 1;
+    for(unsigned int i = offset; i < _end; ++i)
+    {
+        if(_source[i] == ',')
+            ++amount;
+    }
+
+    LDS::Vector<std::string> arguments(amount);
+    for(unsigned int i = 0; i < amount - 1; ++i)
+    {
+        unsigned int comma_index = M_skip_until_symbol_met(_source, ',', true, offset, _end);
+        L_ASSERT(comma_index < _end);
+
+        std::string argument = _source.substr(offset, comma_index - offset);
+        M_cull_empty_symbols(argument);
+        arguments.push((std::string&&)argument);
+
+        offset = comma_index + 1;
+    }
+    std::string argument = _source.substr(offset, _end - offset);
+    M_cull_empty_symbols(argument);
+    arguments.push((std::string&&)argument);
+
+    return arguments;
+}
+
+std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
+{
+    L_ASSERT(_rvalue.size() > 0);
+
+    if(_rvalue.size() >= 2)
+    {
+        if(_rvalue[0] == '\'' && _rvalue[_rvalue.size() - 1] == '\'')
+            return "std::string";
+    }
+
+    if(LV::Type_Manager::validate("int", _rvalue))
+        return "int";
+
+    if(LV::Type_Manager::validate("float", _rvalue))
+        return "float";
+
+    if(LV::Type_Manager::validate("bool", _rvalue))
+        return "bool";
+
+    L_ASSERT(false && "could not deduce type");
+    return "";
+}
+
+
+void Compiler::M_cull_empty_symbols(std::string& _from) const
+{
+    unsigned int begin = M_skip_until_symbol_met(_from, Empty_Symbols, false, 0);
+    L_ASSERT(begin < _from.size());
+
+    unsigned int end = M_skip_until_symbol_met(_from, Empty_Symbols, true, begin);
+    if(end > _from.size())
+        end = _from.size();
+
+    _from = _from.substr(begin, end - begin);
 }
 
 
@@ -387,10 +497,10 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
         return Expression_Type::Type_Name;
 
     if(m_script_target->get_function(_expression))
-        return Expression_Type::Existing_Function;
+        return Expression_Type::Existing_Function_Name;
 
     if(M_can_be_variable_name(_expression))
-        return Expression_Type::Existing_Variable;
+        return Expression_Type::Existing_Variable_Name;
 
     return Expression_Type::Unknown;
 }
@@ -420,6 +530,12 @@ bool Compiler::M_is_existing_variable(const Context& _context, const std::string
 
 bool Compiler::M_can_be_variable_name(const std::string& _name) const
 {
+    for(char c = '0'; c <= '9'; ++c)
+    {
+        if(_name[0] == c)
+            return false;       //  variable name can't start with a digit
+    }
+
     for(unsigned int i = 0; i < _name.size(); ++i)
     {
         char current_char = _name[i];
