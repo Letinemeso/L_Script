@@ -5,6 +5,7 @@
 #include <Script_Details/Operations/Variable_Creation.h>
 #include <Script_Details/Operations/Extract_Variable.h>
 #include <Script_Details/Operations/Call_Member_Function.h>
+#include <Script_Details/Operations/Call_Global_Function.h>
 #include <Script_Details/Operations/RValue_Getter.h>
 
 using namespace LScript;
@@ -241,9 +242,15 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     {
         return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
     }
-    if(expression_type == Expression_Type::Existing_Variable_Name)
+    if(expression_type == Expression_Type::Variable_Name)
     {
-        return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+        Expression_Goal expression_goal = M_member_acces_or_function_call(_source, after_first_word_offset);
+        if(expression_goal == Expression_Goal::Member_Acces)
+            return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+        if(expression_goal == Expression_Goal::Function_Call)
+            return M_parse_function_call(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+
+        L_ASSERT(false);
     }
 
     return Unlimited_Size;
@@ -283,7 +290,7 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     L_ASSERT(_source[arguments_offset] == '(');
     ++arguments_offset;
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
-    L_ASSERT(after_operation_offset < Unlimited_Size);
+    L_ASSERT(after_arguments_offset < Unlimited_Size);
 
     LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, arguments_offset, after_arguments_offset);
 
@@ -298,6 +305,25 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     call_member_function_operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
 
     _compound_statement.add_operation(call_member_function_operation);
+
+    return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
+}
+
+unsigned int Compiler::M_parse_function_call(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int arguments_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(_source[arguments_offset] == '(');
+    ++arguments_offset;
+    unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
+    L_ASSERT(after_arguments_offset < Unlimited_Size);
+
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, arguments_offset, after_arguments_offset);
+
+    Call_Global_Function* operation = new Call_Global_Function;
+    operation->set_function_name(_name);
+    operation->set_arguments_getter_operations((LDS::Vector<Operation*>)argument_getters);
+
+    _compound_statement.add_operation(operation);
 
     return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
 }
@@ -496,11 +522,8 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
     if(LV::Type_Manager::type_is_registered(_expression))
         return Expression_Type::Type_Name;
 
-    if(m_script_target->get_function(_expression))
-        return Expression_Type::Existing_Function_Name;
-
     if(M_can_be_variable_name(_expression))
-        return Expression_Type::Existing_Variable_Name;
+        return Expression_Type::Variable_Name;
 
     return Expression_Type::Unknown;
 }
@@ -519,6 +542,23 @@ Compiler::Expression_Goal Compiler::M_function_or_variable_declaration(const std
         return Expression_Goal::Function_Declaration;
     if(next_symbol == ';')
         return Expression_Goal::Variable_Declaration;
+
+    return Expression_Goal::Unknown;
+}
+
+Compiler::Expression_Goal Compiler::M_member_acces_or_function_call(const std::string& _source, unsigned int _offset_after_name) const
+{
+    unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset_after_name);
+
+    if(next_symbol_index == Unlimited_Size)
+        return Expression_Goal::Unknown;
+
+    char next_symbol = _source[next_symbol_index];
+
+    if(next_symbol == '(')
+        return Expression_Goal::Function_Call;
+    if(next_symbol == '.')
+        return Expression_Goal::Member_Acces;
 
     return Expression_Goal::Unknown;
 }

@@ -46,7 +46,7 @@ void Integrated_Functions::M_register_default_global_functions()
 
             int* what_raw_data = (int*)var_what->data();
 
-            std::cout << *what_raw_data << std::endl;
+            std::cout << "[debug_print] [int] " << *what_raw_data << std::endl;
 
             return nullptr;
         });

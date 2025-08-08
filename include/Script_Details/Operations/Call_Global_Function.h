@@ -15,7 +15,7 @@ namespace LScript
         using Arguments_Getter_Operations = LDS::Vector<Operation*>;
 
     private:
-        Function* m_function = nullptr;
+        std::string m_function_name;
 
         Arguments_Getter_Operations m_arguments_getter_operations;
 
@@ -24,7 +24,7 @@ namespace LScript
         ~Call_Global_Function();
 
     public:
-        inline void set_function(Function* _ptr) { m_function = _ptr; }
+        inline void set_function_name(const std::string& _value) { m_function_name = _value; }
 
     public:
         void clear_arguments_getter_operations();

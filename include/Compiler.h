@@ -18,8 +18,7 @@ namespace LScript
         {
             Unknown,
             Type_Name,
-            Existing_Function_Name,
-            Existing_Variable_Name,
+            Variable_Name,
             If,
             For,
             While,
@@ -31,6 +30,8 @@ namespace LScript
             Unknown,
             Variable_Declaration,
             Function_Declaration,
+            Member_Acces,
+            Function_Call,
         };
 
     public:
@@ -58,6 +59,7 @@ namespace LScript
         unsigned int M_parse_dynamic_expression(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_operation_with_variable(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        unsigned int M_parse_function_call(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         LDS::Vector<Operation*> M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
@@ -72,6 +74,7 @@ namespace LScript
         Expression_Type M_get_expression_type(const std::string& _expression) const;
 
         Expression_Goal M_function_or_variable_declaration(const std::string& _source, unsigned int _offset_after_name) const;
+        Expression_Goal M_member_acces_or_function_call(const std::string& _source, unsigned int _offset_after_name) const;
         bool M_is_existing_variable(const Context& _context, const std::string& _name) const;
         bool M_can_be_variable_name(const std::string& _name) const;
 

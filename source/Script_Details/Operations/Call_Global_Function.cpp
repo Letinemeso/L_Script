@@ -1,5 +1,7 @@
 #include <Script_Details/Operations/Call_Global_Function.h>
 
+#include <Integrated_Functions.h>
+
 using namespace LScript;
 
 
@@ -32,20 +34,23 @@ void Call_Global_Function::set_arguments_getter_operations(Arguments_Getter_Oper
 
 Variable* Call_Global_Function::process()
 {
-    L_ASSERT(m_function);
-    L_ASSERT(m_function->expected_arguments_data().size() == m_arguments_getter_operations.size());
-
     unsigned int arguments_amount = m_arguments_getter_operations.size();
 
-    Function::Arguments arguments(arguments_amount, nullptr);
-    for(unsigned int i = 0; i < arguments_amount; ++i)
+    Integrated_Functions::Argument_Types argument_types(arguments_amount);
+    Function::Arguments arguments(arguments_amount);
+    for(unsigned int i = 0; i < m_arguments_getter_operations.size(); ++i)
     {
         Variable* argument = m_arguments_getter_operations[i]->process();
         L_ASSERT(argument);
-        L_ASSERT(argument->type() == m_function->expected_arguments_data()[i].expected_type);
 
-        arguments[i] = argument;
+        arguments.push(argument);
+        argument_types.push(argument->type());
     }
 
-    return m_function->call(arguments);
+    std::cout << "Trying to call global function: " << m_function_name << std::endl << std::endl;
+
+    Function* function = Integrated_Functions::instance().get_global_function(m_function_name, argument_types);
+    L_ASSERT(function);
+
+    return function->call(arguments);
 }
