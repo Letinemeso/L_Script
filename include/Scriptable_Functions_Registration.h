@@ -28,6 +28,14 @@
 
 //      --------------------------------------------
 
+
+template <typename _Owner_Type, typename _Return_Type, typename... _Arg_Types>
+LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(_Owner_Type::*_func)(_Arg_Types...))
+{
+    return LST::Arguments_Container<_Arg_Types...>();
+}
+
+
 #define SCRIPTABLE_FUNCTIONS_INITIALIZATION_BEGIN \
     static bool __scriptable_functions_initialized = false; \
     if(!__scriptable_functions_initialized) \
@@ -45,7 +53,7 @@
 #define SCRIPTABLE_FUNCTION_NAME(FUNCTION_NAME) \
         auto member_function = &Scriptable_Function_Owner::FUNCTION_NAME; \
         std::string member_function_name = #FUNCTION_NAME; \
-        using Arguments_Container = decltype(construct_args_container(member_function)); \
+        using Arguments_Container = decltype(__construct_args_container(member_function)); \
         LScript::Function::Arguments_Data arguments_data; \
         arguments_data.push({"Test", "this", true}); \
         LScript::Function* function = new LScript::Function; \
