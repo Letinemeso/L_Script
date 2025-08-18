@@ -1,6 +1,7 @@
 #include <Script.h>
 
 #include <Compiler.h>
+#include <Script_Details/Variables/Variable_Weak_Container.h>
 
 using namespace LScript;
 
@@ -15,6 +16,23 @@ Script::~Script()
     clear_functions();
 }
 
+
+
+void Script::set_context_object(const std::string& _type_as_string, void* _ptr)
+{
+    Variable* variable = m_global_context.get_variable("context_object");
+    if(variable)
+    {
+        variable = m_global_context.extract_variable("context_object");
+        delete variable;
+    }
+
+    Variable_Weak_Container* pointer_variable = new Variable_Weak_Container;
+    pointer_variable->set_type(_type_as_string);
+    pointer_variable->set_data(_ptr, sizeof(void*));
+
+    m_global_context.add_variable("context_object", pointer_variable);
+}
 
 
 void Script::register_function(const std::string& _name, Function* _function)

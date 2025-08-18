@@ -12,9 +12,6 @@ namespace LScript
 
 class Variable_Reference : public Variable
 {
-public:
-    using Strings_Vector = LDS::Vector<std::string>;
-
 private:
     Variable* m_referencee = nullptr;
 
@@ -24,8 +21,6 @@ public:
 
 public:
     void reset() override;
-    void set_data(const Strings_Vector& _data) override;
-    void set_data(const std::string& _data) override;
     void set_data(void* _data, unsigned int _raw_size) override;
     void assign(Variable* _other) override;
 

@@ -166,6 +166,7 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     Function* function = new Function;
     function->set_return_type(_type);
     function->set_expected_arguments_data(arguments_data);
+    function->compound_statement().context().set_parent_context(&m_script_target->global_context());
 
     M_parse_function_body(*function, _source, body_offset + 1, after_body_offset);
 
@@ -364,11 +365,14 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
         {
             std::string deduced_type = M_deduce_rvalue_type(argument);
             if(deduced_type == "std::string")
+            {
+                L_ASSERT(argument[0] == '"');
+                L_ASSERT(argument[argument.size() - 1] == '"');
                 argument = argument.substr(1, argument.size() - 2);
+            }
 
             RValue_Getter* operation = new RValue_Getter;
-            operation->variable().set_type(deduced_type);
-            operation->variable().set_data(argument);
+            M_init_variable_container(deduced_type, argument, operation->variable());
             operations.push(operation);
         }
         else if(expression_type == Expression_Type::Variable_Name)
@@ -442,6 +446,20 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
 
     L_ASSERT(false && "could not deduce type");
     return "";
+}
+
+
+void Compiler::M_init_variable_container(const std::string& _type, const std::string& _value_as_string, Variable_Container& _variable) const
+{
+    LV::Type_Utility::Allocate_Result allocation_result = LV::Type_Manager::allocate(_type, 1);
+
+    LDS::Vector<std::string> strings_vector_crutch;
+    strings_vector_crutch.push(_value_as_string);
+
+    LV::Type_Manager::parse(_type, strings_vector_crutch, allocation_result.ptr);
+
+    _variable.set_type(_type);
+    _variable.set_data(allocation_result.ptr, allocation_result.size);
 }
 
 

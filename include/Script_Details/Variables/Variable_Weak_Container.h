@@ -1,16 +1,12 @@
 #pragma once
 
-#include <string>
-
-#include <Data_Structures/Vector.h>
-
 #include <Script_Details/Variables/Variable.h>
 
 
 namespace LScript
 {
 
-    class Variable_Container : public Variable
+    class Variable_Weak_Container : public Variable
     {
     private:
         std::string m_type;
@@ -18,8 +14,8 @@ namespace LScript
         unsigned int m_raw_size = 0;
 
     public:
-        Variable_Container();
-        ~Variable_Container();
+        Variable_Weak_Container();
+        ~Variable_Weak_Container();
 
     public:
         void reset() override;
@@ -32,7 +28,6 @@ namespace LScript
         const std::string& type() const override;
         void* data() const override;
         unsigned int raw_size() const override;
-
     };
 
 }

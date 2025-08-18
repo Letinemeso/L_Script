@@ -24,20 +24,6 @@ void Variable_Reference::reset()
     m_referencee->reset();
 }
 
-void Variable_Reference::set_data(const Strings_Vector& _data)
-{
-    L_ASSERT(m_referencee);
-
-    m_referencee->set_data(_data);
-}
-
-void Variable_Reference::set_data(const std::string& _data)
-{
-    L_ASSERT(m_referencee);
-
-    m_referencee->set_data(_data);
-}
-
 void Variable_Reference::set_data(void* _data, unsigned int _raw_size)
 {
     L_ASSERT(m_referencee);

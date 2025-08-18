@@ -19,8 +19,6 @@ namespace LScript
 
     public:
         virtual void reset() = 0;
-        virtual void set_data(const Strings_Vector& _data) = 0;
-        virtual void set_data(const std::string& _data) = 0;
         virtual void set_data(void* _data, unsigned int _raw_size) = 0;
         virtual void assign(Variable* _what) = 0;
 

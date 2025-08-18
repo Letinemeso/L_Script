@@ -30,6 +30,8 @@ namespace LScript
         inline const Context& global_context() const { return m_global_context; }
 
     public:
+        void set_context_object(const std::string& _type_as_string, void* _ptr);
+
         void register_function(const std::string& _name, Function* _function);
         void clear_functions();
 
