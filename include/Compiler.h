@@ -31,7 +31,7 @@ namespace LScript
             Unknown,
             Variable_Declaration,
             Function_Declaration,
-            Member_Acces,
+            Member_Access,
             Function_Call,
         };
 
@@ -77,7 +77,7 @@ namespace LScript
         Expression_Type M_get_expression_type(const std::string& _expression) const;
 
         Expression_Goal M_function_or_variable_declaration(const std::string& _source, unsigned int _offset_after_name) const;
-        Expression_Goal M_member_acces_or_function_call(const std::string& _source, unsigned int _offset_after_name) const;
+        Expression_Goal M_member_access_or_function_call(const std::string& _source, unsigned int _offset_after_name) const;
         bool M_is_existing_variable(const Context& _context, const std::string& _name) const;
         bool M_can_be_variable_name(const std::string& _name) const;
 

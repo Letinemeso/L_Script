@@ -69,7 +69,7 @@ LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(
                     L_ASSERT(variable); \
                     char* variable_raw = (char*)variable->data(); \
                     for(unsigned int byte = 0; byte < variable->raw_size(); ++byte) \
-                    arg_raw[byte] = variable_raw[byte]; \
+                        arg_raw[byte] = variable_raw[byte]; \
             } \
                 LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this"); \
                 L_ASSERT(context_object_variable); \

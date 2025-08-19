@@ -256,14 +256,18 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     {
         // return M_parse_while();
     }
+    if(expression_type == Expression_Type::Return)
+    {
+        // return M_parse_return();
+    }
     if(expression_type == Expression_Type::Type_Name)
     {
         return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
     }
     if(expression_type == Expression_Type::Variable_Name)
     {
-        Expression_Goal expression_goal = M_member_acces_or_function_call(_source, after_first_word_offset);
-        if(expression_goal == Expression_Goal::Member_Acces)
+        Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
+        if(expression_goal == Expression_Goal::Member_Access)
             return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
         if(expression_goal == Expression_Goal::Function_Call)
             return M_parse_function_call(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
@@ -558,6 +562,9 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
     if(_expression == While_Expression)
         return Expression_Type::While;
 
+    if(_expression == Return_Expression)
+        return Expression_Type::Return;
+
     if(_expression == Void_Type_Name)
         return Expression_Type::Type_Name;
     if(LV::Type_Manager::type_is_registered(_expression))
@@ -587,7 +594,7 @@ Compiler::Expression_Goal Compiler::M_function_or_variable_declaration(const std
     return Expression_Goal::Unknown;
 }
 
-Compiler::Expression_Goal Compiler::M_member_acces_or_function_call(const std::string& _source, unsigned int _offset_after_name) const
+Compiler::Expression_Goal Compiler::M_member_access_or_function_call(const std::string& _source, unsigned int _offset_after_name) const
 {
     unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset_after_name);
 
@@ -599,7 +606,7 @@ Compiler::Expression_Goal Compiler::M_member_acces_or_function_call(const std::s
     if(next_symbol == '(')
         return Expression_Goal::Function_Call;
     if(next_symbol == '.')
-        return Expression_Goal::Member_Acces;
+        return Expression_Goal::Member_Access;
 
     return Expression_Goal::Unknown;
 }
