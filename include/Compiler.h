@@ -57,16 +57,19 @@ namespace LScript
 
         LDS::Vector<Function::Argument_Data> M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         void M_parse_function_body(Function& _function, const std::string& _source, unsigned int _begin, unsigned int _end) const;
-        unsigned int M_parse_dynamic_expression(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        unsigned int M_parse_dynamic_expression(Function& _function, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_operation_with_variable(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_function_call(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         LDS::Vector<Operation*> M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
+        unsigned int M_parse_return(Compound_Statement& _compound_statement, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
         void M_init_variable_container(const std::string& _type, const std::string& _value_as_string, Variable_Container& _variable) const;
 
+        std::string M_parse_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        unsigned int M_skip_past_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         void M_cull_empty_symbols(std::string& _from) const;
 
         unsigned int M_skip_until_symbol_met(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;

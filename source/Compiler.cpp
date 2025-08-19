@@ -96,15 +96,10 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     if(_max_size == Unlimited_Size)
         _max_size = _source.size();
 
-    unsigned int first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    if(first_word_offset == Unlimited_Size)
-        return Unlimited_Size;
-
-    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
-    L_ASSERT(after_first_word_offset > first_word_offset);
-
-    unsigned int first_word_size = after_first_word_offset - first_word_offset;
-    std::string first_word = _source.substr(first_word_offset, first_word_size);
+    std::string first_word = M_parse_first_word(_source, _offset, _max_size);
+    if(first_word.size() == 0)
+        return _max_size;
+    unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type == Expression_Type::Type_Name);
@@ -222,24 +217,19 @@ void Compiler::M_parse_function_body(Function& _function, const std::string& _so
     unsigned int offset = _begin;
     while(offset < _end)
     {
-        offset = M_parse_dynamic_expression(_function.compound_statement(), _source, offset, _end);
+        offset = M_parse_dynamic_expression(_function, _source, offset, _end);
     }
 }
 
-unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+unsigned int Compiler::M_parse_dynamic_expression(Function& _function, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     if(_max_size == Unlimited_Size)
         _max_size = _source.size();
 
-    unsigned int first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    if(first_word_offset == Unlimited_Size)
-        return Unlimited_Size;
-
-    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
-    L_ASSERT(after_first_word_offset > first_word_offset);
-
-    unsigned int first_word_size = after_first_word_offset - first_word_offset;
-    std::string first_word = _source.substr(first_word_offset, first_word_size);
+    std::string first_word = M_parse_first_word(_source, _offset, _max_size);
+    if(first_word.size() == 0)
+        return _max_size;
+    unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type != Expression_Type::Unknown);
@@ -258,19 +248,19 @@ unsigned int Compiler::M_parse_dynamic_expression(Compound_Statement& _compound_
     }
     if(expression_type == Expression_Type::Return)
     {
-        // return M_parse_return();
+        return M_parse_return(_function.compound_statement(), _function.return_type(), _source, after_first_word_offset, _max_size);
     }
     if(expression_type == Expression_Type::Type_Name)
     {
-        return M_parse_dynamic_declaration(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+        return M_parse_dynamic_declaration(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
     }
     if(expression_type == Expression_Type::Variable_Name)
     {
         Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
         if(expression_goal == Expression_Goal::Member_Access)
-            return M_parse_operation_with_variable(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+            return M_parse_operation_with_variable(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
         if(expression_goal == Expression_Goal::Function_Call)
-            return M_parse_function_call(_compound_statement, first_word, _source, after_first_word_offset, _max_size);
+            return M_parse_function_call(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
 
         L_ASSERT(false);
     }
@@ -369,11 +359,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
         {
             std::string deduced_type = M_deduce_rvalue_type(argument);
             if(deduced_type == "std::string")
-            {
-                L_ASSERT(argument[0] == '"');
-                L_ASSERT(argument[argument.size() - 1] == '"');
                 argument = argument.substr(1, argument.size() - 2);
-            }
 
             RValue_Getter* operation = new RValue_Getter;
             M_init_variable_container(deduced_type, argument, operation->variable());
@@ -452,6 +438,52 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
     return "";
 }
 
+unsigned int Compiler::M_parse_return(Compound_Statement& _compound_statement, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(offset < _max_size);
+    if(_source[offset] == ';' && _expected_return_type == Void_Type_Name)
+        return _max_size;
+
+    unsigned int semicolon_index = M_skip_until_symbol_met(_source, ';', true, offset, _max_size);
+    L_ASSERT(offset < _max_size);
+
+    unsigned int expression_size = semicolon_index - offset;
+    std::string expression = _source.substr(offset, expression_size);
+    M_cull_empty_symbols(expression);
+
+    std::string first_word = M_parse_first_word(_source, _offset, _max_size);
+    if(first_word.size() == 0)
+        return _max_size;
+    unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
+
+    Expression_Type expression_type = M_get_expression_type(first_word);
+    L_ASSERT(expression_type != Expression_Type::Type_Name);
+
+    if(expression_type == Expression_Type::Unknown)
+    {
+        std::string deduced_type = M_deduce_rvalue_type(first_word);
+
+        L_ASSERT(deduced_type == _expected_return_type);
+
+        if(deduced_type == "std::string")
+            first_word = first_word.substr(1, first_word.size() - 2);
+
+        RValue_Getter* operation = new RValue_Getter;
+        M_init_variable_container(deduced_type, first_word, operation->variable());
+        _compound_statement.add_operation(operation);
+    }
+    else if(expression_type == Expression_Type::Variable_Name)
+    {
+        Extract_Variable* operation = new Extract_Variable;
+        operation->set_context(&_compound_statement.context());
+        operation->set_variable_name(first_word);
+        _compound_statement.add_operation(operation);
+    }
+
+    return _max_size;
+}
+
 
 void Compiler::M_init_variable_container(const std::string& _type, const std::string& _value_as_string, Variable_Container& _variable) const
 {
@@ -466,6 +498,30 @@ void Compiler::M_init_variable_container(const std::string& _type, const std::st
     _variable.set_data(allocation_result.ptr, allocation_result.size);
 }
 
+
+std::string Compiler::M_parse_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    if(first_word_offset == Unlimited_Size)
+        return {};
+
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
+    L_ASSERT(after_first_word_offset > first_word_offset);
+
+    return _source.substr(first_word_offset, after_first_word_offset - first_word_offset);
+}
+
+unsigned int Compiler::M_skip_past_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int first_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    if(first_word_offset == Unlimited_Size)
+        return _max_size;
+
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
+    L_ASSERT(after_first_word_offset > first_word_offset);
+
+    return after_first_word_offset;
+}
 
 void Compiler::M_cull_empty_symbols(std::string& _from) const
 {

@@ -43,6 +43,7 @@ namespace LScript
         inline const Compound_Statement& compound_statement() const { return m_compound_statement; }
 
         inline const Arguments_Data& expected_arguments_data() const { return m_expected_arguments_data; }
+        inline const std::string& return_type() const { return m_return_type; }
 
     public:
         [[nodiscard]] Variable* call(const Arguments& _args);
