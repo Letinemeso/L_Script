@@ -35,6 +35,12 @@ namespace LScript
             Function_Call,
         };
 
+        struct Operation_Parse_Result
+        {
+            Operation* operation = nullptr;
+            unsigned int offset_after = 0;
+        };
+
     public:
         using Acceptable_Symbols = LDS::Vector<bool>;
 
@@ -59,8 +65,8 @@ namespace LScript
         void M_parse_function_body(Function& _function, const std::string& _source, unsigned int _begin, unsigned int _end) const;
         unsigned int M_parse_dynamic_expression(Function& _function, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         unsigned int M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        unsigned int M_parse_operation_with_variable(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        unsigned int M_parse_function_call(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        Operation_Parse_Result M_parse_operation_with_variable(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        Compiler::Operation_Parse_Result M_parse_function_call(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         LDS::Vector<Operation*> M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
@@ -73,6 +79,7 @@ namespace LScript
         void M_cull_empty_symbols(std::string& _from) const;
 
         unsigned int M_skip_until_symbol_met(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
+        unsigned int M_skip_until_symbol_met_reverse(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected, unsigned int _max, unsigned int _min) const;
         unsigned int M_skip_until_symbol_met(const std::string& _source, char _symbol, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_until_closer(const std::string& _source, char _opener, char _closer, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_past_semicolon(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;

@@ -1,6 +1,5 @@
 #include <Script_Details/Function.h>
 
-#include <Script_Details/Variables/Variable_Container.h>
 #include <Script_Details/Variables/Variable_Reference.h>
 
 using namespace LScript;
@@ -44,7 +43,13 @@ Variable* Function::call(const Arguments& _args)
     Variable* result = m_compound_statement.process();
     L_ASSERT( (!result && m_return_type == "void") || (result && (result->type() == m_return_type)) );
 
+    if(result)
+        m_return_variable.assign(result);
+
     m_compound_statement.context().clear();
 
-    return result;
+    if(result)
+        return &m_return_variable;
+
+    return nullptr;
 }

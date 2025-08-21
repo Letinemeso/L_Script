@@ -3,6 +3,7 @@
 #include <Data_Structures/Vector.h>
 
 #include <Script_Details/Variables/Variable.h>
+#include <Script_Details/Variables/Variable_Container.h>
 #include <Script_Details/Context.h>
 #include <Script_Details/Compound_Statement.h>
 #include <Script_Details/Operations/Operation.h>
@@ -29,6 +30,8 @@ namespace LScript
         Arguments_Data m_expected_arguments_data;
 
         Compound_Statement m_compound_statement;
+
+        Variable_Container m_return_variable;
 
         bool m_should_stop_execution = false;
 

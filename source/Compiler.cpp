@@ -257,12 +257,18 @@ unsigned int Compiler::M_parse_dynamic_expression(Function& _function, const std
     if(expression_type == Expression_Type::Variable_Name)
     {
         Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
-        if(expression_goal == Expression_Goal::Member_Access)
-            return M_parse_operation_with_variable(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
-        if(expression_goal == Expression_Goal::Function_Call)
-            return M_parse_function_call(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
 
-        L_ASSERT(false);
+        Operation_Parse_Result parse_result;
+        if(expression_goal == Expression_Goal::Member_Access)
+            parse_result = M_parse_operation_with_variable(_function.compound_statement().context(), first_word, _source, after_first_word_offset, _max_size);
+        else if(expression_goal == Expression_Goal::Function_Call)
+            parse_result = M_parse_function_call(_function.compound_statement().context(), first_word, _source, after_first_word_offset, _max_size);
+
+        L_ASSERT(parse_result.operation);
+
+        _function.compound_statement().add_operation(parse_result.operation);
+
+        return M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);;
     }
 
     return Unlimited_Size;
@@ -289,7 +295,7 @@ unsigned int Compiler::M_parse_dynamic_declaration(Compound_Statement& _compound
     return M_skip_past_semicolon(_source, after_name_offset, _max_size);
 }
 
-unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     L_ASSERT(_source[_offset] == '.');
 
@@ -304,24 +310,25 @@ unsigned int Compiler::M_parse_operation_with_variable(Compound_Statement& _comp
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_arguments_offset < Unlimited_Size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_compound_statement.context(), _source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, arguments_offset, after_arguments_offset);
 
     Extract_Variable* extract_variable_operation = new Extract_Variable;
-    extract_variable_operation->set_context(&_compound_statement.context());
+    extract_variable_operation->set_context(&_context);
     extract_variable_operation->set_variable_name(_name);
 
     Call_Member_Function* call_member_function_operation = new Call_Member_Function;
-    call_member_function_operation->set_context(&_compound_statement.context());
+    call_member_function_operation->set_context(&_context);
     call_member_function_operation->set_function_name(operation_name);
     call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
     call_member_function_operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
 
-    _compound_statement.add_operation(call_member_function_operation);
-
-    return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
+    Operation_Parse_Result result;
+    result.operation = call_member_function_operation;
+    result.offset_after = after_arguments_offset + 1;
+    return result;
 }
 
-unsigned int Compiler::M_parse_function_call(Compound_Statement& _compound_statement, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int arguments_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
     L_ASSERT(_source[arguments_offset] == '(');
@@ -329,16 +336,17 @@ unsigned int Compiler::M_parse_function_call(Compound_Statement& _compound_state
     unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
     L_ASSERT(after_arguments_offset < Unlimited_Size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_compound_statement.context(), _source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, arguments_offset, after_arguments_offset);
 
     Call_Global_Function* operation = new Call_Global_Function;
     operation->set_function_name(_name);
     operation->set_script(m_script_target);
-    operation->set_arguments_getter_operations((LDS::Vector<Operation*>)argument_getters);
+    operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
 
-    _compound_statement.add_operation(operation);
-
-    return M_skip_past_semicolon(_source, after_arguments_offset + 1, _max_size);
+    Operation_Parse_Result result;
+    result.operation = operation;
+    result.offset_after = after_arguments_offset + 1;
+    return result;
 }
 
 LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
@@ -353,7 +361,11 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
     for(unsigned int i = 0; i < arguments.size(); ++i)
     {
         std::string& argument = arguments[i];
-        Expression_Type expression_type = M_get_expression_type(argument);
+
+        std::string first_word = M_parse_first_word(argument, 0, Unlimited_Size);
+        unsigned int after_first_word_offset = M_skip_past_first_word(argument, 0, Unlimited_Size);
+
+        Expression_Type expression_type = M_get_expression_type(first_word);
 
         if(expression_type == Expression_Type::Unknown)     //  treat this as a possible r-value
         {
@@ -367,10 +379,25 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
         }
         else if(expression_type == Expression_Type::Variable_Name)
         {
-            Extract_Variable* operation = new Extract_Variable;
-            operation->set_context(&_context);
-            operation->set_variable_name(argument);
-            operations.push(operation);
+            Expression_Goal expression_goal = M_member_access_or_function_call(argument, after_first_word_offset);
+
+            if(expression_goal == Expression_Goal::Unknown)
+            {
+                Extract_Variable* operation = new Extract_Variable;
+                operation->set_context(&_context);
+                operation->set_variable_name(argument);
+                operations.push(operation);
+            }
+            else if(expression_goal == Expression_Goal::Member_Access)
+            {
+                Operation_Parse_Result parse_result = M_parse_operation_with_variable(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                operations.push(parse_result.operation);
+            }
+            else if(expression_goal == Expression_Goal::Function_Call)
+            {
+                Operation_Parse_Result parse_result = M_parse_function_call(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                operations.push(parse_result.operation);
+            }
         }
         else
         {
@@ -390,27 +417,60 @@ LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _
     L_ASSERT(_source[offset] != ',');
 
     unsigned int amount = 1;
+
+    unsigned int openers_met = 0;
     for(unsigned int i = offset; i < _end; ++i)
     {
-        if(_source[i] == ',')
-            ++amount;
+        if(_source[i] == '(')
+        {
+            ++openers_met;
+            continue;
+        }
+
+        if(_source[i] == ')')
+        {
+            L_ASSERT(openers_met > 0);
+            --openers_met;
+            continue;
+        }
+
+        if(_source[i] != ',' || openers_met > 0)
+            continue;
+
+        ++amount;
     }
 
     LDS::Vector<std::string> arguments(amount);
-    for(unsigned int i = 0; i < amount - 1; ++i)
+
+    openers_met = 0;
+    for(unsigned int i = offset; i < _end; ++i)
     {
-        unsigned int comma_index = M_skip_until_symbol_met(_source, ',', true, offset, _end);
-        L_ASSERT(comma_index < _end);
+        if(_source[i] == '(')
+        {
+            ++openers_met;
+            continue;
+        }
 
-        std::string argument = _source.substr(offset, comma_index - offset);
-        M_cull_empty_symbols(argument);
-        arguments.push((std::string&&)argument);
+        if(_source[i] == ')')
+        {
+            L_ASSERT(openers_met > 0);
+            --openers_met;
+            continue;
+        }
 
-        offset = comma_index + 1;
+        if(_source[i] != ',' || openers_met > 0)
+            continue;
+
+        std::string arg = _source.substr(offset, i - offset);
+        M_cull_empty_symbols(arg);
+        arguments.push(arg);
+
+        offset = i + 1;
     }
-    std::string argument = _source.substr(offset, _end - offset);
-    M_cull_empty_symbols(argument);
-    arguments.push((std::string&&)argument);
+
+    std::string arg = _source.substr(offset, _end - offset);
+    M_cull_empty_symbols(arg);
+    arguments.push(arg);
 
     return arguments;
 }
@@ -530,9 +590,9 @@ void Compiler::M_cull_empty_symbols(std::string& _from) const
     unsigned int begin = M_skip_until_symbol_met(_from, Empty_Symbols, false, 0);
     L_ASSERT(begin < _from.size());
 
-    unsigned int end = M_skip_until_symbol_met(_from, Empty_Symbols, true, begin);
-    if(end > _from.size())
-        end = _from.size();
+    unsigned int end = M_skip_until_symbol_met_reverse(_from, Empty_Symbols, true, _from.size() - 1, begin);
+    if(end == begin)
+        return;
 
     _from = _from.substr(begin, end - begin);
 }
@@ -552,6 +612,21 @@ unsigned int Compiler::M_skip_until_symbol_met(const std::string& _source, const
     }
 
     return Unlimited_Size;
+}
+
+unsigned int Compiler::M_skip_until_symbol_met_reverse(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected, unsigned int _max, unsigned int _min) const
+{
+    L_ASSERT(_max >= _min);
+
+    for(int i = _max; i > _min; --i)
+    {
+        char current_char = _source[i];
+
+        if(_acceptable_symbols[current_char] == _symbols_expected)
+            return i;
+    }
+
+    return _min;
 }
 
 unsigned int Compiler::M_skip_until_symbol_met(const std::string& _source, char _symbol, bool _symbols_expected, unsigned int _offset, unsigned int _max_size) const
