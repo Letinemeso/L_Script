@@ -471,6 +471,7 @@ unsigned int Compiler::M_parse_return(Compound_Statement& _compound_statement, c
 
         RValue_Getter* operation = new RValue_Getter;
         M_init_variable_container(deduced_type, first_word, operation->variable());
+        operation->set_stop_required(true);
         _compound_statement.add_operation(operation);
     }
     else if(expression_type == Expression_Type::Variable_Name)
@@ -478,10 +479,11 @@ unsigned int Compiler::M_parse_return(Compound_Statement& _compound_statement, c
         Extract_Variable* operation = new Extract_Variable;
         operation->set_context(&_compound_statement.context());
         operation->set_variable_name(first_word);
+        operation->set_stop_required(true);
         _compound_statement.add_operation(operation);
     }
 
-    return _max_size;
+    return M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
 }
 
 

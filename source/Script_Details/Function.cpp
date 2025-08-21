@@ -22,6 +22,8 @@ Variable* Function::call(const Arguments& _args)
 {
     L_ASSERT(_args.size() == m_expected_arguments_data.size());
 
+    m_should_stop_execution = false;
+
     for(unsigned int i = 0; i < _args.size(); ++i)
     {
         L_ASSERT(_args[i]->type() == m_expected_arguments_data[i].expected_type);

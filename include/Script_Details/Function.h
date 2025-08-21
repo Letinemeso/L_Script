@@ -28,7 +28,9 @@ namespace LScript
         std::string m_return_type = "void";
         Arguments_Data m_expected_arguments_data;
 
-        Compound_Statement m_compound_statement;        
+        Compound_Statement m_compound_statement;
+
+        bool m_should_stop_execution = false;
 
     public:
         Function();
@@ -44,6 +46,8 @@ namespace LScript
 
         inline const Arguments_Data& expected_arguments_data() const { return m_expected_arguments_data; }
         inline const std::string& return_type() const { return m_return_type; }
+
+        inline void stop_execution() { m_should_stop_execution = true; }
 
     public:
         [[nodiscard]] Variable* call(const Arguments& _args);

@@ -32,12 +32,18 @@ void Compound_Statement::clear_operations()
 
 Variable* Compound_Statement::process()
 {
+    m_stop_required = false;
+
     Variable* result = nullptr;
 
     for(Operations_List::Iterator it = m_operations.begin(); !it.end_reached(); ++it)
     {
         Operation* operation = *it;
         result = operation->process();
+
+        m_stop_required = operation->stop_required();
+        if(m_stop_required)
+            break;
     }
 
     return result;
