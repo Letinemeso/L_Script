@@ -17,6 +17,7 @@ namespace LScript
         void* m_data = nullptr;
         unsigned int m_raw_size = 0;
 
+
     public:
         Variable_Container();
         ~Variable_Container();

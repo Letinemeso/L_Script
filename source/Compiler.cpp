@@ -567,6 +567,14 @@ std::string Compiler::M_parse_first_word(const std::string& _source, unsigned in
     if(first_word_offset == Unlimited_Size)
         return {};
 
+    if(_source[first_word_offset] == '\'')
+    {
+        unsigned int string_end = M_skip_until_symbol_met(_source, '\'', true, first_word_offset + 1, _max_size);
+        L_ASSERT(string_end > first_word_offset);
+        L_ASSERT(string_end < _max_size);
+        return _source.substr(first_word_offset, string_end - first_word_offset);
+    }
+
     unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
     L_ASSERT(after_first_word_offset > first_word_offset);
 
@@ -579,6 +587,14 @@ unsigned int Compiler::M_skip_past_first_word(const std::string& _source, unsign
     if(first_word_offset == Unlimited_Size)
         return _max_size;
 
+    if(_source[first_word_offset] == '\'')
+    {
+        unsigned int string_end = M_skip_until_symbol_met(_source, '\'', true, first_word_offset + 1, _max_size);
+        L_ASSERT(string_end > first_word_offset);
+        L_ASSERT(string_end < _max_size);
+        return string_end;
+    }
+
     unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
     L_ASSERT(after_first_word_offset > first_word_offset);
 
@@ -590,11 +606,9 @@ void Compiler::M_cull_empty_symbols(std::string& _from) const
     unsigned int begin = M_skip_until_symbol_met(_from, Empty_Symbols, false, 0);
     L_ASSERT(begin < _from.size());
 
-    unsigned int end = M_skip_until_symbol_met_reverse(_from, Empty_Symbols, true, _from.size() - 1, begin);
-    if(end == begin)
-        return;
+    unsigned int end = M_skip_until_symbol_met_reverse(_from, Empty_Symbols, false, _from.size() - 1, begin);
 
-    _from = _from.substr(begin, end - begin);
+    _from = _from.substr(begin, end - begin + 1);
 }
 
 

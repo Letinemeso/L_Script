@@ -30,6 +30,7 @@ namespace LScript
     private:
         void M_register_default_global_functions();
         void M_register_default_int_functions();
+        void M_register_default_string_functions();
 
     public:
         static inline Integrated_Functions& instance() { static Integrated_Functions s_instance; return s_instance; }

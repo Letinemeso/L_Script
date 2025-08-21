@@ -49,14 +49,12 @@ void Variable_Container::assign(Variable* _other)
     if(_other->raw_size() == 0)
         return;
 
-    m_raw_size = _other->raw_size();
-    char* raw_array = new char[m_raw_size];
-    m_data = (void*)raw_array;
+    LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(m_type, 1);
 
-    char* other_raw_array = (char*)_other->data();
+    m_raw_size = allocate_result.size;
+    m_data = allocate_result.ptr;
 
-    for(unsigned int i = 0; i < m_raw_size; ++i)
-        raw_array[i] = other_raw_array[i];
+    LV::Type_Manager::copy(m_type, m_data, _other->data());
 }
 
 

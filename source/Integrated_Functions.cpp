@@ -1,5 +1,7 @@
 #include <Integrated_Functions.h>
 
+#include <Type_Manager.h>
+
 #include <Script_Details/Operations/Custom_Operation.h>
 
 using namespace LScript;
@@ -9,6 +11,7 @@ Integrated_Functions::Integrated_Functions()
 {
     M_register_default_global_functions();
     M_register_default_int_functions();
+    M_register_default_string_functions();
 }
 
 Integrated_Functions::~Integrated_Functions()
@@ -27,7 +30,7 @@ Integrated_Functions::~Integrated_Functions()
 
 void Integrated_Functions::M_register_default_global_functions()
 {
-    //  debug_print
+    //  debug_print(int)
     {
         Function* function = new Function;
 
@@ -47,6 +50,34 @@ void Integrated_Functions::M_register_default_global_functions()
             int* what_raw_data = (int*)var_what->data();
 
             std::cout << "[debug_print] [int] " << *what_raw_data << std::endl;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("debug_print", function);
+    }
+
+    //  debug_print(std::string)
+    {
+        Function* function = new Function;
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"std::string", "_what", false});
+        function->set_expected_arguments_data(arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_what = context.get_variable("_what");
+            L_ASSERT(var_what);
+            L_ASSERT(var_what->type() == "std::string");
+            L_ASSERT(var_what->data());
+
+            std::string* what_raw_data = (std::string*)var_what->data();
+
+            std::cout << "[debug_print] [std::string] " << *what_raw_data << std::endl;
 
             return nullptr;
         });
@@ -84,6 +115,50 @@ void Integrated_Functions::M_register_default_int_functions()
 
             int* this_raw_data = (int*)var_this->data();
             int* value_raw_data = (int*)var_value->data();
+
+            L_ASSERT(this_raw_data);
+            L_ASSERT(value_raw_data);
+
+            *this_raw_data = *value_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("int", "set", function);
+    }
+}
+
+void Integrated_Functions::M_register_default_string_functions()
+{
+    //  set
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"std::string", "this", true});
+        arguments_data.push({"std::string", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            Variable* var_value = context.get_variable("_value");
+            L_ASSERT(var_this);
+            L_ASSERT(var_value);
+            L_ASSERT(var_this->type() == "std::string");
+            L_ASSERT(var_value->type() == "std::string");
+
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("std::string", 1);
+
+            if(var_this->data() == nullptr)
+                var_this->set_data(allocated_data.ptr, allocated_data.size);
+
+            std::string* this_raw_data = (std::string*)var_this->data();
+            std::string* value_raw_data = (std::string*)var_value->data();
 
             L_ASSERT(this_raw_data);
             L_ASSERT(value_raw_data);
