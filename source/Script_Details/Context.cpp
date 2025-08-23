@@ -8,21 +8,6 @@ Context::Context()
 
 }
 
-Context::Context(Context&& _from)
-{
-    m_parent_context = _from.m_parent_context;
-    m_variables = (Variables_Map&&)_from.m_variables;
-}
-
-void Context::operator=(Context&& _from)
-{
-    clear();
-
-    m_parent_context = _from.m_parent_context;
-    m_variables = (Variables_Map&&)_from.m_variables;
-}
-
-
 Context::~Context()
 {
     clear();

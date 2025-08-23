@@ -19,10 +19,10 @@ namespace LScript
         Variables_Map m_variables;
 
     public:
-        Context();
-        Context(Context&& _from);
-        void operator=(Context&& _from);
+        Context(Context&) = delete;
+        Context(Context&&) = delete;
 
+        Context();
         ~Context();
 
     public:

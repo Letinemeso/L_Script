@@ -11,6 +11,7 @@
 #include <Script_Details/Operations/RValue_Getter.h>
 #include <Script_Details/Operations/Custom_Operation.h>
 #include <Script_Details/Operations/If_Operation.h>
+#include <Script_Details/Operations/While_Operation.h>
 
 using namespace LScript;
 
@@ -249,7 +250,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     }
     else if(expression_type == Expression_Type::While)
     {
-        // return M_parse_while();
+        parse_result = M_parse_while(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Return)
     {
@@ -526,11 +527,12 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
         String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
         Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
 
-        Compound_Statement compound_statement;
+        Compound_Statement* compound_statement = new Compound_Statement;
+        compound_statement->context().set_parent_context(&_context);
         String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
-        M_parse_compound_statement(compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+        M_parse_compound_statement(*compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
-        if_operation->add_case(condition_parse_result.operation, (Compound_Statement&&)compound_statement);
+        if_operation->add_case(condition_parse_result.operation, compound_statement);
 
         std::string maybe_else = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
         if(maybe_else != Else_Expression)
@@ -549,11 +551,31 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     }
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, _offset, _max_size);
-    Compound_Statement compound_statement;
-    M_parse_compound_statement(compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+    Compound_Statement* compound_statement = new Compound_Statement;
+    compound_statement->context().set_parent_context(&_context);
+    M_parse_compound_statement(*compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
-    if_operation->add_fail_case((Compound_Statement&&)compound_statement);
+    if_operation->add_fail_case(compound_statement);
 
+    result.offset_after = compound_statement_borders.end + 1;
+
+    return result;
+}
+
+Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    Operation_Parse_Result result;
+
+    While_Operation* while_operation = new While_Operation;
+    while_operation->cycle_compound_statement().context().set_parent_context(&_context);
+    result.operation = while_operation;
+
+    String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
+    Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
+    while_operation->set_condition_operation(condition_parse_result.operation);
+
+    String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
+    M_parse_compound_statement(while_operation->cycle_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
     result.offset_after = compound_statement_borders.end + 1;
 
     return result;

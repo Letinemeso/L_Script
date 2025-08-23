@@ -10,20 +10,20 @@ If_Operation::If_Operation()
 
 If_Operation::~If_Operation()
 {
-
+    delete m_failure_compound_statement;
 }
 
 
 
-void If_Operation::add_case(Operation* _condition, Compound_Statement&& _compound_statement)
+void If_Operation::add_case(Operation* _condition, Compound_Statement* _compound_statement)
 {
     L_ASSERT(_condition);
-    m_case_list.push_back({ _condition, (Compound_Statement&&)_compound_statement });
+    m_case_list.push_back({ _condition, _compound_statement });
 }
 
-void If_Operation::add_fail_case(Compound_Statement&& _compound_statement)
+void If_Operation::add_fail_case(Compound_Statement* _compound_statement)
 {
-    m_failure_compound_statement = (Compound_Statement&&)_compound_statement;
+    m_failure_compound_statement = _compound_statement;
 }
 
 
@@ -53,12 +53,12 @@ Variable* If_Operation::process()
         if(!M_check_condition(current_case.condition))
             continue;
 
-        compound_statement = &current_case.compound_statement;
+        compound_statement = current_case.compound_statement;
         break;
     }
 
     if(!compound_statement)
-        compound_statement = &m_failure_compound_statement;
+        compound_statement = m_failure_compound_statement;
 
     Variable* result = compound_statement->process();
 

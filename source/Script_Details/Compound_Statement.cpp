@@ -8,21 +8,6 @@ Compound_Statement::Compound_Statement()
 
 }
 
-Compound_Statement::Compound_Statement(Compound_Statement&& _from)
-{
-    m_context = (Context&&)_from.m_context;
-    m_operations = (Operations_List&&)_from.m_operations;
-}
-
-void Compound_Statement::operator=(Compound_Statement&& _from)
-{
-    clear_operations();
-
-    m_context = (Context&&)_from.m_context;
-    m_operations = (Operations_List&&)_from.m_operations;
-}
-
-
 Compound_Statement::~Compound_Statement()
 {
     clear_operations();

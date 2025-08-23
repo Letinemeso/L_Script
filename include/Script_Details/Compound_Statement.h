@@ -20,10 +20,10 @@ namespace LScript
         bool m_stop_required = false;
 
     public:
-        Compound_Statement();
-        Compound_Statement(Compound_Statement&& _from);
-        void operator=(Compound_Statement&& _from);
+        Compound_Statement(Compound_Statement&) = delete;
+        Compound_Statement(Compound_Statement&&) = delete;
 
+        Compound_Statement();
         ~Compound_Statement();
 
     public:
