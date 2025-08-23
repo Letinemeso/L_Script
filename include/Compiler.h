@@ -41,6 +41,12 @@ namespace LScript
             unsigned int offset_after = 0;
         };
 
+        struct String_Borders
+        {
+            unsigned int begin = 0;
+            unsigned int end = 0;
+        };
+
     public:
         using Acceptable_Symbols = LDS::Vector<bool>;
 
@@ -59,7 +65,7 @@ namespace LScript
 
         unsigned int M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_parse_global_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
-        unsigned int M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
+        unsigned int M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name, unsigned int _max_size) const;
 
         LDS::Vector<Function::Argument_Data> M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         void M_parse_compound_statement(Compound_Statement& _compound_statement, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _begin, unsigned int _end) const;
@@ -84,6 +90,8 @@ namespace LScript
         unsigned int M_skip_until_symbol_met(const std::string& _source, char _symbol, bool _symbols_expected = true, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_until_closer(const std::string& _source, char _opener, char _closer, unsigned int _offset = 0, unsigned int _max_size = Unlimited_Size) const;
         unsigned int M_skip_past_semicolon(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
+        String_Borders M_calculate_arguments_borders(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        String_Borders M_calculate_compound_statement_borders(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
         Expression_Type M_get_expression_type(const std::string& _expression) const;
 

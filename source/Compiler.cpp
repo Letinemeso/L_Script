@@ -117,7 +117,7 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     L_ASSERT(expression_goal == Expression_Goal::Function_Declaration || expression_goal == Expression_Goal::Variable_Declaration);
 
     if(expression_goal == Expression_Goal::Function_Declaration)
-        return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset);
+        return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset, _max_size);
     else if(expression_goal == Expression_Goal::Variable_Declaration)
         return M_parse_global_variable_declaration(m_script_target->global_context(), _source, first_word, second_word, after_second_word_offset);
 
@@ -141,22 +141,13 @@ unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, co
     return semicolon_index + 1;
 }
 
-unsigned int Compiler::M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
+unsigned int Compiler::M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name, unsigned int _max_size) const
 {
-    unsigned int args_offset = M_skip_until_symbol_met(_source, '(', true, _offset_after_name);
-    L_ASSERT(args_offset != Unlimited_Size);
+    String_Borders args_borders = M_calculate_arguments_borders(_source, _offset_after_name, _max_size);
 
-    unsigned int after_args_offset = M_skip_until_closer(_source, '(', ')', args_offset + 1);
-    L_ASSERT(after_args_offset != Unlimited_Size);
+    LDS::Vector<Function::Argument_Data> arguments_data = M_parse_function_arguments_data(_source, args_borders.begin, args_borders.end);
 
-    LDS::Vector<Function::Argument_Data> arguments_data = M_parse_function_arguments_data(_source, args_offset + 1, after_args_offset);
-
-    unsigned int body_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_args_offset + 1);
-    L_ASSERT(body_offset != Unlimited_Size);
-    L_ASSERT(_source[body_offset] == '{');
-
-    unsigned int after_body_offset = M_skip_until_closer(_source, '{', '}', body_offset + 1);
-    L_ASSERT(after_body_offset != Unlimited_Size);
+    String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
 
     L_ASSERT(m_script_target->get_function(_name) == nullptr);
 
@@ -165,11 +156,11 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     function->set_expected_arguments_data(arguments_data);
     function->compound_statement().context().set_parent_context(&m_script_target->global_context());
 
-    M_parse_compound_statement(function->compound_statement(), function->return_type(), _source, body_offset + 1, after_body_offset);
+    M_parse_compound_statement(function->compound_statement(), function->return_type(), _source, compound_statement_borders.begin, compound_statement_borders.end);
 
     m_script_target->register_function(_name, function);
 
-    return after_body_offset + 1;
+    return compound_statement_borders.end + 1;
 }
 
 
@@ -313,13 +304,9 @@ Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Conte
     L_ASSERT(after_operation_offset > operation_offset);
     std::string operation_name = _source.substr(operation_offset, after_operation_offset - operation_offset);
 
-    unsigned int arguments_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_operation_offset, _max_size);
-    L_ASSERT(_source[arguments_offset] == '(');
-    ++arguments_offset;
-    unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
-    L_ASSERT(after_arguments_offset < Unlimited_Size);
+    String_Borders args_borders = M_calculate_arguments_borders(_source, after_operation_offset, _max_size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, args_borders.begin, args_borders.end);
 
     Extract_Variable* extract_variable_operation = new Extract_Variable;
     extract_variable_operation->set_context(&_context);
@@ -333,19 +320,15 @@ Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Conte
 
     Operation_Parse_Result result;
     result.operation = call_member_function_operation;
-    result.offset_after = after_arguments_offset + 1;
+    result.offset_after = args_borders.end + 1;
     return result;
 }
 
 Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
-    unsigned int arguments_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(_source[arguments_offset] == '(');
-    ++arguments_offset;
-    unsigned int after_arguments_offset = M_skip_until_closer(_source, '(', ')', arguments_offset, _max_size);
-    L_ASSERT(after_arguments_offset < Unlimited_Size);
+    String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, arguments_offset, after_arguments_offset);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, args_borders.begin, args_borders.end);
 
     Call_Global_Function* operation = new Call_Global_Function;
     operation->set_function_name(_name);
@@ -354,7 +337,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
 
     Operation_Parse_Result result;
     result.operation = operation;
-    result.offset_after = after_arguments_offset + 1;
+    result.offset_after = args_borders.end + 1;
     return result;
 }
 
@@ -557,11 +540,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
 
 unsigned int Compiler::M_parse_if(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
-    unsigned int condition_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(_source[condition_offset] == '(');
-    ++condition_offset;
-    unsigned int after_condition_offset = M_skip_until_closer(_source, '(', ')', condition_offset, _max_size);
-    L_ASSERT(after_condition_offset < Unlimited_Size);
     return 0;
     // Expression_Type expression_type
 }
@@ -723,6 +701,32 @@ unsigned int Compiler::M_skip_past_semicolon(const std::string& _source, unsigne
     L_ASSERT(_source[semicolon_index] == ';');
 
     return semicolon_index + 1;
+}
+
+Compiler::String_Borders Compiler::M_calculate_arguments_borders(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    String_Borders result;
+
+    result.begin = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(_source[result.begin] == '(');
+    ++result.begin;
+    result.end = M_skip_until_closer(_source, '(', ')', result.begin, _max_size);
+    L_ASSERT(result.end < Unlimited_Size);
+
+    return result;
+}
+
+Compiler::String_Borders Compiler::M_calculate_compound_statement_borders(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    String_Borders result;
+
+    result.begin = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(_source[result.begin] == '{');
+    ++result.begin;
+    result.end = M_skip_until_closer(_source, '{', '}', result.begin, _max_size);
+    L_ASSERT(result.end < Unlimited_Size);
+
+    return result;
 }
 
 
