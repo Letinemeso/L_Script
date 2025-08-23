@@ -78,8 +78,8 @@ namespace LScript
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
         Operation_Parse_Result M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         Operation_Parse_Result M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation* M_parse_condition(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
+        Operation_Parse_Result M_parse_subexpression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         [[nodiscard]] RValue_Getter* M_construct_rvalue_getter(const std::string& _value_as_string) const;
 
         std::string M_parse_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;

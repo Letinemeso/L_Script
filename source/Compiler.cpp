@@ -506,50 +506,10 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
         return result;
     }
 
-    std::string first_word = M_parse_first_word(_source, _offset, _max_size);
-    L_ASSERT(first_word.size() > 0);
-    unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
+    Operation_Parse_Result result = M_parse_subexpression(_context, _source, offset, _max_size);
+    result.offset_after = M_skip_past_semicolon(_source, result.offset_after, _max_size);
 
-    Expression_Type expression_type = M_get_expression_type(first_word);
-    L_ASSERT(expression_type != Expression_Type::Type_Name);
-
-    Operation_Parse_Result result;
-
-    if(expression_type == Expression_Type::Unknown)
-    {
-        RValue_Getter* operation = M_construct_rvalue_getter(first_word);
-        L_ASSERT(operation->variable().type() == _expected_return_type);
-
-        operation->set_stop_required(true);
-
-        result.operation = operation;
-        result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
-    }
-    else if(expression_type == Expression_Type::Variable_Name)
-    {
-        Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
-
-        if(expression_goal == Expression_Goal::Unknown)
-        {
-            Extract_Variable* operation = new Extract_Variable;
-            operation->set_context(&_context);
-            operation->set_variable_name(first_word);
-            result.operation = operation;
-            result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
-        }
-        else if(expression_goal == Expression_Goal::Member_Access)
-        {
-            result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-        }
-        else if(expression_goal == Expression_Goal::Function_Call)
-        {
-            result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-        }
-    }
-    else
-    {
-        L_ASSERT(false);
-    }
+    result.operation->set_stop_required(true);
 
     return result;
 }
@@ -564,13 +524,13 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     while(true)
     {
         String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
-        Operation* condition_operation = M_parse_condition(_context, _source, args_borders.begin, args_borders.end);
+        Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
 
         Compound_Statement compound_statement;
         String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
         M_parse_compound_statement(compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
-        if_operation->add_case(condition_operation, (Compound_Statement&&)compound_statement);
+        if_operation->add_case(condition_parse_result.operation, (Compound_Statement&&)compound_statement);
 
         std::string maybe_else = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
         if(maybe_else != Else_Expression)
@@ -599,21 +559,22 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     return result;
 }
 
-Operation* Compiler::M_parse_condition(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+
+Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     std::string first_word = M_parse_first_word(_source, _offset, _max_size);
     L_ASSERT(first_word.size() > 0);
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
+    Operation_Parse_Result result;
+
     Expression_Type expression_type = M_get_expression_type(first_word);
     if(expression_type == Expression_Type::Unknown)
     {
         RValue_Getter* operation = M_construct_rvalue_getter(first_word);
-        L_ASSERT(operation->variable().type() == Bool_Type_Name);
 
-        operation->set_stop_required(true);
-
-        return operation;
+        result.operation = operation;
+        result.offset_after = after_first_word_offset;
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
@@ -624,24 +585,23 @@ Operation* Compiler::M_parse_condition(Context& _context, const std::string& _so
             Extract_Variable* operation = new Extract_Variable;
             operation->set_context(&_context);
             operation->set_variable_name(first_word);
-            return operation;
+
+            result.operation = operation;
+            result.offset_after = after_first_word_offset;
         }
         else if(expression_goal == Expression_Goal::Member_Access)
         {
-            Operation_Parse_Result parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-            return parse_result.operation;
+            result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
         }
         else if(expression_goal == Expression_Goal::Function_Call)
         {
-            Operation_Parse_Result parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-            return parse_result.operation;
+            result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
         }
     }
 
-    L_ASSERT(false);
-    return nullptr;
+    L_ASSERT(result.operation);
+    return result;
 }
-
 
 RValue_Getter* Compiler::M_construct_rvalue_getter(const std::string& _value_as_string) const
 {
