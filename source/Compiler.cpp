@@ -21,6 +21,7 @@ namespace LScript
     constexpr const char* Bool_Type_Name = "bool";
 
     constexpr const char* If_Expression = "if";
+    constexpr const char* Else_Expression = "else";
     constexpr const char* For_Expression = "for";
     constexpr const char* While_Expression = "while";
     constexpr const char* Return_Expression = "return";
@@ -565,6 +566,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
 
     If_Operation* if_operation = new If_Operation;
     if_operation->success_compound_statement().context().set_parent_context(&_context);
+    if_operation->failure_compound_statement().context().set_parent_context(&_context);
     result.operation = if_operation;
 
     Expression_Type expression_type = M_get_expression_type(first_word);
@@ -606,6 +608,18 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
     M_parse_compound_statement(if_operation->success_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+
+    std::string next_word = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
+    if(next_word != Else_Expression)
+    {
+        result.offset_after = compound_statement_borders.end + 1;
+        return result;
+    }
+
+    unsigned int offset_after_else = M_skip_past_first_word(_source, compound_statement_borders.end + 1, _max_size);
+    compound_statement_borders = M_calculate_compound_statement_borders(_source, offset_after_else, _max_size);
+
+    M_parse_compound_statement(if_operation->failure_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
     result.offset_after = compound_statement_borders.end + 1;
 

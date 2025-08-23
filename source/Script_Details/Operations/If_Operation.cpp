@@ -15,7 +15,7 @@ If_Operation::~If_Operation()
 
 
 
-bool If_Operation::M_chech_condition(Operation* _condition) const
+bool If_Operation::M_check_condition(Operation* _condition) const
 {
     Variable* condition_result = _condition->process();
     L_ASSERT(condition_result->type() == "bool");
@@ -33,12 +33,17 @@ Variable* If_Operation::process()
 
     set_stop_required(false);
 
-    if(!M_chech_condition(m_condition))
-        return nullptr;
+    bool condition_succeded = M_check_condition(m_condition);
 
-    Variable* result = m_success_compound_statement.process();
+    Compound_Statement* compound_statement = nullptr;
+    if(condition_succeded)
+        compound_statement = &m_success_compound_statement;
+    else
+        compound_statement = &m_failure_compound_statement;
 
-    set_stop_required(m_success_compound_statement.stop_required());
+    Variable* result = compound_statement->process();
+
+    set_stop_required(compound_statement->stop_required());
 
     return result;
 }
