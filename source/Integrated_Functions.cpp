@@ -58,12 +58,12 @@ void Integrated_Functions::M_register_default_global_functions()
         register_global_function("debug_print", function);
     }
 
-    //  debug_print(std::string)
+    //  debug_print(string)
     {
         Function* function = new Function;
 
         Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"std::string", "_what", false});
+        arguments_data.push({"string", "_what", false});
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
@@ -72,12 +72,12 @@ void Integrated_Functions::M_register_default_global_functions()
             Context& context = function->compound_statement().context();
             Variable* var_what = context.get_variable("_what");
             L_ASSERT(var_what);
-            L_ASSERT(var_what->type() == "std::string");
+            L_ASSERT(var_what->type() == "string");
             L_ASSERT(var_what->data());
 
             std::string* what_raw_data = (std::string*)var_what->data();
 
-            std::cout << "[debug_print] [std::string] " << *what_raw_data << std::endl;
+            std::cout << "[debug_print] [string] " << *what_raw_data << std::endl;
 
             return nullptr;
         });
@@ -137,8 +137,8 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_return_type("void");
 
         Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"std::string", "this", true});
-        arguments_data.push({"std::string", "_value", false});
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"string", "_value", false});
         function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
@@ -149,10 +149,10 @@ void Integrated_Functions::M_register_default_string_functions()
             Variable* var_value = context.get_variable("_value");
             L_ASSERT(var_this);
             L_ASSERT(var_value);
-            L_ASSERT(var_this->type() == "std::string");
-            L_ASSERT(var_value->type() == "std::string");
+            L_ASSERT(var_this->type() == "string");
+            L_ASSERT(var_value->type() == "string");
 
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("std::string", 1);
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("string", 1);
 
             if(var_this->data() == nullptr)
                 var_this->set_data(allocated_data.ptr, allocated_data.size);
@@ -169,7 +169,7 @@ void Integrated_Functions::M_register_default_string_functions()
         });
         function->compound_statement().add_operation(operation);
 
-        register_member_function("int", "set", function);
+        register_member_function("string", "set", function);
     }
 }
 

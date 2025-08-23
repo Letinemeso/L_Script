@@ -9,11 +9,13 @@
 #include <Script_Details/Operations/Call_Member_Function.h>
 #include <Script_Details/Operations/Call_Global_Function.h>
 #include <Script_Details/Operations/RValue_Getter.h>
+#include <Script_Details/Operations/Custom_Operation.h>
 
 using namespace LScript;
 
 namespace LScript
 {
+    constexpr const char* String_Type_Name = "string";
     constexpr const char* Void_Type_Name = "void";
     constexpr const char* If_Expression = "if";
     constexpr const char* For_Expression = "for";
@@ -163,7 +165,7 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     function->set_expected_arguments_data(arguments_data);
     function->compound_statement().context().set_parent_context(&m_script_target->global_context());
 
-    M_parse_function_body(*function, _source, body_offset + 1, after_body_offset);
+    M_parse_compound_statement(function->compound_statement(), function->return_type(), _source, body_offset + 1, after_body_offset);
 
     m_script_target->register_function(_name, function);
 
@@ -212,69 +214,75 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
     return result;
 }
 
-void Compiler::M_parse_function_body(Function& _function, const std::string& _source, unsigned int _begin, unsigned int _end) const
+void Compiler::M_parse_compound_statement(Compound_Statement& _compound_statement, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _begin, unsigned int _end) const
 {
     unsigned int offset = _begin;
     while(offset < _end)
     {
-        offset = M_parse_dynamic_expression(_function, _source, offset, _end);
+        Operation_Parse_Result parse_result = M_parse_dynamic_expression(_compound_statement.context(), _owner_function_return_type, _source, offset, _end);
+
+        if(parse_result.offset_after >= _end)
+            break;
+
+        _compound_statement.add_operation(parse_result.operation);
+        offset = parse_result.offset_after;
     }
 }
 
-unsigned int Compiler::M_parse_dynamic_expression(Function& _function, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     if(_max_size == Unlimited_Size)
         _max_size = _source.size();
 
     std::string first_word = M_parse_first_word(_source, _offset, _max_size);
     if(first_word.size() == 0)
-        return _max_size;
+        return { nullptr, _max_size };
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type != Expression_Type::Unknown);
 
+    Operation_Parse_Result parse_result;
+
     if(expression_type == Expression_Type::If)
     {
         // return M_parse_if();
     }
-    if(expression_type == Expression_Type::For)
+    else if(expression_type == Expression_Type::For)
     {
         // return M_parse_for();
     }
-    if(expression_type == Expression_Type::While)
+    else if(expression_type == Expression_Type::While)
     {
         // return M_parse_while();
     }
-    if(expression_type == Expression_Type::Return)
+    else if(expression_type == Expression_Type::Return)
     {
-        return M_parse_return(_function.compound_statement(), _function.return_type(), _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_return(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
-    if(expression_type == Expression_Type::Type_Name)
+    else if(expression_type == Expression_Type::Type_Name)
     {
-        return M_parse_dynamic_declaration(_function.compound_statement(), first_word, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_dynamic_declaration(_context, first_word, _source, after_first_word_offset, _max_size);
     }
-    if(expression_type == Expression_Type::Variable_Name)
+    else if(expression_type == Expression_Type::Variable_Name)
     {
         Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
 
-        Operation_Parse_Result parse_result;
         if(expression_goal == Expression_Goal::Member_Access)
-            parse_result = M_parse_operation_with_variable(_function.compound_statement().context(), first_word, _source, after_first_word_offset, _max_size);
+            parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, _max_size);
         else if(expression_goal == Expression_Goal::Function_Call)
-            parse_result = M_parse_function_call(_function.compound_statement().context(), first_word, _source, after_first_word_offset, _max_size);
+            parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, _max_size);
 
-        L_ASSERT(parse_result.operation);
-
-        _function.compound_statement().add_operation(parse_result.operation);
-
-        return M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);;
+        parse_result.offset_after = M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);
     }
 
-    return Unlimited_Size;
+    L_ASSERT(parse_result.operation);
+    L_ASSERT(parse_result.offset_after < _max_size);
+
+    return parse_result;
 }
 
-unsigned int Compiler::M_parse_dynamic_declaration(Compound_Statement& _compound_statement, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset);
     unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset);
@@ -286,13 +294,14 @@ unsigned int Compiler::M_parse_dynamic_declaration(Compound_Statement& _compound
     L_ASSERT(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration);
 
     Variable_Creation* operation = new Variable_Creation;
-    operation->set_context(&_compound_statement.context());
+    operation->set_context(&_context);
     operation->set_variable_type(_type);
     operation->set_variable_name(name);
 
-    _compound_statement.add_operation(operation);
-
-    return M_skip_past_semicolon(_source, after_name_offset, _max_size);
+    Operation_Parse_Result result;
+    result.operation = operation;
+    result.offset_after = M_skip_past_semicolon(_source, after_name_offset, _max_size);
+    return result;
 }
 
 Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
@@ -369,12 +378,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
 
         if(expression_type == Expression_Type::Unknown)     //  treat this as a possible r-value
         {
-            std::string deduced_type = M_deduce_rvalue_type(argument);
-            if(deduced_type == "std::string")
-                argument = argument.substr(1, argument.size() - 2);
-
-            RValue_Getter* operation = new RValue_Getter;
-            M_init_variable_container(deduced_type, argument, operation->variable());
+            RValue_Getter* operation = M_construct_rvalue_getter(argument);
             operations.push(operation);
         }
         else if(expression_type == Expression_Type::Variable_Name)
@@ -482,7 +486,7 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
     if(_rvalue.size() >= 2)
     {
         if(_rvalue[0] == '\'' && _rvalue[_rvalue.size() - 1] == '\'')
-            return "std::string";
+            return String_Type_Name;
     }
 
     if(LV::Type_Manager::validate("int", _rvalue))
@@ -498,66 +502,90 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
     return "";
 }
 
-unsigned int Compiler::M_parse_return(Compound_Statement& _compound_statement, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
     L_ASSERT(offset < _max_size);
+
     if(_source[offset] == ';' && _expected_return_type == Void_Type_Name)
-        return _max_size;
+    {
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](){ return nullptr; });     //  do nothing, just return
+        operation->set_stop_required(true);
 
-    unsigned int semicolon_index = M_skip_until_symbol_met(_source, ';', true, offset, _max_size);
-    L_ASSERT(offset < _max_size);
-
-    unsigned int expression_size = semicolon_index - offset;
-    std::string expression = _source.substr(offset, expression_size);
-    M_cull_empty_symbols(expression);
+        Operation_Parse_Result result;
+        result.offset_after = offset + 1;
+        result.operation = operation;
+        return result;
+    }
 
     std::string first_word = M_parse_first_word(_source, _offset, _max_size);
-    if(first_word.size() == 0)
-        return _max_size;
+    L_ASSERT(first_word.size() > 0);
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
     L_ASSERT(expression_type != Expression_Type::Type_Name);
 
+    Operation_Parse_Result result;
+
     if(expression_type == Expression_Type::Unknown)
     {
-        std::string deduced_type = M_deduce_rvalue_type(first_word);
+        RValue_Getter* operation = M_construct_rvalue_getter(first_word);
+        L_ASSERT(operation->variable().type() == _expected_return_type);
 
-        L_ASSERT(deduced_type == _expected_return_type);
-
-        if(deduced_type == "std::string")
-            first_word = first_word.substr(1, first_word.size() - 2);
-
-        RValue_Getter* operation = new RValue_Getter;
-        M_init_variable_container(deduced_type, first_word, operation->variable());
         operation->set_stop_required(true);
-        _compound_statement.add_operation(operation);
+
+        result.operation = operation;
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
         Extract_Variable* operation = new Extract_Variable;
-        operation->set_context(&_compound_statement.context());
+        operation->set_context(&_context);
         operation->set_variable_name(first_word);
         operation->set_stop_required(true);
-        _compound_statement.add_operation(operation);
+
+        result.operation = operation;
+    }
+    else
+    {
+        L_ASSERT(false);
     }
 
-    return M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
+    result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
+    return result;
+}
+
+unsigned int Compiler::M_parse_if(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    unsigned int condition_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
+    L_ASSERT(_source[condition_offset] == '(');
+    ++condition_offset;
+    unsigned int after_condition_offset = M_skip_until_closer(_source, '(', ')', condition_offset, _max_size);
+    L_ASSERT(after_condition_offset < Unlimited_Size);
+    return 0;
+    // Expression_Type expression_type
 }
 
 
-void Compiler::M_init_variable_container(const std::string& _type, const std::string& _value_as_string, Variable_Container& _variable) const
+RValue_Getter* Compiler::M_construct_rvalue_getter(const std::string& _value_as_string) const
 {
-    LV::Type_Utility::Allocate_Result allocation_result = LV::Type_Manager::allocate(_type, 1);
+    std::string deduced_type = M_deduce_rvalue_type(_value_as_string);
 
     LDS::Vector<std::string> strings_vector_crutch;
-    strings_vector_crutch.push(_value_as_string);
 
-    LV::Type_Manager::parse(_type, strings_vector_crutch, allocation_result.ptr);
+    if(deduced_type == String_Type_Name)
+        strings_vector_crutch.push(_value_as_string.substr(1, _value_as_string.size() - 2));
+    else
+        strings_vector_crutch.push(_value_as_string);
 
-    _variable.set_type(_type);
-    _variable.set_data(allocation_result.ptr, allocation_result.size);
+    LV::Type_Utility::Allocate_Result allocation_result = LV::Type_Manager::allocate(deduced_type, 1);
+    LV::Type_Manager::parse(deduced_type, strings_vector_crutch, allocation_result.ptr);
+
+    RValue_Getter* operation = new RValue_Getter;
+    operation->variable().set_type(deduced_type);
+    operation->variable().set_data(allocation_result.ptr, allocation_result.size);
+
+    return operation;
 }
 
 
