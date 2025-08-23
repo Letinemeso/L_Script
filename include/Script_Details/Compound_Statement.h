@@ -21,6 +21,9 @@ namespace LScript
 
     public:
         Compound_Statement();
+        Compound_Statement(Compound_Statement&& _from);
+        void operator=(Compound_Statement&& _from);
+
         ~Compound_Statement();
 
     public:

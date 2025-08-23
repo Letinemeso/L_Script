@@ -10,8 +10,34 @@ namespace LScript
     class If_Operation : public Operation
     {
     private:
-        Operation* m_condition = nullptr;
-        Compound_Statement m_success_compound_statement;
+        struct Case
+        {
+            Operation* condition = nullptr;
+            Compound_Statement compound_statement;
+
+            Case(Operation* _condition, Compound_Statement&& _compound_statement)
+            {
+                condition = _condition;
+                compound_statement = (Compound_Statement&&)_compound_statement;
+            }
+
+            Case(Case& _other) = delete;
+
+            Case(Case&& _from)
+            {
+                condition = _from.condition;
+                _from.condition = nullptr;
+                compound_statement = (Compound_Statement&&)_from.compound_statement;
+            }
+
+            ~Case()
+            {
+                delete condition;
+            }
+        };
+        using Case_List = LDS::List<Case>;
+
+        Case_List m_case_list;
         Compound_Statement m_failure_compound_statement;
 
     public:
@@ -19,10 +45,8 @@ namespace LScript
         ~If_Operation();
 
     public:
-        inline void set_condition(Operation* _operation) { delete m_condition; m_condition = _operation; }
-
-        inline Compound_Statement& success_compound_statement() { return m_success_compound_statement; }
-        inline Compound_Statement& failure_compound_statement() { return m_failure_compound_statement; }
+        void add_case(Operation* _condition, Compound_Statement&& _compound_statement);
+        void add_fail_case(Compound_Statement&& _compound_statement);
 
     private:
         bool M_check_condition(Operation* _condition) const;

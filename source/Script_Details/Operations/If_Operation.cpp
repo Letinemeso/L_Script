@@ -10,7 +10,20 @@ If_Operation::If_Operation()
 
 If_Operation::~If_Operation()
 {
-    delete m_condition;
+
+}
+
+
+
+void If_Operation::add_case(Operation* _condition, Compound_Statement&& _compound_statement)
+{
+    L_ASSERT(_condition);
+    m_case_list.push_back({ _condition, (Compound_Statement&&)_compound_statement });
+}
+
+void If_Operation::add_fail_case(Compound_Statement&& _compound_statement)
+{
+    m_failure_compound_statement = (Compound_Statement&&)_compound_statement;
 }
 
 
@@ -29,16 +42,22 @@ bool If_Operation::M_check_condition(Operation* _condition) const
 
 Variable* If_Operation::process()
 {
-    L_ASSERT(m_condition);
+    L_ASSERT(m_case_list.size() > 0);
 
     set_stop_required(false);
 
-    bool condition_succeded = M_check_condition(m_condition);
-
     Compound_Statement* compound_statement = nullptr;
-    if(condition_succeded)
-        compound_statement = &m_success_compound_statement;
-    else
+    for(Case_List::Iterator it = m_case_list.begin(); !it.end_reached(); ++it)
+    {
+        Case& current_case = *it;
+        if(!M_check_condition(current_case.condition))
+            continue;
+
+        compound_statement = &current_case.compound_statement;
+        break;
+    }
+
+    if(!compound_statement)
         compound_statement = &m_failure_compound_statement;
 
     Variable* result = compound_statement->process();

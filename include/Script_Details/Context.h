@@ -20,6 +20,9 @@ namespace LScript
 
     public:
         Context();
+        Context(Context&& _from);
+        void operator=(Context&& _from);
+
         ~Context();
 
     public:

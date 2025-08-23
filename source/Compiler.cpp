@@ -216,7 +216,7 @@ void Compiler::M_parse_compound_statement(Compound_Statement& _compound_statemen
     {
         Operation_Parse_Result parse_result = M_parse_dynamic_expression(_compound_statement.context(), _owner_function_return_type, _source, offset, _end);
 
-        if(parse_result.offset_after >= _end)
+        if(!parse_result.operation)
             break;
 
         _compound_statement.add_operation(parse_result.operation);
@@ -272,7 +272,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     }
 
     L_ASSERT(parse_result.operation);
-    L_ASSERT(parse_result.offset_after < _max_size);
+    L_ASSERT(parse_result.offset_after <= _max_size);
 
     return parse_result;
 }
@@ -556,18 +556,54 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
 
 Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
-    String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
-
-    std::string first_word = M_parse_first_word(_source, args_borders.begin, args_borders.end);
-    L_ASSERT(first_word.size() > 0);
-    unsigned int after_first_word_offset = M_skip_past_first_word(_source, args_borders.begin, args_borders.end);
-
     Operation_Parse_Result result;
 
     If_Operation* if_operation = new If_Operation;
-    if_operation->success_compound_statement().context().set_parent_context(&_context);
-    if_operation->failure_compound_statement().context().set_parent_context(&_context);
     result.operation = if_operation;
+
+    while(true)
+    {
+        String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
+        Operation* condition_operation = M_parse_condition(_context, _source, args_borders.begin, args_borders.end);
+
+        Compound_Statement compound_statement;
+        String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
+        M_parse_compound_statement(compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+
+        if_operation->add_case(condition_operation, (Compound_Statement&&)compound_statement);
+
+        std::string maybe_else = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
+        if(maybe_else != Else_Expression)
+        {
+            result.offset_after = compound_statement_borders.end + 1;
+            return result;
+        }
+
+        _offset = M_skip_past_first_word(_source, compound_statement_borders.end + 1, _max_size);
+
+        std::string maybe_if = M_parse_first_word(_source, _offset, _max_size);
+        if(maybe_if != If_Expression)
+            break;
+
+        _offset = M_skip_past_first_word(_source, _offset, _max_size);
+    }
+
+    String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, _offset, _max_size);
+    Compound_Statement compound_statement;
+    M_parse_compound_statement(compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+
+    if_operation->add_fail_case((Compound_Statement&&)compound_statement);
+
+    result.offset_after = compound_statement_borders.end + 1;
+
+    return result;
+}
+
+Operation* Compiler::M_parse_condition(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    std::string first_word = M_parse_first_word(_source, _offset, _max_size);
+    L_ASSERT(first_word.size() > 0);
+    unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
     if(expression_type == Expression_Type::Unknown)
@@ -577,7 +613,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
 
         operation->set_stop_required(true);
 
-        if_operation->set_condition(operation);
+        return operation;
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
@@ -588,42 +624,22 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
             Extract_Variable* operation = new Extract_Variable;
             operation->set_context(&_context);
             operation->set_variable_name(first_word);
-            if_operation->set_condition(operation);
+            return operation;
         }
         else if(expression_goal == Expression_Goal::Member_Access)
         {
             Operation_Parse_Result parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-            if_operation->set_condition(parse_result.operation);
+            return parse_result.operation;
         }
         else if(expression_goal == Expression_Goal::Function_Call)
         {
             Operation_Parse_Result parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-            if_operation->set_condition(parse_result.operation);
+            return parse_result.operation;
         }
     }
-    else
-    {
-        L_ASSERT(false);
-    }
 
-    String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
-    M_parse_compound_statement(if_operation->success_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
-
-    std::string next_word = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
-    if(next_word != Else_Expression)
-    {
-        result.offset_after = compound_statement_borders.end + 1;
-        return result;
-    }
-
-    unsigned int offset_after_else = M_skip_past_first_word(_source, compound_statement_borders.end + 1, _max_size);
-    compound_statement_borders = M_calculate_compound_statement_borders(_source, offset_after_else, _max_size);
-
-    M_parse_compound_statement(if_operation->failure_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
-
-    result.offset_after = compound_statement_borders.end + 1;
-
-    return result;
+    L_ASSERT(false);
+    return nullptr;
 }
 
 
