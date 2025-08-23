@@ -522,22 +522,34 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
         operation->set_stop_required(true);
 
         result.operation = operation;
+        result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
-        Extract_Variable* operation = new Extract_Variable;
-        operation->set_context(&_context);
-        operation->set_variable_name(first_word);
-        operation->set_stop_required(true);
+        Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
 
-        result.operation = operation;
+        if(expression_goal == Expression_Goal::Unknown)
+        {
+            Extract_Variable* operation = new Extract_Variable;
+            operation->set_context(&_context);
+            operation->set_variable_name(first_word);
+            result.operation = operation;
+            result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
+        }
+        else if(expression_goal == Expression_Goal::Member_Access)
+        {
+            result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+        }
+        else if(expression_goal == Expression_Goal::Function_Call)
+        {
+            result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+        }
     }
     else
     {
         L_ASSERT(false);
     }
 
-    result.offset_after = M_skip_past_semicolon(_source, after_first_word_offset, _max_size);
     return result;
 }
 
@@ -546,6 +558,8 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
 
     std::string first_word = M_parse_first_word(_source, args_borders.begin, args_borders.end);
+    L_ASSERT(first_word.size() > 0);
+    unsigned int after_first_word_offset = M_skip_past_first_word(_source, args_borders.begin, args_borders.end);
 
     Operation_Parse_Result result;
 
@@ -565,11 +579,25 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
-        Extract_Variable* operation = new Extract_Variable;
-        operation->set_context(&_context);
-        operation->set_variable_name(first_word);
+        Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
 
-        if_operation->set_condition(operation);
+        if(expression_goal == Expression_Goal::Unknown)
+        {
+            Extract_Variable* operation = new Extract_Variable;
+            operation->set_context(&_context);
+            operation->set_variable_name(first_word);
+            if_operation->set_condition(operation);
+        }
+        else if(expression_goal == Expression_Goal::Member_Access)
+        {
+            Operation_Parse_Result parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            if_operation->set_condition(parse_result.operation);
+        }
+        else if(expression_goal == Expression_Goal::Function_Call)
+        {
+            Operation_Parse_Result parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            if_operation->set_condition(parse_result.operation);
+        }
     }
     else
     {
@@ -645,7 +673,10 @@ unsigned int Compiler::M_skip_past_first_word(const std::string& _source, unsign
     }
 
     unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
-    L_ASSERT(after_first_word_offset > first_word_offset);
+    L_ASSERT(after_first_word_offset >= first_word_offset);
+
+    if(after_first_word_offset == first_word_offset)
+        return _max_size;
 
     return after_first_word_offset;
 }
