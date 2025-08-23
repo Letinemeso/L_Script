@@ -77,7 +77,7 @@ namespace LScript
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
         Operation_Parse_Result M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        unsigned int M_parse_if(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        Operation_Parse_Result M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
         [[nodiscard]] RValue_Getter* M_construct_rvalue_getter(const std::string& _value_as_string) const;
 

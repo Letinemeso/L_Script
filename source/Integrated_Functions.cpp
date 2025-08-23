@@ -12,6 +12,7 @@ Integrated_Functions::Integrated_Functions()
     M_register_default_global_functions();
     M_register_default_int_functions();
     M_register_default_string_functions();
+    M_register_default_bool_functions();
 }
 
 Integrated_Functions::~Integrated_Functions()
@@ -111,7 +112,10 @@ void Integrated_Functions::M_register_default_int_functions()
             L_ASSERT(var_value->type() == "int");
 
             if(var_this->data() == nullptr)
-                var_this->set_data(new int, sizeof(int));
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
+                var_this->set_data(allocated_data.ptr, allocated_data.size);
+            }
 
             int* this_raw_data = (int*)var_this->data();
             int* value_raw_data = (int*)var_value->data();
@@ -152,10 +156,11 @@ void Integrated_Functions::M_register_default_string_functions()
             L_ASSERT(var_this->type() == "string");
             L_ASSERT(var_value->type() == "string");
 
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("string", 1);
-
             if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("string", 1);
                 var_this->set_data(allocated_data.ptr, allocated_data.size);
+            }
 
             std::string* this_raw_data = (std::string*)var_this->data();
             std::string* value_raw_data = (std::string*)var_value->data();
@@ -170,6 +175,117 @@ void Integrated_Functions::M_register_default_string_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function("string", "set", function);
+    }
+}
+
+void Integrated_Functions::M_register_default_bool_functions()
+{
+    //  set
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"bool", "this", true});
+        arguments_data.push({"bool", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            Variable* var_value = context.get_variable("_value");
+            L_ASSERT(var_this);
+            L_ASSERT(var_value);
+            L_ASSERT(var_this->type() == "bool");
+            L_ASSERT(var_value->type() == "bool");
+
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                var_this->set_data(allocated_data.ptr, allocated_data.size);
+            }
+
+            bool* this_raw_data = (bool*)var_this->data();
+            bool* value_raw_data = (bool*)var_value->data();
+
+            L_ASSERT(this_raw_data);
+            L_ASSERT(value_raw_data);
+
+            *this_raw_data = *value_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "set", function);
+    }
+
+    //  invert
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"bool", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == "bool");
+
+            bool* this_raw_data = (bool*)var_this->data();
+            L_ASSERT(this_raw_data);
+
+            *this_raw_data = !*this_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "invert", function);
+    }
+
+
+    //  inverted
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"bool", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == "bool");
+
+            bool* this_raw_data = (bool*)var_this->data();
+            L_ASSERT(this_raw_data);
+
+            Variable_Container* inverted_container = new Variable_Container;
+            context.add_variable("inverted_this", inverted_container);
+            inverted_container->assign(var_this);
+
+            bool* inverted_raw_data = (bool*)inverted_container->data();
+            L_ASSERT(inverted_raw_data);
+
+            *inverted_raw_data = !*inverted_raw_data;
+
+            return inverted_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "inverted", function);
     }
 }
 

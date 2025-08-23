@@ -10,6 +10,7 @@
 #include <Script_Details/Operations/Call_Global_Function.h>
 #include <Script_Details/Operations/RValue_Getter.h>
 #include <Script_Details/Operations/Custom_Operation.h>
+#include <Script_Details/Operations/If_Operation.h>
 
 using namespace LScript;
 
@@ -17,6 +18,8 @@ namespace LScript
 {
     constexpr const char* String_Type_Name = "string";
     constexpr const char* Void_Type_Name = "void";
+    constexpr const char* Bool_Type_Name = "bool";
+
     constexpr const char* If_Expression = "if";
     constexpr const char* For_Expression = "for";
     constexpr const char* While_Expression = "while";
@@ -237,7 +240,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
 
     if(expression_type == Expression_Type::If)
     {
-        // return M_parse_if();
+        parse_result = M_parse_if(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::For)
     {
@@ -538,10 +541,47 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
     return result;
 }
 
-unsigned int Compiler::M_parse_if(Compound_Statement& _compound_statement, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
-    return 0;
-    // Expression_Type expression_type
+    String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
+
+    std::string first_word = M_parse_first_word(_source, args_borders.begin, args_borders.end);
+
+    Operation_Parse_Result result;
+
+    If_Operation* if_operation = new If_Operation;
+    if_operation->success_compound_statement().context().set_parent_context(&_context);
+    result.operation = if_operation;
+
+    Expression_Type expression_type = M_get_expression_type(first_word);
+    if(expression_type == Expression_Type::Unknown)
+    {
+        RValue_Getter* operation = M_construct_rvalue_getter(first_word);
+        L_ASSERT(operation->variable().type() == Bool_Type_Name);
+
+        operation->set_stop_required(true);
+
+        if_operation->set_condition(operation);
+    }
+    else if(expression_type == Expression_Type::Variable_Name)
+    {
+        Extract_Variable* operation = new Extract_Variable;
+        operation->set_context(&_context);
+        operation->set_variable_name(first_word);
+
+        if_operation->set_condition(operation);
+    }
+    else
+    {
+        L_ASSERT(false);
+    }
+
+    String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
+    M_parse_compound_statement(if_operation->success_compound_statement(), _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
+
+    result.offset_after = compound_statement_borders.end + 1;
+
+    return result;
 }
 
 
@@ -582,7 +622,10 @@ std::string Compiler::M_parse_first_word(const std::string& _source, unsigned in
     }
 
     unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
-    L_ASSERT(after_first_word_offset > first_word_offset);
+    L_ASSERT(after_first_word_offset >= first_word_offset);
+
+    if(after_first_word_offset == first_word_offset)
+        return {};
 
     return _source.substr(first_word_offset, after_first_word_offset - first_word_offset);
 }
@@ -631,7 +674,7 @@ unsigned int Compiler::M_skip_until_symbol_met(const std::string& _source, const
             return i;
     }
 
-    return Unlimited_Size;
+    return _max_size;
 }
 
 unsigned int Compiler::M_skip_until_symbol_met_reverse(const std::string& _source, const Acceptable_Symbols& _acceptable_symbols, bool _symbols_expected, unsigned int _max, unsigned int _min) const
