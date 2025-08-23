@@ -60,6 +60,9 @@ Variable* If_Operation::process()
     if(!compound_statement)
         compound_statement = m_failure_compound_statement;
 
+    if(!compound_statement)
+        return nullptr;
+
     Variable* result = compound_statement->process();
 
     set_stop_required(compound_statement->stop_required());

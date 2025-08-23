@@ -32,6 +32,7 @@ namespace LScript
     Compiler::Acceptable_Symbols Empty_Symbols(Max_Symbols, false);
     Compiler::Acceptable_Symbols Variable_Name_Symbols(Max_Symbols, false);
     Compiler::Acceptable_Symbols Type_Name_Symbols(Max_Symbols, false);
+    Compiler::Acceptable_Symbols Maybe_Value_Symbols(Max_Symbols, false);
 
     using Reserved_Keywords_Tree = LDS::AVL_Tree<std::string>;
     Reserved_Keywords_Tree Reserved_Keywords;
@@ -71,6 +72,19 @@ Compiler::Compiler()
     Type_Name_Symbols['<'] = true;
     Type_Name_Symbols['>'] = true;
     Type_Name_Symbols['&'] = true;
+
+    for(char i = 'a'; i <= 'z'; ++i)
+        Maybe_Value_Symbols[i] = true;
+    for(char i = 'A'; i <= 'Z'; ++i)
+        Maybe_Value_Symbols[i] = true;
+    for(char i = '0'; i <= '9'; ++i)
+        Maybe_Value_Symbols[i] = true;
+    Maybe_Value_Symbols['_'] = true;
+    Maybe_Value_Symbols[':'] = true;
+    Maybe_Value_Symbols['<'] = true;
+    Maybe_Value_Symbols['>'] = true;
+    Maybe_Value_Symbols['&'] = true;
+    Maybe_Value_Symbols['-'] = true;
 
     Reserved_Keywords.insert(Void_Type_Name);
     Reserved_Keywords.insert(If_Expression);
@@ -661,7 +675,7 @@ std::string Compiler::M_parse_first_word(const std::string& _source, unsigned in
         return _source.substr(first_word_offset, string_end - first_word_offset);
     }
 
-    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, first_word_offset, _max_size);
+    unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Maybe_Value_Symbols, false, first_word_offset, _max_size);
     L_ASSERT(after_first_word_offset >= first_word_offset);
 
     if(after_first_word_offset == first_word_offset)
