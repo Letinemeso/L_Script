@@ -80,7 +80,10 @@ LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(
         })
 
 #define SCRIPTABLE_FUNCTION_ARG(TYPE) \
-        arguments_data.push({#TYPE, "_" + std::to_string(arguments_data.size() - 1), false})
+        { \
+            const std::string& default_type_name = LV::Type_Manager::get_default_type_name(#TYPE); \
+            arguments_data.push({default_type_name, "_" + std::to_string(arguments_data.size() - 1), false}); \
+        }
 
 #define SCRIPTABLE_FUNCTION_INITIALIZATION_END \
         L_ASSERT(arguments_data.size() == Arguments_Container::arguments_amount() + 1); \
