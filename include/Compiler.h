@@ -21,7 +21,6 @@ namespace LScript
             Type_Name,
             Variable_Name,
             If,
-            For,
             While,
             Return,
         };
@@ -59,6 +58,9 @@ namespace LScript
 
     public:
         inline void set_target(Script* _ptr) { m_script_target = _ptr; }
+
+    private:
+        void M_print_debug_error_message(bool _condition, const std::string& _source, unsigned int _offset, unsigned int _marker_length, const std::string& _message) const;
 
     private:
         void M_parse_global_space(const std::string& _source) const;

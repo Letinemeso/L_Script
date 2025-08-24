@@ -23,7 +23,6 @@ namespace LScript
 
     constexpr const char* If_Expression = "if";
     constexpr const char* Else_Expression = "else";
-    constexpr const char* For_Expression = "for";
     constexpr const char* While_Expression = "while";
     constexpr const char* Return_Expression = "return";
 
@@ -36,17 +35,18 @@ namespace LScript
 
     using Reserved_Keywords_Tree = LDS::AVL_Tree<std::string>;
     Reserved_Keywords_Tree Reserved_Keywords;
+
+    constexpr const char* Debug_Log_Level = "LScript_Debug";
 }
 
 
 
 Compiler::Compiler()
 {
-    static bool acceptable_symbols_initialized = false;
-    if(acceptable_symbols_initialized)
+    static bool s_initialized = false;
+    if(s_initialized)
         return;
-
-    acceptable_symbols_initialized = true;
+    s_initialized = true;
 
     Empty_Symbols[' '] = true;
     Empty_Symbols['\n'] = true;
@@ -88,16 +88,75 @@ Compiler::Compiler()
 
     Reserved_Keywords.insert(Void_Type_Name);
     Reserved_Keywords.insert(If_Expression);
-    Reserved_Keywords.insert(For_Expression);
     Reserved_Keywords.insert(While_Expression);
     Reserved_Keywords.insert(Return_Expression);
     Reserved_Keywords.insert("true");
     Reserved_Keywords.insert("false");
+
+    L_CREATE_LOG_LEVEL(Debug_Log_Level);
 }
 
 Compiler::~Compiler()
 {
 
+}
+
+
+
+void Compiler::M_print_debug_error_message(bool _condition, const std::string& _source, unsigned int _offset, unsigned int _marker_length, const std::string& _message) const
+{
+    if(_condition)
+        return;
+
+    unsigned int line_offset = _offset;
+    for(; line_offset > 1; --line_offset)
+    {
+        if(_source[line_offset] == '\n')
+            break;
+    }
+    ++line_offset;
+
+    unsigned int line_end = _offset;
+    for(; line_end < _source.size(); ++line_end)
+    {
+        if(_source[line_end] == '\n')
+            break;
+    }
+
+    unsigned int line = 0;
+    for(unsigned int i = 0; i < line_offset; ++i)
+    {
+        if(_source[i] == '\n')
+            ++line;
+    }
+
+    std::string line_str = _source.substr(line_offset, line_end - line_offset);
+    std::string marker;
+    marker.resize(line_str.size());
+
+    if(_marker_length < Unlimited_Size)
+    {
+        for(unsigned int i = 0; i < line_str.size(); ++i)
+            marker[i] = '-';
+        unsigned int difference = _offset - line_offset;
+        if(_marker_length > line_str.size() - difference)
+            _marker_length = line_str.size() - difference;
+
+        for(unsigned int i = 0; i < _marker_length; ++i)
+            marker[difference + i] = '^';
+    }
+    else
+    {
+        for(unsigned int i = 0; i < line_str.size(); ++i)
+            marker[i] = '^';
+    }
+
+    L_LOG(Debug_Log_Level, "Error at line " + std::to_string(line) + ": ");
+    L_LOG(Debug_Log_Level, _message);
+    L_LOG(Debug_Log_Level, line_str);
+    L_LOG(Debug_Log_Level, marker);
+
+    L_ASSERT(false);
 }
 
 
@@ -123,17 +182,18 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
-    L_ASSERT(expression_type == Expression_Type::Type_Name);
+    M_print_debug_error_message(expression_type == Expression_Type::Type_Name, _source, after_first_word_offset - first_word.size(), first_word.size(), "Only declarations available in global space");
 
     unsigned int second_word_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_first_word_offset);
     unsigned int after_second_word_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, second_word_offset);
-    L_ASSERT(after_second_word_offset > second_word_offset);
+    M_print_debug_error_message(after_second_word_offset > second_word_offset, _source, second_word_offset, 1, "Expected name");
 
     unsigned int next_word_size = after_second_word_offset - second_word_offset;
     std::string second_word = _source.substr(second_word_offset, next_word_size);
 
     Expression_Goal expression_goal = M_function_or_variable_declaration(_source, after_second_word_offset);
-    L_ASSERT(expression_goal == Expression_Goal::Function_Declaration || expression_goal == Expression_Goal::Variable_Declaration);
+    M_print_debug_error_message(expression_goal == Expression_Goal::Function_Declaration || expression_goal == Expression_Goal::Variable_Declaration,
+                                _source, after_second_word_offset, Unlimited_Size, "Unknown expression");
 
     if(expression_goal == Expression_Goal::Function_Declaration)
         return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset, _max_size);
@@ -145,8 +205,8 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
 
 unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
 {
-    L_ASSERT(_type != Void_Type_Name);  //  variable type cannot be void
-    L_ASSERT(_context.get_local_variable(_name) == nullptr);
+    M_print_debug_error_message(_type != Void_Type_Name, _source, _offset_after_name, Unlimited_Size, "Unable to create variable with type \"void\"");
+    M_print_debug_error_message(_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
 
     Variable_Container* variable = new Variable_Container;
     variable->set_type(_type);
@@ -154,8 +214,8 @@ unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, co
     _context.add_variable(_name, variable);
 
     unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset_after_name);
-    L_ASSERT(semicolon_index != Unlimited_Size);
-    L_ASSERT(_source[semicolon_index] == ';');
+    M_print_debug_error_message(semicolon_index != Unlimited_Size, _source, _offset_after_name, 1, "Expected \";\"");
+    M_print_debug_error_message(_source[semicolon_index] == ';', _source, semicolon_index, 1, "Expected \";\"");
 
     return semicolon_index + 1;
 }
@@ -168,7 +228,7 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
 
-    L_ASSERT(m_script_target->get_function(_name) == nullptr);
+    M_print_debug_error_message(m_script_target->get_function(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Function with name \"" + _name + "\" is already registered");
 
     Function* function = new Function;
     function->set_return_type(_type);
@@ -195,13 +255,13 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
     {
         unsigned int type_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, offset, _end);
         unsigned int after_type_offset = M_skip_until_symbol_met(_source, Type_Name_Symbols, false, type_offset, _end);
-        L_ASSERT(after_type_offset > type_offset);
+        M_print_debug_error_message(after_type_offset > type_offset, _source, type_offset, 1, "Expected argument type");
 
         unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_type_offset, _end);
         unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset, _end);
         if(after_name_offset == Unlimited_Size)
             after_name_offset = _end;
-        L_ASSERT(after_name_offset > name_offset);
+        M_print_debug_error_message(after_name_offset > name_offset, _source, name_offset, 1, "Expected argument name");
 
         std::string type = _source.substr(type_offset, after_type_offset - type_offset);
         std::string name = _source.substr(name_offset, after_name_offset - name_offset);
@@ -209,7 +269,7 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
         if(reference)
             type.pop_back();
 
-        L_ASSERT(LV::Type_Manager::type_is_registered(type));
+        M_print_debug_error_message(LV::Type_Manager::type_is_registered(type), _source, type_offset, type.size(), "Unknown type \"" + type + "\"");
 
         result.push({type, name, reference});
 
@@ -217,7 +277,7 @@ LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(c
         if(offset >= _end)
             break;
 
-        L_ASSERT(_source[offset] == ',');
+        M_print_debug_error_message(_source[offset] == ',', _source, offset, 1, "Expected \",\"");
         ++offset;
     }
 
@@ -250,17 +310,13 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Expression_Type expression_type = M_get_expression_type(first_word);
-    L_ASSERT(expression_type != Expression_Type::Unknown);
+    M_print_debug_error_message(expression_type != Expression_Type::Unknown, _source, _offset, Unlimited_Size, "Unknown expression");
 
     Operation_Parse_Result parse_result;
 
     if(expression_type == Expression_Type::If)
     {
         parse_result = M_parse_if(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
-    }
-    else if(expression_type == Expression_Type::For)
-    {
-        // return M_parse_for();
     }
     else if(expression_type == Expression_Type::While)
     {
@@ -286,8 +342,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
         parse_result.offset_after = M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);
     }
 
-    L_ASSERT(parse_result.operation);
-    L_ASSERT(parse_result.offset_after <= _max_size);
+    M_print_debug_error_message(parse_result.operation, _source, after_first_word_offset, Unlimited_Size, "Could not parse an expression");
 
     return parse_result;
 }
@@ -296,12 +351,13 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
 {
     unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset);
     unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset);
-    L_ASSERT(after_name_offset > name_offset);
+    M_print_debug_error_message(after_name_offset > name_offset, _source, name_offset, 1, "Expected name");
 
     unsigned int next_word_size = after_name_offset - name_offset;
     std::string name = _source.substr(name_offset, next_word_size);
 
-    L_ASSERT(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration);
+    M_print_debug_error_message(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration,
+                                _source, after_name_offset, 1, "Unable to declare a function inside a function");
 
     Variable_Creation* operation = new Variable_Creation;
     operation->set_context(&_context);
@@ -316,7 +372,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
 
 Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
-    L_ASSERT(_source[_offset] == '.');
+    M_print_debug_error_message(_source[_offset] == '.', _source, _offset, 1, "Expected \".\"");
 
     unsigned int operation_offset = _offset + 1;
     unsigned int after_operation_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, operation_offset, _max_size);
@@ -407,7 +463,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
         }
         else
         {
-            L_ASSERT(false);    //  remove later!
+            M_print_debug_error_message(false, _source, _source.find(argument, _args_begin), argument.size(), "Unexpected expression type as an argument");
         }
     }
 
@@ -420,7 +476,7 @@ LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _
     if(offset >= _end)
         return {};
 
-    L_ASSERT(_source[offset] != ',');
+    M_print_debug_error_message(_source[offset] != ',', _source, offset, 1, "Expected value");
 
     unsigned int amount = 1;
 
@@ -435,7 +491,7 @@ LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _
 
         if(_source[i] == ')')
         {
-            L_ASSERT(openers_met > 0);
+            M_print_debug_error_message(openers_met > 0, _source, i, Unlimited_Size, "Extra \")\"");
             --openers_met;
             continue;
         }
@@ -459,7 +515,7 @@ LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _
 
         if(_source[i] == ')')
         {
-            L_ASSERT(openers_met > 0);
+            M_print_debug_error_message(openers_met > 0, _source, i, Unlimited_Size, "Extra \")\"");
             --openers_met;
             continue;
         }
@@ -483,7 +539,7 @@ LDS::Vector<std::string> Compiler::M_parse_passed_arguments(const std::string& _
 
 std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
 {
-    L_ASSERT(_rvalue.size() > 0);
+    M_print_debug_error_message(_rvalue.size() > 0, _rvalue, 0, Unlimited_Size, "Trying to deduce value from empty string");
 
     if(_rvalue.size() >= 2)
     {
@@ -500,14 +556,14 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
     if(LV::Type_Manager::validate("bool", _rvalue))
         return "bool";
 
-    L_ASSERT(false && "could not deduce type");
+    M_print_debug_error_message(false, _rvalue, 0, Unlimited_Size, "Unable to deduce type for \"" + _rvalue + "\"");
     return "";
 }
 
 Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(offset < _max_size);
+    M_print_debug_error_message(offset < _max_size, _source, offset, 1, "Expected expression or \";\"");
 
     if(_source[offset] == ';' && _expected_return_type == Void_Type_Name)
     {
@@ -599,7 +655,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, cons
 Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     std::string first_word = M_parse_first_word(_source, _offset, _max_size);
-    L_ASSERT(first_word.size() > 0);
+    M_print_debug_error_message(first_word.size() > 0, _source, _offset, Unlimited_Size, "Trying to parse subexpression from empty string");
     unsigned int after_first_word_offset = M_skip_past_first_word(_source, _offset, _max_size);
 
     Operation_Parse_Result result;
@@ -635,7 +691,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _conte
         }
     }
 
-    L_ASSERT(result.operation);
+    M_print_debug_error_message(result.operation, _source, _offset, Unlimited_Size, "Unexpected subexpression type");
     return result;
 }
 
@@ -670,13 +726,12 @@ std::string Compiler::M_parse_first_word(const std::string& _source, unsigned in
     if(_source[first_word_offset] == '\'')
     {
         unsigned int string_end = M_skip_until_symbol_met(_source, '\'', true, first_word_offset + 1, _max_size);
-        L_ASSERT(string_end > first_word_offset);
-        L_ASSERT(string_end < _max_size);
+        M_print_debug_error_message(string_end < _max_size, _source, first_word_offset, 1, "Could not find end of the string");
         return _source.substr(first_word_offset, string_end - first_word_offset);
     }
 
     unsigned int after_first_word_offset = M_skip_until_symbol_met(_source, Maybe_Value_Symbols, false, first_word_offset, _max_size);
-    L_ASSERT(after_first_word_offset >= first_word_offset);
+    L_ASSERT(after_first_word_offset >= first_word_offset);     //  this shouldn't happen probably
 
     if(after_first_word_offset == first_word_offset)
         return {};
@@ -693,8 +748,7 @@ unsigned int Compiler::M_skip_past_first_word(const std::string& _source, unsign
     if(_source[first_word_offset] == '\'')
     {
         unsigned int string_end = M_skip_until_symbol_met(_source, '\'', true, first_word_offset + 1, _max_size);
-        L_ASSERT(string_end > first_word_offset);
-        L_ASSERT(string_end < _max_size);
+        M_print_debug_error_message(string_end < _max_size, _source, first_word_offset, 1, "Could not find end of the string");
         return string_end;
     }
 
@@ -797,8 +851,8 @@ unsigned int Compiler::M_skip_until_closer(const std::string& _source, char _ope
 unsigned int Compiler::M_skip_past_semicolon(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(semicolon_index != Unlimited_Size);
-    L_ASSERT(_source[semicolon_index] == ';');
+    M_print_debug_error_message(semicolon_index != Unlimited_Size, _source, _offset, 1, "Expected \";\"");
+    M_print_debug_error_message(_source[semicolon_index] == ';', _source, _offset, 1, "Expected \";\"");
 
     return semicolon_index + 1;
 }
@@ -808,10 +862,10 @@ Compiler::String_Borders Compiler::M_calculate_arguments_borders(const std::stri
     String_Borders result;
 
     result.begin = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(_source[result.begin] == '(');
+    M_print_debug_error_message(_source[result.begin] == '(', _source, result.begin, 1, "Expected \"(\"");
     ++result.begin;
     result.end = M_skip_until_closer(_source, '(', ')', result.begin, _max_size);
-    L_ASSERT(result.end < Unlimited_Size);
+    M_print_debug_error_message(result.end < _max_size, _source, _offset, Unlimited_Size, "Closing \")\" not found");
 
     return result;
 }
@@ -821,10 +875,10 @@ Compiler::String_Borders Compiler::M_calculate_compound_statement_borders(const 
     String_Borders result;
 
     result.begin = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
-    L_ASSERT(_source[result.begin] == '{');
+    M_print_debug_error_message(_source[result.begin] == '{', _source, result.begin, 1, "Expected \"{\"");
     ++result.begin;
     result.end = M_skip_until_closer(_source, '{', '}', result.begin, _max_size);
-    L_ASSERT(result.end < Unlimited_Size);
+    M_print_debug_error_message(result.end < _max_size, _source, _offset, Unlimited_Size, "Closing \"}\" not found");
 
     return result;
 }
@@ -834,9 +888,6 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
 {
     if(_expression == If_Expression)
         return Expression_Type::If;
-
-    if(_expression == For_Expression)
-        return Expression_Type::For;
 
     if(_expression == While_Expression)
         return Expression_Type::While;
