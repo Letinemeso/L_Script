@@ -1,5 +1,7 @@
 #include <Script_Details/Operations/Variable_Creation.h>
 
+#include <Type_Manager.h>
+
 #include <Script_Details/Variables/Variable_Container.h>
 
 using namespace LScript;
@@ -24,6 +26,9 @@ Variable* Variable_Creation::process()
 
     Variable_Container* variable = new Variable_Container;
     variable->set_type(m_variable_type);
+
+    LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(m_variable_type, 1);
+    variable->set_data(allocate_result.ptr, allocate_result.size);
 
     m_context->add_variable(m_variable_name, variable);
 
