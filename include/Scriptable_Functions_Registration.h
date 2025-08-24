@@ -12,6 +12,7 @@
 // Test::Test()
 // {
 //     SCRIPTABLE_FUNCTIONS_INITIALIZATION_BEGIN;       //  whole registration block begin
+//
 //     SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN( Test );
 //     SCRIPTABLE_FUNCTION_NAME(print_shit);
 //     SCRIPTABLE_FUNCTION_ARG(int);
@@ -63,13 +64,12 @@ LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(
                 Arguments_Container args_container; \
                 for(unsigned int i = 0; i < args_container.arguments_amount(); ++i) \
             { \
-                    char* arg_raw = nullptr; \
+                    void* arg_raw = nullptr; \
                     args_container.init_pointer(i, arg_raw); \
                     LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i)); \
                     L_ASSERT(variable); \
-                    char* variable_raw = (char*)variable->data(); \
-                    for(unsigned int byte = 0; byte < variable->raw_size(); ++byte) \
-                        arg_raw[byte] = variable_raw[byte]; \
+                    void* variable_raw = (void*)variable->data(); \
+                    LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw); \
             } \
                 LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this"); \
                 L_ASSERT(context_object_variable); \
@@ -88,3 +88,4 @@ LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(
         function->set_expected_arguments_data(arguments_data); \
         LScript::Integrated_Functions::instance().register_member_function(scriptable_function_owner_name, member_function_name, function); \
     }
+
