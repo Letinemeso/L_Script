@@ -390,6 +390,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
     operation->set_variable_type(_type);
     operation->set_variable_name(name);
 
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        operation->set_debug_info(M_parse_line(_source, name_offset), M_calculate_line_number(_source, name_offset));
+    });
+
     Operation_Parse_Result result;
     result.operation = operation;
     result.offset_after = M_skip_past_semicolon(_source, after_name_offset, _max_size);
