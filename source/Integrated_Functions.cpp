@@ -29,6 +29,7 @@ Integrated_Functions::Integrated_Functions()
     M_register_default_global_functions();
     M_register_default_int_functions();
     M_register_default_unsigned_int_functions();
+    M_register_default_float_functions();
     M_register_default_string_functions();
     M_register_default_bool_functions();
 }
@@ -88,6 +89,28 @@ void Integrated_Functions::M_register_default_global_functions()
 
                                            return nullptr;
                                        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("debug_print", function);
+    }
+
+    //  debug_print(float)
+    {
+        Function* function = new Function;
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "_what", false});
+        function->set_expected_arguments_data(arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            float* what_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_what");
+
+            std::cout << "[debug_print] [float] " << *what_raw_data << std::endl;
+
+            return nullptr;
+        });
         function->compound_statement().add_operation(operation);
 
         register_global_function("debug_print", function);
@@ -459,6 +482,74 @@ void Integrated_Functions::M_register_default_int_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function("int", "more_or_equal", function);
+    }
+
+    //  to_uint
+    {
+        Function* function = new Function;
+        function->set_return_type("uint");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"int", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            int* this_raw_data = __extract_raw_data<int>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("uint");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            unsigned int* result_raw_data = (unsigned int*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (unsigned int)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("int", "to_uint", function);
+    }
+
+    //  to_float
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"int", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            int* this_raw_data = __extract_raw_data<int>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("float");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            float* result_raw_data = (float*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (float)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("int", "to_float", function);
     }
 
 }
@@ -1124,6 +1215,464 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "more_or_equal", function);
+    }
+
+    //  to_int
+    {
+        Function* function = new Function;
+        function->set_return_type("int");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"uint", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("int");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            int* result_raw_data = (int*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (int)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("uint", "to_int", function);
+    }
+
+    //  to_float
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"uint", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("float");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            float* result_raw_data = (float*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (float)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("uint", "to_float", function);
+    }
+
+}
+
+void Integrated_Functions::M_register_default_float_functions()
+{
+    //  set
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+                                           Variable* var_this = context.get_variable("this");
+                                           L_ASSERT(var_this);
+                                           L_ASSERT(var_this->type() == "float");
+
+                                           if(var_this->data() == nullptr)
+                                           {
+                                               LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
+                                               var_this->set_data(allocated_data.ptr, allocated_data.size);
+                                           }
+
+                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+                                           float* this_raw_data = (float*)var_this->data();
+
+                                           L_ASSERT(this_raw_data);
+
+                                           *this_raw_data = *value_raw_data;
+
+                                           return nullptr;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "set", function);
+    }
+
+    //  add
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
+                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+
+                                           *this_raw_data += *value_raw_data;
+
+                                           return nullptr;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "add", function);
+    }
+
+    //  subtract
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
+                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+
+                                           *this_raw_data -= *value_raw_data;
+
+                                           return nullptr;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "subtract", function);
+    }
+
+    //  multiply
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
+                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+
+                                           *this_raw_data *= *value_raw_data;
+
+                                           return nullptr;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "multiply", function);
+    }
+
+    //  divide
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
+                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+
+                                           *this_raw_data /= *value_raw_data;
+
+                                           return nullptr;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "divide", function);
+    }
+
+    //  equals
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+
+                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+
+                                           Variable_Container* result_container = new Variable_Container;
+                                           context.add_variable("result", result_container);
+                                           result_container->set_type("bool");
+                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+                                           bool* result_raw_data = (bool*)result_container->data();
+                                           L_ASSERT(result_raw_data);
+
+                                           *result_raw_data = *this_raw_data == *value_raw_data;
+
+                                           return result_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "equals", function);
+    }
+
+    //  less
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+
+                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+
+                                           Variable_Container* result_container = new Variable_Container;
+                                           context.add_variable("result", result_container);
+                                           result_container->set_type("bool");
+                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+                                           bool* result_raw_data = (bool*)result_container->data();
+                                           L_ASSERT(result_raw_data);
+
+                                           *result_raw_data = *this_raw_data < *value_raw_data;
+
+                                           return result_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "less", function);
+    }
+
+    //  more
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+
+                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+
+                                           Variable_Container* result_container = new Variable_Container;
+                                           context.add_variable("result", result_container);
+                                           result_container->set_type("bool");
+                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+                                           bool* result_raw_data = (bool*)result_container->data();
+                                           L_ASSERT(result_raw_data);
+
+                                           *result_raw_data = *this_raw_data > *value_raw_data;
+
+                                           return result_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "more", function);
+    }
+
+    //  less_or_equal
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+
+                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+
+                                           Variable_Container* result_container = new Variable_Container;
+                                           context.add_variable("result", result_container);
+                                           result_container->set_type("bool");
+                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+                                           bool* result_raw_data = (bool*)result_container->data();
+                                           L_ASSERT(result_raw_data);
+
+                                           *result_raw_data = *this_raw_data <= *value_raw_data;
+
+                                           return result_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "less_or_equal", function);
+    }
+
+    //  more_or_equal
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+                                       {
+                                           Context& context = function->compound_statement().context();
+
+                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+
+                                           Variable_Container* result_container = new Variable_Container;
+                                           context.add_variable("result", result_container);
+                                           result_container->set_type("bool");
+                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
+                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+                                           bool* result_raw_data = (bool*)result_container->data();
+                                           L_ASSERT(result_raw_data);
+
+                                           *result_raw_data = *this_raw_data >= *value_raw_data;
+
+                                           return result_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "more_or_equal", function);
+    }
+
+    //  to_int
+    {
+        Function* function = new Function;
+        function->set_return_type("int");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"float", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("int");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            int* result_raw_data = (int*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (int)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "to_int", function);
+    }
+
+    //  to_uint
+    {
+        Function* function = new Function;
+        function->set_return_type("uint");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"float", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+            result_container->set_type("uint");
+            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
+            result_container->set_data(allocated_data.ptr, allocated_data.size);
+
+            unsigned int* result_raw_data = (unsigned int*)result_container->data();
+            L_ASSERT(result_raw_data);
+
+            *result_raw_data = (unsigned int)(*this_raw_data);
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("float", "to_uint", function);
     }
 
 }

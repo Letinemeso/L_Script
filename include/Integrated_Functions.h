@@ -31,6 +31,7 @@ namespace LScript
         void M_register_default_global_functions();
         void M_register_default_int_functions();
         void M_register_default_unsigned_int_functions();
+        void M_register_default_float_functions();
         void M_register_default_string_functions();
         void M_register_default_bool_functions();
 
