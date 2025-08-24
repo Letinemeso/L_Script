@@ -1814,6 +1814,105 @@ void Integrated_Functions::M_register_default_bool_functions()
         register_member_function("bool", "inverted", function);
     }
 
+    //  and
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"bool", "this", true});
+        arguments_data.push({"bool", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
+            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+
+            bool* new_bool_data = new bool;
+            *new_bool_data = *this_raw_data && *value_raw_data;
+            result_container->set_type("bool");
+            result_container->set_data(new_bool_data, sizeof(bool));
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "and", function);
+    }
+
+    //  or
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"bool", "this", true});
+        arguments_data.push({"bool", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
+            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+
+            bool* new_bool_data = new bool;
+            *new_bool_data = *this_raw_data || *value_raw_data;
+            result_container->set_type("bool");
+            result_container->set_data(new_bool_data, sizeof(bool));
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "or", function);
+    }
+
+    //  equals
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"bool", "this", true});
+        arguments_data.push({"bool", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
+            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+
+            Variable_Container* result_container = new Variable_Container;
+            context.add_variable("result", result_container);
+
+            bool* new_bool_data = new bool;
+            *new_bool_data = *this_raw_data == *value_raw_data;
+            result_container->set_type("bool");
+            result_container->set_data(new_bool_data, sizeof(bool));
+
+            return result_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("bool", "equals", function);
+    }
+
 }
 
 
