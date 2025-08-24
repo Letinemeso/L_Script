@@ -1818,7 +1818,7 @@ void Integrated_Functions::M_register_default_bool_functions()
 
 
 
-std::string Integrated_Functions::M_construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type) const
+std::string Integrated_Functions::construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type) const
 {
     std::string result;
 
@@ -1839,7 +1839,7 @@ std::string Integrated_Functions::M_construct_function_name(const std::string& _
     return result;
 }
 
-std::string Integrated_Functions::M_construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type) const
+std::string Integrated_Functions::construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type) const
 {
     std::string result;
 
@@ -1863,7 +1863,7 @@ std::string Integrated_Functions::M_construct_function_name(const std::string& _
 
 void Integrated_Functions::register_global_function(const std::string& _name, Function* _function)
 {
-    std::string full_name = M_construct_function_name(_name, _function);
+    std::string full_name = construct_function_name(_name, _function);
     L_ASSERT(!m_global_functions.find(full_name).is_ok());
 
     m_global_functions.insert((std::string&&)full_name, _function);
@@ -1877,7 +1877,7 @@ void Integrated_Functions::register_member_function(const std::string& _owner_ty
 
     Functions& functions = *functions_it;
 
-    std::string full_name = M_construct_function_name(_name, _function, _owner_type);
+    std::string full_name = construct_function_name(_name, _function, _owner_type);
     L_ASSERT(!functions.find(full_name).is_ok());
 
     functions.insert((std::string&&)full_name, _function);
@@ -1887,7 +1887,7 @@ void Integrated_Functions::register_member_function(const std::string& _owner_ty
 
 Function* Integrated_Functions::get_global_function(const std::string& _name, const Argument_Types& _arg_types) const
 {
-    std::string full_name = M_construct_function_name(_name, _arg_types);
+    std::string full_name = construct_function_name(_name, _arg_types);
     Functions::Const_Iterator maybe_function_it = m_global_functions.find(full_name);
     if(maybe_function_it.is_ok())
         return *maybe_function_it;
@@ -1903,7 +1903,7 @@ Function* Integrated_Functions::get_member_function(const std::string& _owner_ty
 
     const Functions& functions = *functions_it;
 
-    std::string full_name = M_construct_function_name(_name, _arg_types, _owner_type);
+    std::string full_name = construct_function_name(_name, _arg_types, _owner_type);
     Functions::Const_Iterator maybe_function_it = functions.find(full_name);
     if(maybe_function_it.is_ok())
         return *maybe_function_it;

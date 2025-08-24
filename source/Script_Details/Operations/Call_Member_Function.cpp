@@ -1,7 +1,6 @@
 #include <Script_Details/Operations/Call_Member_Function.h>
 
 #include <Script_Details/Function.h>
-#include <Integrated_Functions.h>
 
 using namespace LScript;
 
@@ -40,7 +39,18 @@ Variable* Call_Member_Function::process()
     L_ASSERT(m_owner_object_getter_operation);
 
     Variable* owner_object = m_owner_object_getter_operation->process();
-    L_ASSERT(owner_object);
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        if(owner_object)
+            return;
+
+        L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
+        L_LOG("LScript_Debug", "Unable to retrieve owner object while calling function \"" + m_function_name + "\"");
+        L_LOG("LScript_Debug", m_source_line);
+        L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
+        L_ASSERT(owner_object);
+    });
 
     unsigned int arguments_amount = m_arguments_getter_operations.size() + 1;
 
@@ -58,7 +68,19 @@ Variable* Call_Member_Function::process()
     }
 
     Function* function = Integrated_Functions::instance().get_member_function(owner_object->type(), m_function_name, argument_types);
-    L_ASSERT(function);
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        if(function)
+            return;
+
+        L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
+        L_LOG("LScript_Debug", "Calling unregistered function \"" + Integrated_Functions::instance().construct_function_name(m_function_name, argument_types, owner_object->type()) + "\"");
+        L_LOG("LScript_Debug", m_source_line);
+        L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
+
+        L_ASSERT(function);
+    });
 
     return function->call(arguments);
 }

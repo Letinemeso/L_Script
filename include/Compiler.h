@@ -60,6 +60,8 @@ namespace LScript
         inline void set_target(Script* _ptr) { m_script_target = _ptr; }
 
     private:
+        unsigned int M_calculate_line_number(const std::string& _source, unsigned int _offset) const;
+        std::string M_parse_line(const std::string& _source, unsigned int _offset) const;
         void M_print_debug_error_message(bool _condition, const std::string& _source, unsigned int _offset, unsigned int _marker_length, const std::string& _message) const;
 
     private:

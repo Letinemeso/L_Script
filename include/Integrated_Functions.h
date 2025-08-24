@@ -38,9 +38,9 @@ namespace LScript
     public:
         static inline Integrated_Functions& instance() { static Integrated_Functions s_instance; return s_instance; }
 
-    private:
-        std::string M_construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type = {}) const;
-        std::string M_construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type = {}) const;
+    public:
+        std::string construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type = {}) const;
+        std::string construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type = {}) const;
 
     public:
         void register_global_function(const std::string& _name, Function* _function);

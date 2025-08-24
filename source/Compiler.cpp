@@ -103,6 +103,37 @@ Compiler::~Compiler()
 
 
 
+unsigned int Compiler::M_calculate_line_number(const std::string& _source, unsigned int _offset) const
+{
+    unsigned int result = 0;
+    for(unsigned int i = 0; i < _offset; ++i)
+    {
+        if(_source[i] == '\n')
+            ++result;
+    }
+    return result;
+}
+
+std::string Compiler::M_parse_line(const std::string& _source, unsigned int _offset) const
+{
+    unsigned int line_offset = _offset;
+    for(; line_offset > 1; --line_offset)
+    {
+        if(_source[line_offset] == '\n')
+            break;
+    }
+    if(line_offset > 0)
+        ++line_offset;
+
+    unsigned int line_end = _offset;
+    for(; line_end < _source.size(); ++line_end)
+    {
+        if(_source[line_end] == '\n')
+            break;
+    }
+    return _source.substr(line_offset, line_end - line_offset);
+}
+
 void Compiler::M_print_debug_error_message(bool _condition, const std::string& _source, unsigned int _offset, unsigned int _marker_length, const std::string& _message) const
 {
     if(_condition)
@@ -123,12 +154,7 @@ void Compiler::M_print_debug_error_message(bool _condition, const std::string& _
             break;
     }
 
-    unsigned int line = 0;
-    for(unsigned int i = 0; i < line_offset; ++i)
-    {
-        if(_source[i] == '\n')
-            ++line;
-    }
+    unsigned int line = M_calculate_line_number(_source, _offset);
 
     std::string line_str = _source.substr(line_offset, line_end - line_offset);
     std::string marker;
@@ -387,11 +413,21 @@ Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Conte
     extract_variable_operation->set_context(&_context);
     extract_variable_operation->set_variable_name(_name);
 
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        extract_variable_operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+    });
+
     Call_Member_Function* call_member_function_operation = new Call_Member_Function;
     call_member_function_operation->set_context(&_context);
     call_member_function_operation->set_function_name(operation_name);
     call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
     call_member_function_operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        call_member_function_operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+    });
 
     Operation_Parse_Result result;
     result.operation = call_member_function_operation;
@@ -409,6 +445,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
     operation->set_function_name(_name);
     operation->set_script(m_script_target);
     operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+    });
 
     Operation_Parse_Result result;
     result.operation = operation;
@@ -448,6 +489,12 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
                 Extract_Variable* operation = new Extract_Variable;
                 operation->set_context(&_context);
                 operation->set_variable_name(argument);
+
+                L_DEBUG_FUNC_NOARG([&]()
+                {
+                    operation->set_debug_info(M_parse_line(_source, 0), M_calculate_line_number(_source, 0));
+                });
+
                 operations.push(operation);
             }
             else if(expression_goal == Expression_Goal::Member_Access)
@@ -592,6 +639,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     If_Operation* if_operation = new If_Operation;
     result.operation = if_operation;
 
+    unsigned int conditions_amount = 0;
     while(true)
     {
         String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
@@ -603,6 +651,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
         M_parse_compound_statement(*compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
         if_operation->add_case(condition_parse_result.operation, compound_statement);
+
+        L_DEBUG_FUNC_NOARG([&]()
+        {
+            if_operation->add_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+        });
 
         std::string maybe_else = M_parse_first_word(_source, compound_statement_borders.end + 1, _max_size);
         if(maybe_else != Else_Expression)
@@ -618,6 +671,8 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
             break;
 
         _offset = M_skip_past_first_word(_source, _offset, _max_size);
+
+        ++conditions_amount;
     }
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, _offset, _max_size);
@@ -639,6 +694,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, cons
     While_Operation* while_operation = new While_Operation;
     while_operation->cycle_compound_statement().context().set_parent_context(&_context);
     result.operation = while_operation;
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        while_operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+    });
 
     String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
     Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
@@ -677,6 +737,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _conte
             Extract_Variable* operation = new Extract_Variable;
             operation->set_context(&_context);
             operation->set_variable_name(first_word);
+
+            L_DEBUG_FUNC_NOARG([&]()
+            {
+                operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+            });
 
             result.operation = operation;
             result.offset_after = after_first_word_offset;

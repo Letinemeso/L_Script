@@ -1,7 +1,5 @@
 #include <Script_Details/Operations/Call_Global_Function.h>
 
-#include <Integrated_Functions.h>
-
 using namespace LScript;
 
 
@@ -53,7 +51,17 @@ Variable* Call_Global_Function::process()
     if(!function)
         function = Integrated_Functions::instance().get_global_function(m_function_name, argument_types);
 
-    L_ASSERT(function);
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        if(function)
+            return;
+
+        L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
+        L_LOG("LScript_Debug", "Calling unregistered function \"" + Integrated_Functions::instance().construct_function_name(m_function_name, argument_types) + "\"");
+        L_LOG("LScript_Debug", m_source_line);
+        L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
+        L_ASSERT(function);
+    });
 
     return function->call(arguments);
 }
