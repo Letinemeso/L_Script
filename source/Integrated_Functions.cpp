@@ -21,7 +21,6 @@ namespace LScript
         return raw_data;
     }
 
-    template<typename _Type>
     [[nodiscard]] Variable_Container* __construct_return_container(Context& _context, const std::string& _name, const std::string& _type_alias)
     {
         Variable_Container* result = new Variable_Container;
@@ -96,7 +95,7 @@ namespace LScript
                 Vector& this_vec = *(Vector*)var_this->data();
                 unsigned int index = *__extract_raw_data<unsigned int>(function->compound_statement().context(), "_index");
 
-                Variable_Container* return_container = __construct_return_container<_Type>(context, "result", _type_alias);
+                Variable_Container* return_container = __construct_return_container(context, "result", _type_alias);
                 _Type* return_raw_data = (_Type*)return_container->data();
                 L_ASSERT(return_raw_data);
 
@@ -140,6 +139,300 @@ namespace LScript
             function->compound_statement().add_operation(operation);
 
             _integrated_functions.register_member_function(_alias, "push", function);
+        }
+
+        //  pop(uint)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"uint", "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                unsigned int index = *__extract_raw_data<unsigned int>(context, "_value");
+
+                this_vec.pop(index);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "pop", function);
+        }
+
+        //  pop(int)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"int", "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                int index = *__extract_raw_data<int>(context, "_value");
+                L_ASSERT(index >= 0);
+
+                this_vec.pop(index);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "pop", function);
+        }
+
+        //  pop
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(1);
+            arguments_data.push({_alias, "this", true});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+
+                this_vec.pop(this_vec.size() - 1);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "pop", function);
+        }
+
+        //  resize(uint)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"uint", "_size", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
+
+                this_vec.resize(size);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "resize", function);
+        }
+
+        //  resize(int)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"int", "_size", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                int size = *__extract_raw_data<int>(context, "_size");
+                L_ASSERT(size > 0);
+
+                this_vec.resize(size);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "resize", function);
+        }
+
+        //  resize_and_fill(uint, _Type)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(3);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"uint", "_size", false});
+            arguments_data.push({_type_alias, "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
+                _Type value = *__extract_raw_data<_Type>(context, "_value");
+
+                L_ASSERT(size > 0);
+
+                this_vec.resize_and_fill(size, value);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "resize_and_fill", function);
+        }
+
+        //  resize_and_fill(int, _Type)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(3);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"int", "_size", false});
+            arguments_data.push({_type_alias, "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                int size = *__extract_raw_data<int>(context, "_size");
+                _Type value = *__extract_raw_data<_Type>(context, "_value");
+
+                L_ASSERT(size > 0);
+
+                this_vec.resize_and_fill(size, value);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "resize_and_fill", function);
+        }
+
+        //  clear
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(1);
+            arguments_data.push({_alias, "this", true});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+
+                this_vec.clear();
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "clear", function);
+        }
+
+        //  size
+        {
+            Function* function = new Function;
+            function->set_return_type("uint");
+
+            Function::Arguments_Data arguments_data(1);
+            arguments_data.push({_alias, "this", true});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+
+                Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+                int* return_raw_data = (int*)return_container->data();
+
+                *return_raw_data = this_vec.size();
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "size", function);
+        }
+
+        //  capacity
+        {
+            Function* function = new Function;
+            function->set_return_type("uint");
+
+            Function::Arguments_Data arguments_data(1);
+            arguments_data.push({_alias, "this", true});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+
+                Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+                int* return_raw_data = (int*)return_container->data();
+
+                *return_raw_data = this_vec.capacity();
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "capacity", function);
         }
 
     }
