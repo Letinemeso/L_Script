@@ -38,7 +38,7 @@ namespace LScript
     {
         using Vector = LDS::Vector<_Type>;
 
-        //  set
+        //  set(uint, _Type)
         {
             Function* function = new Function;
             function->set_return_type("void");
@@ -65,6 +65,33 @@ namespace LScript
                 L_ASSERT(value_raw_data);
 
                 this_vec[index] = *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "set", function);
+        }
+
+        //  set(Vector)
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({_alias, "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                Vector& value_vec = *__extract_raw_data<Vector>(context, "_value");
+
+                this_vec = value_vec;
 
                 return nullptr;
             });
