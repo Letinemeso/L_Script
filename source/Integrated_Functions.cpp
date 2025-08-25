@@ -2111,29 +2111,285 @@ void Integrated_Functions::M_register_default_string_functions()
         operation->set_operation_logic([function]()->Variable*
         {
             Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == "string");
 
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("string", 1);
-                var_this->set_data(allocated_data.ptr, allocated_data.size);
-            }
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            std::string& value_string = *__extract_raw_data<std::string>(context, "_value");
 
-            std::string* this_raw_data = (std::string*)var_this->data();
-            std::string* value_raw_data = __extract_raw_data<std::string>(context, "_value");
-
-            L_ASSERT(this_raw_data);
-            L_ASSERT(value_raw_data);
-
-            *this_raw_data = *value_raw_data;
+            this_string = value_string;
 
             return nullptr;
         });
         function->compound_statement().add_operation(operation);
 
         register_member_function("string", "set", function);
+    }
+
+    //  clear
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"string", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+
+            this_string.clear();
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "clear", function);
+    }
+
+    //  set(uint)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"uint", "_index", false});
+        arguments_data.push({"string", "_symbol", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
+            std::string& symbol_string = *__extract_raw_data<std::string>(context, "_symbol");
+            L_ASSERT(symbol_string.size() == 1);
+
+            this_string[index] = symbol_string[0];
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "set", function);
+    }
+
+    //  set(int)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"int", "_index", false});
+        arguments_data.push({"string", "_symbol", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            int index = *__extract_raw_data<int>(context, "_index");
+            std::string& symbol_string = *__extract_raw_data<std::string>(context, "_symbol");
+            L_ASSERT(index >= 0);
+            L_ASSERT(symbol_string.size() == 1);
+
+            this_string[index] = symbol_string[0];
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "set", function);
+    }
+
+    //  get(uint)
+    {
+        Function* function = new Function;
+        function->set_return_type("string");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"uint", "_index", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
+
+            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            std::string& return_string = *(std::string*)return_container->data();
+
+            return_string = this_string[index];
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "get", function);
+    }
+
+    //  get(int)
+    {
+        Function* function = new Function;
+        function->set_return_type("string");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"int", "_index", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            int index = *__extract_raw_data<int>(context, "_index");
+            L_ASSERT(index >= 0);
+
+            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            std::string& return_string = *(std::string*)return_container->data();
+
+            return_string = this_string[index];
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "get", function);
+    }
+
+    //  size
+    {
+        Function* function = new Function;
+        function->set_return_type("uint");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"string", "this", true});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+
+            Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+            unsigned int* return_raw_data = (unsigned int*)return_container->data();
+
+            *return_raw_data = this_string.size();
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "size", function);
+    }
+
+    //  append
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"string", "_value", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            std::string& value_string = *__extract_raw_data<std::string>(context, "_value");
+
+            this_string += value_string;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "append", function);
+    }
+
+    //  substring(int, int)
+    {
+        Function* function = new Function;
+        function->set_return_type("string");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"int", "_offset", false});
+        arguments_data.push({"int", "_size", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            int offset = *__extract_raw_data<int>(context, "_offset");
+            int size = *__extract_raw_data<int>(context, "_size");
+            L_ASSERT(offset >= 0);
+            L_ASSERT(size >= 0);
+
+            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            std::string& return_string = *(std::string*)return_container->data();
+
+            return_string = this_string.substr(offset, size);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "substring", function);
+    }
+
+    //  substring(uint, uint)
+    {
+        Function* function = new Function;
+        function->set_return_type("string");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({"string", "this", true});
+        arguments_data.push({"uint", "_offset", false});
+        arguments_data.push({"uint", "_size", false});
+        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            unsigned int offset = *__extract_raw_data<unsigned int>(context, "_offset");
+            unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
+
+            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            std::string& return_string = *(std::string*)return_container->data();
+
+            return_string = this_string.substr(offset, size);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("string", "substring", function);
     }
 
 }
@@ -2336,6 +2592,10 @@ void Integrated_Functions::M_register_default_bool_functions()
 void Integrated_Functions::M_register_default_vector_functions()
 {
     __register_vector_with_type<int>(*this, "Int_Vector", "int");
+    __register_vector_with_type<unsigned int>(*this, "Uint_Vector", "uint");
+    __register_vector_with_type<bool>(*this, "Bool_Vector", "bool");
+    __register_vector_with_type<std::string>(*this, "String_Vector", "string");
+    __register_vector_with_type<float>(*this, "Float_Vector", "float");
 }
 
 
