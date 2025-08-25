@@ -20,6 +20,130 @@ namespace LScript
 
         return raw_data;
     }
+
+    template<typename _Type>
+    [[nodiscard]] Variable_Container* __construct_return_container(Context& _context, const std::string& _name, const std::string& _type_alias)
+    {
+        Variable_Container* result = new Variable_Container;
+        result->set_type(_type_alias);
+        _context.add_variable(_name, result);
+
+        LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(_type_alias, 1);
+        result->set_data(allocate_result.ptr, allocate_result.size);
+
+        return result;
+    }
+
+    template<typename _Type>
+    void __register_vector_with_type(Integrated_Functions& _integrated_functions, const std::string& _alias, const std::string& _type_alias)
+    {
+        using Vector = LDS::Vector<_Type>;
+
+        //  set
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(3);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"uint", "_index", false});
+            arguments_data.push({_type_alias, "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
+                _Type* value_raw_data = __extract_raw_data<_Type>(context, "_value");
+
+                L_ASSERT(value_raw_data);
+
+                this_vec[index] = *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "set", function);
+        }
+
+        //  get
+        {
+            Function* function = new Function;
+            function->set_return_type(_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"uint", "_index", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                unsigned int index = *__extract_raw_data<unsigned int>(function->compound_statement().context(), "_index");
+
+                Variable_Container* return_container = __construct_return_container<_Type>(context, "result", _type_alias);
+                _Type* return_raw_data = (_Type*)return_container->data();
+                L_ASSERT(return_raw_data);
+
+                *return_raw_data = this_vec[index];
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "get", function);
+        }
+
+        //  push
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({_type_alias, "_value", false});
+            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            {
+                Context& context = function->compound_statement().context();
+
+                Variable* var_this = context.get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                _Type* value_raw_data = __extract_raw_data<_Type>(context, "_value");
+
+                L_ASSERT(value_raw_data);
+
+                this_vec.push(*value_raw_data);
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _integrated_functions.register_member_function(_alias, "push", function);
+        }
+
+    }
+
 }
 
 
@@ -32,6 +156,7 @@ Integrated_Functions::Integrated_Functions()
     M_register_default_float_functions();
     M_register_default_string_functions();
     M_register_default_bool_functions();
+    M_register_default_vector_functions();
 }
 
 Integrated_Functions::~Integrated_Functions()
@@ -1913,6 +2038,11 @@ void Integrated_Functions::M_register_default_bool_functions()
         register_member_function("bool", "equals", function);
     }
 
+}
+
+void Integrated_Functions::M_register_default_vector_functions()
+{
+    __register_vector_with_type<int>(*this, "Int_Vector", "int");
 }
 
 

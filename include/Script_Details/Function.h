@@ -31,8 +31,6 @@ namespace LScript
 
         Compound_Statement m_compound_statement;
 
-        Variable_Container m_return_variable;
-
         bool m_should_stop_execution = false;
 
     public:

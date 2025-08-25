@@ -46,5 +46,13 @@ Variable* Compound_Statement::process()
             break;
     }
 
-    return result;
+    if(result)
+        m_return_variable.assign(result);
+
+    m_context.clear();
+
+    if(result)
+        return &m_return_variable;
+
+    return nullptr;
 }

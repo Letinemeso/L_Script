@@ -43,13 +43,5 @@ Variable* Function::call(const Arguments& _args)
     Variable* result = m_compound_statement.process();
     L_ASSERT( (!result && m_return_type == "void") || (result && (result->type() == m_return_type)) );
 
-    if(result)
-        m_return_variable.assign(result);
-
-    m_compound_statement.context().clear();
-
-    if(result)
-        return &m_return_variable;
-
-    return nullptr;
+    return result;
 }

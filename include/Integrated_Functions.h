@@ -34,6 +34,7 @@ namespace LScript
         void M_register_default_float_functions();
         void M_register_default_string_functions();
         void M_register_default_bool_functions();
+        void M_register_default_vector_functions();
 
     public:
         static inline Integrated_Functions& instance() { static Integrated_Functions s_instance; return s_instance; }
