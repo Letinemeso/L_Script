@@ -188,6 +188,26 @@ void Compiler::M_print_debug_error_message(bool _condition, const std::string& _
 
 
 
+void Compiler::M_preprocess(std::string& _source) const
+{
+    for(unsigned int i = 0; i < _source.size() - 1; ++i)
+    {
+        if(_source[i] != '/')
+            continue;
+        if(_source[i + 1] != '/')
+            continue;
+
+        for(; i < _source.size(); ++i)
+        {
+            if(_source[i] == '\n')
+                break;
+
+            _source[i] = ' ';
+        }
+    }
+}
+
+
 void Compiler::M_parse_global_space(const std::string& _source) const
 {
     unsigned int offset = 0;
@@ -1057,5 +1077,8 @@ void Compiler::compile(const std::string& _source) const
 {
     L_ASSERT(m_script_target);
 
-    M_parse_global_space(_source);
+    std::string preprocessed_source = _source;
+    M_preprocess(preprocessed_source);
+
+    M_parse_global_space(preprocessed_source);
 }

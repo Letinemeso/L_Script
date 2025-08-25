@@ -65,6 +65,8 @@ namespace LScript
         void M_print_debug_error_message(bool _condition, const std::string& _source, unsigned int _offset, unsigned int _marker_length, const std::string& _message) const;
 
     private:
+        void M_preprocess(std::string& _source) const;
+
         void M_parse_global_space(const std::string& _source) const;
 
         unsigned int M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
