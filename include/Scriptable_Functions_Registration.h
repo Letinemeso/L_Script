@@ -114,7 +114,7 @@ namespace LScript
             construct_result = LScript::__Calling_Function_Construction_Helper<Return_Type>().construct_calling_function<Scriptable_Function_Owner, Member_Function_Type, Arguments_Container>(return_type_str); \
         \
         LScript::Function::Arguments_Data arguments_data; \
-        arguments_data.push({"Test", "this", true}); \
+        arguments_data.push({scriptable_function_owner_name, "this", true}); \
         LScript::Function* function = new LScript::Function; \
         function->set_return_type(return_type_str == "void" ? return_type_str : LV::Type_Manager::get_default_type_name(return_type_str)); \
         LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation; \

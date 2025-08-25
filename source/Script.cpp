@@ -18,12 +18,12 @@ Script::~Script()
 
 
 
-void Script::set_context_object(const std::string& _type_as_string, void* _ptr)
+void Script::set_context_object(const std::string& _type_as_string, const std::string& _name, void* _ptr)
 {
-    Variable* variable = m_global_context.get_variable("context_object");
+    Variable* variable = m_global_context.get_variable(_name);
     if(variable)
     {
-        variable = m_global_context.extract_variable("context_object");
+        variable = m_global_context.extract_variable(_name);
         delete variable;
     }
 
@@ -31,7 +31,7 @@ void Script::set_context_object(const std::string& _type_as_string, void* _ptr)
     pointer_variable->set_type(_type_as_string);
     pointer_variable->set_data(_ptr, sizeof(void*));
 
-    m_global_context.add_variable("context_object", pointer_variable);
+    m_global_context.add_variable(_name, pointer_variable);
 }
 
 
