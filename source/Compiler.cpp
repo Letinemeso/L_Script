@@ -145,7 +145,8 @@ void Compiler::M_print_debug_error_message(bool _condition, const std::string& _
         if(_source[line_offset] == '\n')
             break;
     }
-    ++line_offset;
+    if(line_offset > 0)
+        ++line_offset;
 
     unsigned int line_end = _offset;
     for(; line_end < _source.size(); ++line_end)
@@ -359,6 +360,8 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     else if(expression_type == Expression_Type::Variable_Name)
     {
         Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
+
+        M_print_debug_error_message(expression_goal != Expression_Goal::Unknown, _source, after_first_word_offset, Unlimited_Size, "Could not parse an expression");
 
         if(expression_goal == Expression_Goal::Member_Access)
             parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, _max_size);
