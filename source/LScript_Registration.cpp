@@ -1,6 +1,6 @@
 #include <LScript_Registration.h>
 
-#include <Script.h>
+#include <L_Script/Script.h>
 
 using namespace LScript;
 

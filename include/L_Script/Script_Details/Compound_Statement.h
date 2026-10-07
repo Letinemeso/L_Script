@@ -1,0 +1,47 @@
+#pragma once
+
+#include <Data_Structures/List.h>
+
+#include <L_Script/Script_Details/Context.h>
+#include <L_Script/Script_Details/Operations/Operation.h>
+#include <L_Script/Script_Details/Variables/Variable_Container.h>
+
+
+namespace LScript
+{
+
+    class Compound_Statement
+    {
+    private:
+        Context m_context;
+
+        using Operations_List = LDS::List<Operation*>;
+        Operations_List m_operations;
+
+        Variable_Container m_return_variable;
+
+        bool m_stop_required = false;
+
+    public:
+        Compound_Statement(Compound_Statement&) = delete;
+        Compound_Statement(Compound_Statement&&) = delete;
+
+        Compound_Statement();
+        ~Compound_Statement();
+
+    public:
+        inline Context& context() { return m_context; }
+        inline const Context& context() const { return m_context; }
+
+        inline bool stop_required() const { return m_stop_required; }
+
+    public:
+        void add_operation(Operation* _operation);
+        void clear_operations();
+
+    public:
+        [[nodiscard]] Variable* process();
+
+    };
+
+}
