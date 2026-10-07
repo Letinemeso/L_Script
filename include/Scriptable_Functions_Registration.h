@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Data_Structures/Vector.h>
 #include <Stuff/Arguments_Container.h>
 
 #include <Script.h>
@@ -53,16 +54,16 @@ namespace LScript
         LST::Function<LScript::Variable*(_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)>
         construct_calling_function(const std::string& _return_type_str)
         {
-            return [_return_type_str](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container) \
-            { \
-                    _Return_Type return_value = _args_container.call_with_args(*_owner_object, _func); \
-                    std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str); \
-                    LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(default_return_type_name, 1); \
-                    LScript::Variable_Container* return_container = new LScript::Variable_Container; \
-                    return_container->set_type(default_return_type_name); \
-                    return_container->set_data(allocate_result.ptr, allocate_result.size); \
-                    LV::Type_Manager::copy(default_return_type_name, allocate_result.ptr, &return_value); \
-                    return return_container; \
+            return [_return_type_str](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)
+            {
+                    _Return_Type return_value = _args_container.call_with_args(*_owner_object, _func);
+                    std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
+                    LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(default_return_type_name, 1);
+                    LScript::Variable_Container* return_container = new LScript::Variable_Container;
+                    return_container->set_type(default_return_type_name);
+                    return_container->set_data(allocate_result.ptr, allocate_result.size);
+                    LV::Type_Manager::copy(default_return_type_name, allocate_result.ptr, &return_value);
+                    return return_container;
             };
         }
     };
@@ -83,6 +84,54 @@ namespace LScript
         }
     };
 
+
+    template <typename _Owner_Type, typename _Return_Type, typename _Function_Type>
+    void __register_scriptable_function(const std::string& _owner_name, const std::string& _function_name,
+                                        const std::string& _return_type, const LDS::Vector<std::string>& _arguments_types,
+                                        _Function_Type _function)
+    {
+        using Arguments_Container_Type = decltype(LScript::__construct_args_container(_function));
+
+        L_ASSERT(_arguments_types.size() == Arguments_Container_Type::arguments_amount());
+
+        LST::Function<LScript::Variable*(_Owner_Type* _owner_object, _Function_Type _func, Arguments_Container_Type& _args_container)>
+            construct_result = LScript::__Calling_Function_Construction_Helper<_Return_Type>().construct_calling_function<_Owner_Type, _Function_Type, Arguments_Container_Type>(_return_type);
+
+        LScript::Function::Arguments_Data arguments_data;
+        arguments_data.push({_owner_name, "this", true});
+        for(unsigned int i = 0; i < _arguments_types.size(); ++i)
+            arguments_data.push({_arguments_types[i], "_" + std::to_string(arguments_data.size() - 1), true});
+
+        LScript::Function* function = new LScript::Function;
+        function->set_return_type(_return_type == "void" ? _return_type : LV::Type_Manager::get_default_type_name(_return_type));
+        LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation;
+        call_scriptable_function_operation->set_operation_logic([_owner_name, function, _function, construct_result]()
+        {
+            Arguments_Container_Type args_container;
+            for(unsigned int i = 0; i < args_container.arguments_amount(); ++i)
+            {
+                void* arg_raw = nullptr;
+                args_container.init_pointer(i, arg_raw);
+                LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i));
+                L_ASSERT(variable);
+                void* variable_raw = (void*)variable->data();
+                LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw);
+            }
+            LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this");
+            L_ASSERT(context_object_variable);
+            L_ASSERT(_owner_name == context_object_variable->type());
+            _Owner_Type* context_object = (_Owner_Type*)context_object_variable->data();
+            LScript::Variable* return_variable = construct_result(context_object, _function, args_container);
+            if(return_variable)
+                function->compound_statement().context().add_variable("__result__", return_variable);
+            return return_variable;
+        });
+
+        function->compound_statement().add_operation(call_scriptable_function_operation);
+            function->set_expected_arguments_data(arguments_data);
+            LScript::Integrated_Functions::instance().register_member_function(_owner_name, _function_name, function);
+    }
+
 }
 
 
@@ -98,7 +147,8 @@ namespace LScript
 #define SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN(OWNER_CLASS) \
     { \
         using Scriptable_Function_Owner = OWNER_CLASS; \
-        std::string scriptable_function_owner_name = #OWNER_CLASS
+        std::string scriptable_function_owner_name = #OWNER_CLASS; \
+        LDS::Vector<std::string> arguments_types;
 
 #define SCRIPTABLE_FUNCTION_RETURN_TYPE(TYPE) \
         using Return_Type = TYPE; \
@@ -107,49 +157,15 @@ namespace LScript
 #define SCRIPTABLE_FUNCTION_NAME(FUNCTION_NAME) \
         auto member_function = &Scriptable_Function_Owner::FUNCTION_NAME; \
         using Member_Function_Type = decltype(member_function); \
-        std::string member_function_name = #FUNCTION_NAME; \
-        using Arguments_Container = decltype(LScript::__construct_args_container(member_function)); \
-        \
-        LST::Function<LScript::Variable*(Scriptable_Function_Owner* _owner_object, Member_Function_Type _func, Arguments_Container& _args_container)> \
-            construct_result = LScript::__Calling_Function_Construction_Helper<Return_Type>().construct_calling_function<Scriptable_Function_Owner, Member_Function_Type, Arguments_Container>(return_type_str); \
-        \
-        LScript::Function::Arguments_Data arguments_data; \
-        arguments_data.push({scriptable_function_owner_name, "this", true}); \
-        LScript::Function* function = new LScript::Function; \
-        function->set_return_type(return_type_str == "void" ? return_type_str : LV::Type_Manager::get_default_type_name(return_type_str)); \
-        LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation; \
-        call_scriptable_function_operation->set_operation_logic([scriptable_function_owner_name, function, member_function, construct_result]() \
-        { \
-                Arguments_Container args_container; \
-                for(unsigned int i = 0; i < args_container.arguments_amount(); ++i) \
-            { \
-                    void* arg_raw = nullptr; \
-                    args_container.init_pointer(i, arg_raw); \
-                    LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i)); \
-                    L_ASSERT(variable); \
-                    void* variable_raw = (void*)variable->data(); \
-                    LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw); \
-            } \
-                LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this"); \
-                L_ASSERT(context_object_variable); \
-                L_ASSERT(scriptable_function_owner_name == context_object_variable->type()); \
-                Scriptable_Function_Owner* context_object = (Scriptable_Function_Owner*)context_object_variable->data(); \
-                LScript::Variable* return_variable = construct_result(context_object, member_function, args_container); \
-                if(return_variable) \
-                    function->compound_statement().context().add_variable("__result__", return_variable); \
-                return return_variable; \
-        })
+        std::string member_function_name = #FUNCTION_NAME;
 
 #define SCRIPTABLE_FUNCTION_ARG(TYPE) \
         { \
             const std::string& default_type_name = LV::Type_Manager::get_default_type_name(#TYPE); \
-            arguments_data.push({default_type_name, "_" + std::to_string(arguments_data.size() - 1), true}); \
+            arguments_types.push(default_type_name); \
         }
 
 #define SCRIPTABLE_FUNCTION_INITIALIZATION_END \
-        L_ASSERT(arguments_data.size() == Arguments_Container::arguments_amount() + 1); \
-        function->compound_statement().add_operation(call_scriptable_function_operation); \
-        function->set_expected_arguments_data(arguments_data); \
-        LScript::Integrated_Functions::instance().register_member_function(scriptable_function_owner_name, member_function_name, function); \
+        LScript::__register_scriptable_function<Scriptable_Function_Owner, Return_Type, Member_Function_Type>(scriptable_function_owner_name, member_function_name, return_type_str, arguments_types, member_function); \
     }
 
