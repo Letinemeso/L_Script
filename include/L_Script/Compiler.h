@@ -1,6 +1,6 @@
 #pragma once
 
-#include <L_Script/Script.h>
+#include <L_Script/L_Script.h>
 
 #include <L_Script/Script_Details/Function.h>
 #include <L_Script/Script_Details/Compound_Statement.h>
@@ -50,14 +50,14 @@ namespace LScript
         using Acceptable_Symbols = LDS::Vector<bool>;
 
     private:
-        Script* m_script_target = nullptr;
+        L_Script* m_script_target = nullptr;
 
     public:
         Compiler();
         ~Compiler();
 
     public:
-        inline void set_target(Script* _ptr) { m_script_target = _ptr; }
+        inline void set_target(L_Script* _ptr) { m_script_target = _ptr; }
 
     private:
         unsigned int M_calculate_line_number(const std::string& _source, unsigned int _offset) const;

@@ -5,7 +5,7 @@
 #include <L_Script/Integrated_Functions.h>
 #include <L_Script/Script_Details/Operations/Operation.h>
 #include <L_Script/Script_Details/Function.h>
-#include <L_Script/Script.h>
+#include <L_Script/L_Script.h>
 
 
 namespace LScript
@@ -20,7 +20,7 @@ namespace LScript
         std::string m_function_name;
 
         Arguments_Getter_Operations m_arguments_getter_operations;
-        const Script* m_script = nullptr;
+        const L_Script* m_script = nullptr;
 
     private:
         std::string m_source_line;
@@ -32,7 +32,7 @@ namespace LScript
 
     public:
         inline void set_function_name(const std::string& _value) { m_function_name = _value; }
-        inline void set_script(const Script* _ptr) { m_script = _ptr; }
+        inline void set_script(const L_Script* _ptr) { m_script = _ptr; }
 
         inline void set_debug_info(const std::string& _line, unsigned int _line_number) { m_source_line = _line; m_source_line_number = _line_number; }
 

@@ -96,7 +96,7 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
             public: \
             __Pybind_Registrator() \
             { \
-                LScript::Python_Script_Import_Manager::instance().register_module(Registered_Type_Str); \
+                LScript::Python_Script_Import_Manager::instance().register_module<Registered_Type>(Registered_Type_Str); \
                  \
                 PyImport_AppendInittab(Registered_Type_Str, []()->PyObject* \
                 { \

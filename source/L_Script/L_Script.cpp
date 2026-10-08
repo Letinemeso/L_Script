@@ -1,4 +1,4 @@
-#include <L_Script/Script.h>
+#include <L_Script/L_Script.h>
 
 #include <L_Script/Compiler.h>
 #include <L_Script/Script_Details/Variables/Variable_Weak_Container.h>
@@ -6,19 +6,19 @@
 using namespace LScript;
 
 
-Script::Script()
+L_Script::L_Script()
 {
 
 }
 
-Script::~Script()
+L_Script::~L_Script()
 {
     clear_functions();
 }
 
 
 
-void Script::set_context_object(const std::string& _type_as_string, const std::string& _name, void* _ptr)
+void L_Script::set_context_object(const std::string& _type_as_string, const std::string& _name, void* _ptr)
 {
     Variable* variable = m_global_context.get_variable(_name);
     if(variable)
@@ -35,14 +35,14 @@ void Script::set_context_object(const std::string& _type_as_string, const std::s
 }
 
 
-void Script::register_function(const std::string& _name, Function* _function)
+void L_Script::register_function(const std::string& _name, Function* _function)
 {
     L_ASSERT(!m_functions.find(_name).is_ok());
 
     m_functions.insert(_name, _function);
 }
 
-void Script::clear_functions()
+void L_Script::clear_functions()
 {
     for(Functions_Map::Iterator it = m_functions.iterator(); !it.end_reached(); ++it)
         delete *it;
@@ -50,7 +50,7 @@ void Script::clear_functions()
 }
 
 
-Function* Script::get_function(const std::string& _name) const
+Function* L_Script::get_function(const std::string& _name) const
 {
     Functions_Map::Const_Iterator maybe_function_it = m_functions.find(_name);
     if(maybe_function_it.is_ok())
@@ -61,7 +61,7 @@ Function* Script::get_function(const std::string& _name) const
 
 
 
-void Script::run()
+void L_Script::run()
 {
     Function* main_func = get_function("main");
     L_ASSERT(main_func);
@@ -74,9 +74,9 @@ void Script::run()
 
 
 
-BUILDER_STUB_DEFAULT_CONSTRUCTION_FUNC(Script_Stub)
+BUILDER_STUB_DEFAULT_CONSTRUCTION_FUNC(L_Script_Stub)
 
-BUILDER_STUB_INITIALIZATION_FUNC(Script_Stub)
+BUILDER_STUB_INITIALIZATION_FUNC(L_Script_Stub)
 {
     BUILDER_STUB_PARENT_INITIALIZATION;
     BUILDER_STUB_CAST_PRODUCT;

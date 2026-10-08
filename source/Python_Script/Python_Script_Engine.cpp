@@ -1,6 +1,4 @@
-#include <Python_Script/Python_Script_Engine.h>
-
-#include <pybind11/embed.h>
+#include <Python_Script/Python_Script_Engine.h>5
 
 #include <L_Debug/L_Debug.h>
 #include <Stuff/Cast_Tools.h>
@@ -43,7 +41,10 @@ Python_Script_Engine::Python_Script_Engine()
 {
     L_CREATE_LOG_LEVEL(Log_Level_Name);
 
-    m_hidden_interpreter = (void*) new pybind11::scoped_interpreter;
+    m_interpreter = new pybind11::scoped_interpreter;
+    m_builtins = pybind11::module_::import("builtins");
+    m_default_executor = m_builtins.attr("exec");
+    m_default_compiler = m_builtins.attr("compile");
 
     M_register_default_functions();
 }
@@ -63,4 +64,40 @@ Python_Script_Engine::~Python_Script_Engine()
 void Python_Script_Engine::M_register_default_functions()
 {
 
+}
+
+
+
+pybind11::object Python_Script_Engine::compile_script(const std::string& _source, const std::string& _name) const
+{
+#ifdef L_DEBUG
+    try
+    {
+        pybind11::object result = m_default_compiler(_source, _name, "exec");
+        return result;
+    }
+    catch(const std::exception& _exception)
+    {
+        L_ASSERT_WITH_INFO(false, std::string("[Script compilation crash] ") + _exception.what());
+    }
+#else
+    pybind11::object result = m_default_compiler(_source, _name, "exec");
+    return result;
+#endif
+}
+
+void Python_Script_Engine::run_script(const pybind11::object& _precompiled_script, const pybind11::dict& _script_context) const
+{
+#ifdef L_DEBUG
+    try
+    {
+        m_default_executor(_precompiled_script, _script_context);
+    }
+    catch(const std::exception& _exception)
+    {
+        L_ASSERT_WITH_INFO(false, std::string("[Script crash] ") + _exception.what());
+    }
+#else
+    m_default_executor(_precompiled_script, _script_context);
+#endif
 }
