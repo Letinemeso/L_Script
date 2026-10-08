@@ -53,7 +53,7 @@ namespace LScript
         LST::Function<LScript::Variable*(_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)>
         construct_calling_function(const std::string& _return_type_str)
         {
-            return [](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)\
+            return [](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)
             {
                 _args_container.call_with_args(*_owner_object, _func);
                 return nullptr;
@@ -77,32 +77,35 @@ namespace LScript
         LScript::Function::Arguments_Data arguments_data;
         arguments_data.push({_owner_name, "this", true});
         for(unsigned int i = 0; i < _arguments_types.size(); ++i)
-            arguments_data.push({_arguments_types[i], "_" + std::to_string(arguments_data.size() - 1), true});
+        {
+            const std::string& default_type_name = LV::Type_Manager::get_default_type_name(_arguments_types[i]);
+            arguments_data.push({default_type_name, "_" + std::to_string(arguments_data.size() - 1), true});
+        }
 
         LScript::Function* function = new LScript::Function;
         function->set_return_type(_return_type == "void" ? _return_type : LV::Type_Manager::get_default_type_name(_return_type));
         LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation;
         call_scriptable_function_operation->set_operation_logic([_owner_name, function, _function, construct_result]()
-                                                                {
-                                                                    Arguments_Container_Type args_container;
-                                                                    for(unsigned int i = 0; i < args_container.arguments_amount(); ++i)
-                                                                    {
-                                                                        void* arg_raw = nullptr;
-                                                                        args_container.init_pointer(i, arg_raw);
-                                                                        LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i));
-                                                                        L_ASSERT(variable);
-                                                                        void* variable_raw = (void*)variable->data();
-                                                                        LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw);
-                                                                    }
-                                                                    LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this");
-                                                                    L_ASSERT(context_object_variable);
-                                                                    L_ASSERT(_owner_name == context_object_variable->type());
-                                                                    _Owner_Type* context_object = (_Owner_Type*)context_object_variable->data();
-                                                                    LScript::Variable* return_variable = construct_result(context_object, _function, args_container);
-                                                                    if(return_variable)
-                                                                        function->compound_statement().context().add_variable("__result__", return_variable);
-                                                                    return return_variable;
-                                                                });
+        {
+            Arguments_Container_Type args_container;
+            for(unsigned int i = 0; i < args_container.arguments_amount(); ++i)
+            {
+                void* arg_raw = nullptr;
+                args_container.init_pointer(i, arg_raw);
+                LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i));
+                L_ASSERT(variable);
+                void* variable_raw = (void*)variable->data();
+                LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw);
+            }
+            LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this");
+            L_ASSERT(context_object_variable);
+            L_ASSERT(_owner_name == context_object_variable->type());
+            _Owner_Type* context_object = (_Owner_Type*)context_object_variable->data();
+            LScript::Variable* return_variable = construct_result(context_object, _function, args_container);
+            if(return_variable)
+                function->compound_statement().context().add_variable("__result__", return_variable);
+            return return_variable;
+        });
 
         function->compound_statement().add_operation(call_scriptable_function_operation);
         function->set_expected_arguments_data(arguments_data);
