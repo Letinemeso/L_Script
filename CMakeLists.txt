@@ -27,5 +27,6 @@ target_include_directories(L_Script PUBLIC
                             "${PROJECT_SOURCE_DIR}/Third_Party/pybind11/include"
                             ${Python_INCLUDE_DIRS}
                             "${PROJECT_SOURCE_DIR}/../L_Utility/include"
+                            "${PROJECT_SOURCE_DIR}/../L_Utility/glm"
                             "${PROJECT_SOURCE_DIR}/../L_Variable/include"
                             )
