@@ -104,7 +104,8 @@ PYBIND11_EMBEDDED_MODULE(Debug, module)
 PYBIND11_EMBEDDED_MODULE(Math, module)
 {
     pybind11::class_<glm::vec2>(module, "vec2")
-    .def(pybind11::init<float, float>())
+        .def(pybind11::init<float, float>())
+        .def(pybind11::init<const glm::vec2&>())
         .def_readwrite("x", &glm::vec2::x)
         .def_readwrite("y", &glm::vec2::y)
         .def("__add__", [](const glm::vec2& _this, const glm::vec2& _other){ return _this + _other; })
@@ -113,12 +114,13 @@ PYBIND11_EMBEDDED_MODULE(Math, module)
         .def("__truediv__", [](const glm::vec2& _this, float _divider){ return _this / _divider; })
         .def("__getitem__", [](const glm::vec2& _this, unsigned int _index){ L_ASSERT(_index < 2); return _this[_index]; })
         .def("__setitem__", [](glm::vec2& _this, unsigned int _index, float _value){ L_ASSERT(_index < 2); _this[_index] = _value; })
-        .def("__repr__", [](const glm::vec2& v){
-            return "vec2(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ")";
+        .def("__repr__", [](const glm::vec2& _v){
+            return "vec2(" + std::to_string(_v.x) + ", " + std::to_string(_v.y) + ")";
         });
 
     pybind11::class_<glm::vec3>(module, "vec3")
         .def(pybind11::init<float, float, float>())
+        .def(pybind11::init<const glm::vec3&>())
         .def_readwrite("x", &glm::vec3::x)
         .def_readwrite("y", &glm::vec3::y)
         .def_readwrite("z", &glm::vec3::z)
@@ -128,11 +130,68 @@ PYBIND11_EMBEDDED_MODULE(Math, module)
         .def("__truediv__", [](const glm::vec3& _this, float _divider){ return _this / _divider; })
         .def("__getitem__", [](const glm::vec3& _this, unsigned int _index){ L_ASSERT(_index < 3); return _this[_index]; })
         .def("__setitem__", [](glm::vec3& _this, unsigned int _index, float _value){ L_ASSERT(_index < 3); _this[_index] = _value; })
-        .def("__repr__", [](const glm::vec3& v){
-            return "vec3(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
+        .def("__repr__", [](const glm::vec3& _v){
+            return "vec3(" + std::to_string(_v.x) + ", " + std::to_string(_v.y) + ", " + std::to_string(_v.z) + ")";
         });
+
+    pybind11::class_<glm::quat>(module, "quat")
+        .def(pybind11::init<>())
+        .def(pybind11::init<float, float, float, float>())
+        .def(pybind11::init<const glm::quat&>())
+        .def_readwrite("x", &glm::quat::x)
+        .def_readwrite("y", &glm::quat::y)
+        .def_readwrite("z", &glm::quat::z)
+        .def_readwrite("w", &glm::quat::w)
+        .def("__repr__", [](const glm::quat& _q){
+            return "quat(" + std::to_string(_q.x) + ", " + std::to_string(_q.y) + ", " + std::to_string(_q.z) + ", " + std::to_string(_q.w) + ")";
+        });
+
+    module.def("vector_length", pybind11::overload_cast<const glm::vec2&>(&LST::Math::vector_length));
+    module.def("vector_length", pybind11::overload_cast<const glm::vec3&>(&LST::Math::vector_length));
+
+    module.def("vector_length_squared", pybind11::overload_cast<const glm::vec2&>(&LST::Math::vector_length_squared));
+    module.def("vector_length_squared", pybind11::overload_cast<const glm::vec3&>(&LST::Math::vector_length_squared));
 
     module.def("shrink_vector_to_1", pybind11::overload_cast<glm::vec2&>(&LST::Math::shrink_vector_to_1));
     module.def("shrink_vector_to_1", pybind11::overload_cast<glm::vec3&>(&LST::Math::shrink_vector_to_1));
+
+    module.def("extend_vector_to_length", pybind11::overload_cast<glm::vec2&, float>(&LST::Math::extend_vector_to_length));
+    module.def("extend_vector_to_length", pybind11::overload_cast<glm::vec3&, float>(&LST::Math::extend_vector_to_length));
+
+    module.def("calculate_direction_vec", &LST::Math::calculate_direction_vec);
+
+    module.def("calculate_distance", &LST::Math::calculate_distance);
+    module.def("calculate_distance_squared", &LST::Math::calculate_distance_squared);
+
+    module.def("dot_product", pybind11::overload_cast<const glm::vec2&, const glm::vec2&>(&LST::Math::dot_product));
+    module.def("dot_product", pybind11::overload_cast<const glm::vec3&, const glm::vec3&>(&LST::Math::dot_product));
+
+    module.def("cross_product", &LST::Math::cross_product);
+
+    module.def("calculate_perpendicular", &LST::Math::calculate_perpendicular);
+
+    module.def("rotate_vector", &LST::Math::rotate_vector);
+
+    module.def("calculate_angles", pybind11::overload_cast<const glm::vec3&, const glm::vec3&>(&LST::Math::calculate_angles));
+    module.def("calculate_angles", pybind11::overload_cast<const glm::quat&>(&LST::Math::calculate_angles));
+
+    module.def("calculate_rotation_quaternion", pybind11::overload_cast<const glm::vec3&, const glm::vec3&>(&LST::Math::calculate_rotation_quaternion));
+    module.def("calculate_rotation_quaternion", pybind11::overload_cast<const glm::vec3&>(&LST::Math::calculate_rotation_quaternion));
+
+    module.def("random_number", &LST::Math::random_number);
+
+    module.def("random_number_float", &LST::Math::random_number_float);
+
+    module.def("random_number_float_normal_distribution", &LST::Math::random_number_float_normal_distribution);
+
+    module.def("random_bool", pybind11::overload_cast<>(&LST::Math::random_bool));
+    module.def("random_bool", pybind11::overload_cast<unsigned int, unsigned int>(&LST::Math::random_bool));
+
+    module.def("random_vec2", &LST::Math::random_vec2);
+
+    module.def("random_vec3", pybind11::overload_cast<float>(&LST::Math::random_vec3));
+    module.def("random_vec3", pybind11::overload_cast<const glm::vec3&, const glm::vec3&>(&LST::Math::random_vec3));
+
+    module.def("random_vec3_rotation", &LST::Math::random_vec3_rotation);
 }
 
