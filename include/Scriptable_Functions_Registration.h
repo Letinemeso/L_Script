@@ -45,6 +45,12 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
         std::string member_function_name = #FUNCTION_NAME; \
         m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) );
 
+#define SCRIPTABLE_FUNCTION_NAME_RENAMED(FUNCTION_NAME, FUNCTION_NAME_STR) \
+        auto member_function = &Registered_Type::FUNCTION_NAME; \
+        using Member_Function_Type = decltype(member_function); \
+        std::string member_function_name = FUNCTION_NAME_STR; \
+        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) );
+
 #define SCRIPTABLE_FUNCTION_ARG(TYPE) \
         { \
             const std::string& default_type_name = #TYPE; \
