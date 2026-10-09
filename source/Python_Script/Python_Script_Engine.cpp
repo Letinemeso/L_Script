@@ -1,8 +1,10 @@
-#include <Python_Script/Python_Script_Engine.h>5
+#include <Python_Script/Python_Script_Engine.h>
 
 #include <L_Debug/L_Debug.h>
 #include <Stuff/Cast_Tools.h>
 #include <Stuff/Math_Stuff.h>
+#include <Data_Structures/Vector.h>
+#include <Data_Structures/List.h>
 
 using namespace LScript;
 
@@ -100,7 +102,6 @@ PYBIND11_EMBEDDED_MODULE(Debug, module)
     module.def("L_ASSERT_WITH_INFO", LScript::__assert_with_info);
 }
 
-
 PYBIND11_EMBEDDED_MODULE(Math, module)
 {
     pybind11::class_<glm::vec2>(module, "vec2")
@@ -193,5 +194,46 @@ PYBIND11_EMBEDDED_MODULE(Math, module)
     module.def("random_vec3", pybind11::overload_cast<const glm::vec3&, const glm::vec3&>(&LST::Math::random_vec3));
 
     module.def("random_vec3_rotation", &LST::Math::random_vec3_rotation);
+}
+
+template <typename _Type>
+void register_vector(pybind11::module_& _module, const std::string& _type_name)
+{
+    std::string container_name = "Vector_" + _type_name;
+
+    using Vec_Type = LDS::Vector<_Type>;
+
+    pybind11::class_<Vec_Type> class_object(_module, container_name.c_str());
+    class_object.def(pybind11::init<>());
+    class_object.def(pybind11::init<unsigned int>());
+    class_object.def(pybind11::init<unsigned int, const _Type&>());
+    class_object.def(pybind11::init<const Vec_Type&>());
+
+    class_object.def("resize", &Vec_Type::resize);
+    class_object.def("fill", &Vec_Type::fill);
+    class_object.def("resize_and_fill", &Vec_Type::resize_and_fill);
+    class_object.def("clear", &Vec_Type::clear);
+    class_object.def("mark_empty", &Vec_Type::mark_empty);
+    class_object.def("mark_full", &Vec_Type::mark_full);
+
+    class_object.def("push", pybind11::overload_cast<const _Type&>(&Vec_Type::push));
+    class_object.def("swap", pybind11::overload_cast<unsigned int, unsigned int>(&Vec_Type::swap));
+
+    class_object.def("size", &Vec_Type::size);
+    class_object.def("capacity", &Vec_Type::capacity);
+    class_object.def("contains", &Vec_Type::contains);
+
+    class_object.def("__getitem__", [](const Vec_Type& _this, unsigned int _index){ return _this[_index]; });
+    class_object.def("__setitem__", [](Vec_Type& _this, unsigned int _index, const _Type& _value){ _this[_index] = _value; });
+}
+
+PYBIND11_EMBEDDED_MODULE(Containers, module)
+{
+    register_vector<int>(module, "int");
+    register_vector<unsigned int>(module, "uint");
+    register_vector<float>(module, "float");
+    register_vector<bool>(module, "bool");
+    register_vector<glm::vec2>(module, "vec2");
+    register_vector<glm::vec3>(module, "vec3");
 }
 
