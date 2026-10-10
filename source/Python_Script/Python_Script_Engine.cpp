@@ -96,13 +96,13 @@ namespace LScript
 
 
 
-PYBIND11_EMBEDDED_MODULE(Debug, module)
+PYBIND11_EMBEDDED_MODULE(L_Debug, module)
 {
     module.def("L_ASSERT", LScript::__assert);
     module.def("L_ASSERT_WITH_INFO", LScript::__assert_with_info);
 }
 
-PYBIND11_EMBEDDED_MODULE(Math, module)
+PYBIND11_EMBEDDED_MODULE(L_Math, module)
 {
     pybind11::class_<glm::vec2>(module, "vec2")
         .def(pybind11::init<float, float>())
@@ -227,7 +227,7 @@ void register_vector(pybind11::module_& _module, const std::string& _type_name)
     class_object.def("__setitem__", [](Vec_Type& _this, unsigned int _index, const _Type& _value){ _this[_index] = _value; });
 }
 
-PYBIND11_EMBEDDED_MODULE(Containers, module)
+PYBIND11_EMBEDDED_MODULE(L_Containers, module)
 {
     register_vector<int>(module, "int");
     register_vector<unsigned int>(module, "uint");
