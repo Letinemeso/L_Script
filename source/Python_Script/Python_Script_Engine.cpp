@@ -210,7 +210,8 @@ void register_vector(pybind11::module_& _module, const std::string& _type_name)
     class_object.def(pybind11::init<const Vec_Type&>());
 
     class_object.def("resize", &Vec_Type::resize);
-    class_object.def("fill", &Vec_Type::fill);
+    class_object.def("fill", pybind11::overload_cast<const _Type&>(&Vec_Type::fill));
+    class_object.def("fill", pybind11::overload_cast<const _Type&, unsigned int>(&Vec_Type::fill));
     class_object.def("resize_and_fill", &Vec_Type::resize_and_fill);
     class_object.def("clear", &Vec_Type::clear);
     class_object.def("mark_empty", &Vec_Type::mark_empty);
