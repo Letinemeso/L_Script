@@ -31,6 +31,7 @@ namespace LScript
     public:
         const std::string& type() const override;
         void* data() const override;
+        bool bindable() const override;
 
     };
 

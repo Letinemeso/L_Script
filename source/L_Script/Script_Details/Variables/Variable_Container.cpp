@@ -72,3 +72,8 @@ void* Variable_Container::data() const
 {
     return m_data;
 }
+
+bool Variable_Container::bindable() const
+{
+    return false;
+}

@@ -25,6 +25,7 @@ namespace LScript
     public:
         virtual const std::string& type() const = 0;
         virtual void* data() const = 0;
+        virtual bool bindable() const = 0;
 
     };
 

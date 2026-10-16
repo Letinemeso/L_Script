@@ -19,35 +19,40 @@ Variable_Reference::~Variable_Reference()
 
 void Variable_Reference::reset()
 {
-    L_ASSERT(m_referencee);
+    L_ASSERT(m_referenced_variable);
 
-    m_referencee->reset();
+    m_referenced_variable->reset();
 }
 
 void Variable_Reference::set_data(void* _data)
 {
-    L_ASSERT(m_referencee);
+    L_ASSERT(m_referenced_variable);
 
-    m_referencee->set_data(_data);
+    m_referenced_variable->set_data(_data);
 }
 
 void Variable_Reference::assign(Variable* _other)
 {
-    m_referencee = _other;
+    m_referenced_variable->assign(_other);
 }
 
 
 
 const std::string& Variable_Reference::type() const
 {
-    L_ASSERT(m_referencee);
+    L_ASSERT(m_referenced_variable);
 
-    return m_referencee->type();
+    return m_referenced_variable->type();
 }
 
 void* Variable_Reference::data() const
 {
-    L_ASSERT(m_referencee);
+    L_ASSERT(m_referenced_variable);
 
-    return m_referencee->data();
+    return m_referenced_variable->data();
+}
+
+bool Variable_Reference::bindable() const
+{
+    return m_referenced_variable->bindable();
 }

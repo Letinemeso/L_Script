@@ -14,10 +14,13 @@ namespace LScript
         using Argument_Types = LDS::Vector<std::string>;
 
     private:
+        using Functions_Vec = LDS::Vector<Function*>;
         using Functions = LDS::Map<std::string, Function*>;
+        using Functions_By_Name = LDS::Map<std::string, Functions_Vec>;;
         using Member_Functions = LDS::Map<std::string, Functions>;
 
         Functions m_global_functions;
+        Functions_By_Name m_global_functions_by_name;
         Member_Functions m_member_functions;
 
     private:
@@ -35,6 +38,10 @@ namespace LScript
         void M_register_default_string_functions();
         void M_register_default_bool_functions();
         void M_register_default_vector_functions();
+
+    private:
+        bool M_function_arguments_match(const Function* _function, const Argument_Types& _arg_types) const;
+        Function* M_find_matching_function_by_name(const std::string& _name, const Argument_Types& _arg_types) const;
 
     public:
         static inline Integrated_Functions& instance() { static Integrated_Functions s_instance; return s_instance; }

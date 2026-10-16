@@ -11,10 +11,14 @@ namespace LScript
     private:
         std::string m_type;
         void* m_data = nullptr;
+        bool m_bindable = false;
 
     public:
         Variable_Weak_Container();
         ~Variable_Weak_Container();
+
+    public:
+        inline void set_bindable(bool _value) { m_bindable = _value; }
 
     public:
         void reset() override;
@@ -26,6 +30,7 @@ namespace LScript
     public:
         const std::string& type() const override;
         void* data() const override;
+        bool bindable() const override;
     };
 
 }

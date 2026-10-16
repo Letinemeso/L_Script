@@ -13,11 +13,14 @@ namespace LScript
     class Variable_Reference : public Variable
     {
     private:
-        Variable* m_referencee = nullptr;
+        Variable* m_referenced_variable = nullptr;
 
     public:
         Variable_Reference();
         ~Variable_Reference();
+
+    public:
+        inline void set_referenced_variable(Variable* _ptr) { m_referenced_variable = _ptr; }
 
     public:
         void reset() override;
@@ -27,6 +30,7 @@ namespace LScript
     public:
         const std::string& type() const override;
         void* data() const override;
+        bool bindable() const override;
 
     };
 

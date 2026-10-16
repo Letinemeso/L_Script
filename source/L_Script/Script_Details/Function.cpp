@@ -25,17 +25,22 @@ Variable* Function::call(const Arguments& _args)
 
     for(unsigned int i = 0; i < _args.size(); ++i)
     {
-        L_ASSERT(_args[i]->type() == m_expected_arguments_data[i].expected_type);
+        L_ASSERT((m_expected_arguments_data[i].expected_type == Any_Type_Name) || (_args[i]->type() == m_expected_arguments_data[i].expected_type));
 
         Variable* parameter = _args[i];
 
         Variable* variable = nullptr;
         if(m_expected_arguments_data[i].reference)
-            variable = new Variable_Reference;
+        {
+            Variable_Reference* variable_reference = new Variable_Reference;
+            variable_reference->set_referenced_variable(parameter);
+            variable = variable_reference;
+        }
         else
+        {
             variable = new Variable_Container;
-
-        variable->assign(parameter);
+            variable->assign(parameter);
+        }
 
         m_compound_statement.context().add_variable(m_expected_arguments_data[i].name, variable);
     }

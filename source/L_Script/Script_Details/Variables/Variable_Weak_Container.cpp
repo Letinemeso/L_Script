@@ -52,3 +52,8 @@ void* Variable_Weak_Container::data() const
 {
     return m_data;
 }
+
+bool Variable_Weak_Container::bindable() const
+{
+    return m_bindable;
+}

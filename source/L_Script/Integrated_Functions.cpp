@@ -47,7 +47,7 @@ namespace LScript
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"uint", "_index", false});
             arguments_data.push({_type_alias, "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -81,7 +81,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({_alias, "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -108,7 +108,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"uint", "_index", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -143,7 +143,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({_type_alias, "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -176,7 +176,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"uint", "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -203,7 +203,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"int", "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -230,7 +230,7 @@ namespace LScript
 
             Function::Arguments_Data arguments_data(1);
             arguments_data.push({_alias, "this", true});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -256,7 +256,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"uint", "_size", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -287,7 +287,7 @@ namespace LScript
             Function::Arguments_Data arguments_data(2);
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"int", "_size", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -320,7 +320,7 @@ namespace LScript
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"uint", "_size", false});
             arguments_data.push({_type_alias, "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -355,7 +355,7 @@ namespace LScript
             arguments_data.push({_alias, "this", true});
             arguments_data.push({"int", "_size", false});
             arguments_data.push({_type_alias, "_value", false});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -388,7 +388,7 @@ namespace LScript
 
             Function::Arguments_Data arguments_data(1);
             arguments_data.push({_alias, "this", true});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -413,7 +413,7 @@ namespace LScript
 
             Function::Arguments_Data arguments_data(1);
             arguments_data.push({_alias, "this", true});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -441,7 +441,7 @@ namespace LScript
 
             Function::Arguments_Data arguments_data(1);
             arguments_data.push({_alias, "this", true});
-            function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+            function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
@@ -582,6 +582,39 @@ void Integrated_Functions::M_register_default_global_functions()
 
         register_global_function("debug_print", function);
     }
+
+    //  reference utility
+
+    //  ref_bind
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({Function::Any_Type_Name, "_reference", true});
+        arguments_data.push({Function::Any_Type_Name, "_target", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            Context& context = function->compound_statement().context();
+
+            Variable* var_reference = context.get_variable("_reference");
+            Variable* var_target = context.get_variable("_target");
+
+            L_ASSERT(var_reference && var_target);
+            L_ASSERT(var_reference->bindable());
+            L_ASSERT(var_reference->type() == var_target->type());
+
+            var_reference->assign(var_target);
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("ref_bind", function);
+    }
 }
 
 void Integrated_Functions::M_register_default_int_functions()
@@ -594,7 +627,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -632,7 +665,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -657,7 +690,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -682,7 +715,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -707,7 +740,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -732,7 +765,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -757,7 +790,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -793,7 +826,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -829,7 +862,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -865,7 +898,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -901,7 +934,7 @@ void Integrated_Functions::M_register_default_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"int", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -936,7 +969,7 @@ void Integrated_Functions::M_register_default_int_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"int", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -970,7 +1003,7 @@ void Integrated_Functions::M_register_default_int_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"int", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1009,31 +1042,31 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
-                                           Variable* var_this = context.get_variable("this");
-                                           L_ASSERT(var_this);
-                                           L_ASSERT(var_this->type() == "uint");
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == "uint");
 
-                                           if(var_this->data() == nullptr)
-                                           {
-                                               LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                                               var_this->set_data(allocated_data.ptr);
-                                           }
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
+                var_this->set_data(allocated_data.ptr);
+            }
 
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
-                                           unsigned int* this_raw_data = (unsigned int*)var_this->data();
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+            unsigned int* this_raw_data = (unsigned int*)var_this->data();
 
-                                           L_ASSERT(this_raw_data);
+            L_ASSERT(this_raw_data);
 
-                                           *this_raw_data = *value_raw_data;
+            *this_raw_data = *value_raw_data;
 
-                                           return nullptr;
-                                       });
+            return nullptr;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "set", function);
@@ -1047,7 +1080,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1085,7 +1118,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1110,7 +1143,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1135,7 +1168,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1160,7 +1193,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1185,7 +1218,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1210,7 +1243,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1235,7 +1268,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1260,7 +1293,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1285,7 +1318,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1310,7 +1343,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1346,7 +1379,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1382,7 +1415,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1418,7 +1451,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1454,7 +1487,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1490,7 +1523,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1526,7 +1559,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1562,7 +1595,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1598,7 +1631,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1634,7 +1667,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"uint", "this", true});
         arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1669,7 +1702,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"uint", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1703,7 +1736,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"uint", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1742,7 +1775,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1780,7 +1813,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1805,7 +1838,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1830,7 +1863,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1855,7 +1888,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1880,7 +1913,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1916,7 +1949,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1952,7 +1985,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -1988,7 +2021,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2024,7 +2057,7 @@ void Integrated_Functions::M_register_default_float_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"float", "this", true});
         arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2059,7 +2092,7 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"float", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2093,7 +2126,7 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"float", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2132,7 +2165,7 @@ void Integrated_Functions::M_register_default_string_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"string", "this", true});
         arguments_data.push({"string", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2158,7 +2191,7 @@ void Integrated_Functions::M_register_default_string_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"string", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2185,7 +2218,7 @@ void Integrated_Functions::M_register_default_string_functions()
         arguments_data.push({"string", "this", true});
         arguments_data.push({"uint", "_index", false});
         arguments_data.push({"string", "_symbol", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2215,7 +2248,7 @@ void Integrated_Functions::M_register_default_string_functions()
         arguments_data.push({"string", "this", true});
         arguments_data.push({"int", "_index", false});
         arguments_data.push({"string", "_symbol", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2245,7 +2278,7 @@ void Integrated_Functions::M_register_default_string_functions()
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"string", "this", true});
         arguments_data.push({"uint", "_index", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2275,7 +2308,7 @@ void Integrated_Functions::M_register_default_string_functions()
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"string", "this", true});
         arguments_data.push({"int", "_index", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2305,7 +2338,7 @@ void Integrated_Functions::M_register_default_string_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"string", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2334,7 +2367,7 @@ void Integrated_Functions::M_register_default_string_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"string", "this", true});
         arguments_data.push({"string", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2362,7 +2395,7 @@ void Integrated_Functions::M_register_default_string_functions()
         arguments_data.push({"string", "this", true});
         arguments_data.push({"int", "_offset", false});
         arguments_data.push({"int", "_size", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2396,7 +2429,7 @@ void Integrated_Functions::M_register_default_string_functions()
         arguments_data.push({"string", "this", true});
         arguments_data.push({"uint", "_offset", false});
         arguments_data.push({"uint", "_size", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2431,7 +2464,7 @@ void Integrated_Functions::M_register_default_bool_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"bool", "this", true});
         arguments_data.push({"bool", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2468,7 +2501,7 @@ void Integrated_Functions::M_register_default_bool_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"bool", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2491,7 +2524,7 @@ void Integrated_Functions::M_register_default_bool_functions()
 
         Function::Arguments_Data arguments_data(1);
         arguments_data.push({"bool", "this", true});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2523,7 +2556,7 @@ void Integrated_Functions::M_register_default_bool_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"bool", "this", true});
         arguments_data.push({"bool", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2556,7 +2589,7 @@ void Integrated_Functions::M_register_default_bool_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"bool", "this", true});
         arguments_data.push({"bool", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2589,7 +2622,7 @@ void Integrated_Functions::M_register_default_bool_functions()
         Function::Arguments_Data arguments_data(2);
         arguments_data.push({"bool", "this", true});
         arguments_data.push({"bool", "_value", false});
-        function->set_expected_arguments_data((Function::Arguments_Data&&)arguments_data);
+        function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
@@ -2623,6 +2656,60 @@ void Integrated_Functions::M_register_default_vector_functions()
     __register_vector_with_type<bool>(*this, "Bool_Vector", "bool");
     __register_vector_with_type<std::string>(*this, "String_Vector", "string");
     __register_vector_with_type<float>(*this, "Float_Vector", "float");
+}
+
+
+
+bool Integrated_Functions::M_function_arguments_match(const Function* _function, const Argument_Types& _arg_types) const
+{
+    L_ASSERT(_function);
+
+    const Function::Arguments_Data& args_data = _function->expected_arguments_data();
+
+    if(args_data.size() != _arg_types.size())
+        return false;
+
+    for(unsigned int i = 0; i < args_data.size(); ++i)
+    {
+        if(args_data[i].expected_type == Function::Any_Type_Name)
+            continue;
+        if(args_data[i].expected_type != _arg_types[i])
+            return false;
+    }
+
+    return true;
+}
+
+Function* Integrated_Functions::M_find_matching_function_by_name(const std::string& _name, const Argument_Types& _arg_types) const
+{
+    Functions_By_Name::Const_Iterator maybe_functions_it = m_global_functions_by_name.find(_name);
+    if(!maybe_functions_it.is_ok())
+        return nullptr;
+
+    const Functions_Vec& functions = *maybe_functions_it;
+    for(unsigned int i = 0; i < functions.size(); ++i)
+    {
+        Function* function = functions[i];
+
+        if(!M_function_arguments_match(function, _arg_types))
+            continue;
+
+        L_DEBUG_FUNC_NOARG([&]()
+        {
+            ++i;
+
+            for(; i < functions.size(); ++i)
+            {
+                Function* function = functions[i];
+
+                L_ASSERT_WITH_INFO(!M_function_arguments_match(function, _arg_types), "Call to " + _name + " is ambiguous");
+            }
+        });
+
+        return function;
+    }
+
+    return nullptr;
 }
 
 
@@ -2675,7 +2762,10 @@ void Integrated_Functions::register_global_function(const std::string& _name, Fu
     std::string full_name = construct_function_name(_name, _function);
     L_ASSERT(!m_global_functions.find(full_name).is_ok());
 
-    m_global_functions.insert((std::string&&)full_name, _function);
+    m_global_functions.insert(LST::move(full_name), _function);
+
+    Functions_By_Name::Iterator by_name_it = m_global_functions_by_name.find_or_insert(_name);
+    by_name_it->push(_function);
 }
 
 void Integrated_Functions::register_member_function(const std::string& _owner_type, const std::string& _name, Function* _function)
@@ -2689,7 +2779,7 @@ void Integrated_Functions::register_member_function(const std::string& _owner_ty
     std::string full_name = construct_function_name(_name, _function, _owner_type);
     L_ASSERT(!functions.find(full_name).is_ok());
 
-    functions.insert((std::string&&)full_name, _function);
+    functions.insert(LST::move(full_name), _function);
 }
 
 
@@ -2701,7 +2791,7 @@ Function* Integrated_Functions::get_global_function(const std::string& _name, co
     if(maybe_function_it.is_ok())
         return *maybe_function_it;
 
-    return nullptr;
+    return M_find_matching_function_by_name(_name, _arg_types);
 }
 
 Function* Integrated_Functions::get_member_function(const std::string& _owner_type, const std::string& _name, const Argument_Types& _arg_types) const

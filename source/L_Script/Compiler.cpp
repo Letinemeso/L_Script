@@ -5,6 +5,7 @@
 #include <L_Script/Integrated_Functions.h>
 #include <L_Script/Script_Details/Operations/Operation.h>
 #include <L_Script/Script_Details/Operations/Variable_Creation.h>
+#include <L_Script/Script_Details/Operations/Reference_Creation.h>
 #include <L_Script/Script_Details/Operations/Extract_Variable.h>
 #include <L_Script/Script_Details/Operations/Call_Member_Function.h>
 #include <L_Script/Script_Details/Operations/Call_Global_Function.h>
@@ -377,6 +378,10 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     {
         parse_result = M_parse_dynamic_declaration(_context, first_word, _source, after_first_word_offset, _max_size);
     }
+    else if(expression_type == Expression_Type::Reference_Declaration)
+    {
+        parse_result = M_parse_reference_declaration(_context, first_word, _source, after_first_word_offset, _max_size);
+    }
     else if(expression_type == Expression_Type::Variable_Name)
     {
         Expression_Goal expression_goal = M_member_access_or_function_call(_source, after_first_word_offset);
@@ -394,6 +399,36 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     M_print_debug_error_message(parse_result.operation, _source, after_first_word_offset, Unlimited_Size, "Could not parse an expression");
 
     return parse_result;
+}
+
+Compiler::Operation_Parse_Result Compiler::M_parse_reference_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    const std::string& referenceless_type = _type.substr(0, _type.size() - 1);
+
+    unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset);
+    unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset);
+    M_print_debug_error_message(after_name_offset > name_offset, _source, name_offset, 1, "Expected name");
+
+    unsigned int next_word_size = after_name_offset - name_offset;
+    std::string name = _source.substr(name_offset, next_word_size);
+
+    M_print_debug_error_message(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration,
+                                _source, after_name_offset, 1, "Unable to declare a function inside a function");
+
+    Reference_Creation* operation = new Reference_Creation;
+    operation->set_context(&_context);
+    operation->set_variable_type(referenceless_type);
+    operation->set_variable_name(name);
+
+    L_DEBUG_FUNC_NOARG([&]()
+                       {
+                           operation->set_debug_info(M_parse_line(_source, name_offset), M_calculate_line_number(_source, name_offset));
+                       });
+
+    Operation_Parse_Result result;
+    result.operation = operation;
+    result.offset_after = M_skip_past_semicolon(_source, after_name_offset, _max_size);
+    return result;
 }
 
 Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
@@ -450,7 +485,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Conte
     call_member_function_operation->set_context(&_context);
     call_member_function_operation->set_function_name(operation_name);
     call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
-    call_member_function_operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
+    call_member_function_operation->set_arguments_getter_operations(LST::move(argument_getters));
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -472,7 +507,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
     Call_Global_Function* operation = new Call_Global_Function;
     operation->set_function_name(_name);
     operation->set_script(m_script_target);
-    operation->set_arguments_getter_operations((LDS::Vector<Operation*>&&)argument_getters);
+    operation->set_arguments_getter_operations(LST::move(argument_getters));
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -1000,6 +1035,8 @@ Compiler::Expression_Type Compiler::M_get_expression_type(const std::string& _ex
     if(_expression == Return_Expression)
         return Expression_Type::Return;
 
+    if(_expression.size() > 0 && _expression[_expression.size() - 1] == '&')
+        return Expression_Type::Reference_Declaration;
     if(_expression == Void_Type_Name)
         return Expression_Type::Type_Name;
     if(LV::Type_Manager::type_is_registered(_expression))

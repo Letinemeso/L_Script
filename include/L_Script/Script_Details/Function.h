@@ -15,6 +15,8 @@ namespace LScript
     class Function
     {
     public:
+        static constexpr const char* Any_Type_Name = "[[Any]]";
+
         struct Argument_Data
         {
             std::string expected_type;

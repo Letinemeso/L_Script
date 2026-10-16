@@ -42,14 +42,20 @@ Variable* Call_Member_Function::process()
 
     L_DEBUG_FUNC_NOARG([&]()
     {
-        if(owner_object)
+        if(owner_object && (!owner_object->bindable() || owner_object->data() != nullptr))
             return;
 
         L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
-        L_LOG("LScript_Debug", "Unable to retrieve owner object while calling function \"" + m_function_name + "\"");
+
+        if(!owner_object)
+            L_LOG("LScript_Debug", "Unable to retrieve owner object while calling function \"" + m_function_name + "\"");
+        else
+            L_LOG("LScript_Debug", "Unable to call a function for a non-bound reference");
+
         L_LOG("LScript_Debug", m_source_line);
         L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
-        L_ASSERT(owner_object);
+
+        L_ASSERT(false);
     });
 
     unsigned int arguments_amount = m_arguments_getter_operations.size() + 1;
