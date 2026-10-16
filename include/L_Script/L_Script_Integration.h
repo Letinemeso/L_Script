@@ -90,12 +90,11 @@ namespace LScript
             Arguments_Container_Type args_container;
             for(unsigned int i = 0; i < args_container.arguments_amount(); ++i)
             {
-                void* arg_raw = nullptr;
-                args_container.init_pointer(i, arg_raw);
+                void*& arg_raw = args_container.get_arg_pointer(i);
                 LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i));
                 L_ASSERT(variable);
                 void* variable_raw = (void*)variable->data();
-                LV::Type_Manager::copy(function->expected_arguments_data()[1].expected_type, arg_raw, variable_raw);
+                arg_raw = variable_raw;
             }
             LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this");
             L_ASSERT(context_object_variable);
