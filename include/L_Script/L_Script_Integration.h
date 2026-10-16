@@ -164,8 +164,6 @@ namespace LScript
             L_ASSERT(_owner_name == context_object_variable->type());
             _Owner_Type* context_object = (_Owner_Type*)context_object_variable->data();
             LScript::Variable* return_variable = construct_result(context_object, _function, args_container);
-            if(return_variable)
-                function->compound_statement().context().add_variable("__result__", return_variable);
             return return_variable;
         });
 

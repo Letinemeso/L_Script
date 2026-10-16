@@ -18,8 +18,6 @@ namespace LScript
         using Operations_List = LDS::List<Operation*>;
         Operations_List m_operations;
 
-        Variable_Container m_return_variable;
-
         bool m_stop_required = false;
 
     public:
