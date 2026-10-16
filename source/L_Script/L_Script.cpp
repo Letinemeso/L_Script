@@ -29,7 +29,7 @@ void L_Script::set_context_object(const std::string& _type_as_string, const std:
 
     Variable_Weak_Container* pointer_variable = new Variable_Weak_Container;
     pointer_variable->set_type(_type_as_string);
-    pointer_variable->set_data(_ptr, sizeof(void*));
+    pointer_variable->set_data(_ptr);
 
     m_global_context.add_variable(_name, pointer_variable);
 }

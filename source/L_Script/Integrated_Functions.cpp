@@ -28,7 +28,7 @@ namespace LScript
         _context.add_variable(_name, result);
 
         LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(_type_alias, 1);
-        result->set_data(allocate_result.ptr, allocate_result.size);
+        result->set_data(allocate_result.ptr);
 
         return result;
     }
@@ -607,7 +607,7 @@ void Integrated_Functions::M_register_default_int_functions()
             if(var_this->data() == nullptr)
             {
                 LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-                var_this->set_data(allocated_data.ptr, allocated_data.size);
+                var_this->set_data(allocated_data.ptr);
             }
 
             int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
@@ -771,7 +771,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("bool");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -807,7 +807,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("bool");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -843,7 +843,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("bool");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -879,7 +879,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("bool");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -915,7 +915,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("bool");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -949,7 +949,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("uint");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             unsigned int* result_raw_data = (unsigned int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -983,7 +983,7 @@ void Integrated_Functions::M_register_default_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("float");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             float* result_raw_data = (float*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1022,7 +1022,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            if(var_this->data() == nullptr)
                                            {
                                                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                                               var_this->set_data(allocated_data.ptr, allocated_data.size);
+                                               var_this->set_data(allocated_data.ptr);
                                            }
 
                                            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
@@ -1060,7 +1060,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            if(var_this->data() == nullptr)
                                            {
                                                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                                               var_this->set_data(allocated_data.ptr, allocated_data.size);
+                                               var_this->set_data(allocated_data.ptr);
                                            }
 
                                            unsigned int* this_raw_data = (unsigned int*)var_this->data();
@@ -1324,7 +1324,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1360,7 +1360,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1396,7 +1396,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1432,7 +1432,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1468,7 +1468,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1504,7 +1504,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1540,7 +1540,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1576,7 +1576,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1612,7 +1612,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1648,7 +1648,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1682,7 +1682,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("int");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             int* result_raw_data = (int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1716,7 +1716,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
             context.add_variable("result", result_container);
             result_container->set_type("float");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             float* result_raw_data = (float*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1755,7 +1755,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            if(var_this->data() == nullptr)
                                            {
                                                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-                                               var_this->set_data(allocated_data.ptr, allocated_data.size);
+                                               var_this->set_data(allocated_data.ptr);
                                            }
 
                                            float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
@@ -1894,7 +1894,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1930,7 +1930,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -1966,7 +1966,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -2002,7 +2002,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -2038,7 +2038,7 @@ void Integrated_Functions::M_register_default_float_functions()
                                            context.add_variable("result", result_container);
                                            result_container->set_type("bool");
                                            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr, allocated_data.size);
+                                           result_container->set_data(allocated_data.ptr);
 
                                            bool* result_raw_data = (bool*)result_container->data();
                                            L_ASSERT(result_raw_data);
@@ -2072,7 +2072,7 @@ void Integrated_Functions::M_register_default_float_functions()
             context.add_variable("result", result_container);
             result_container->set_type("int");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             int* result_raw_data = (int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -2106,7 +2106,7 @@ void Integrated_Functions::M_register_default_float_functions()
             context.add_variable("result", result_container);
             result_container->set_type("uint");
             LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-            result_container->set_data(allocated_data.ptr, allocated_data.size);
+            result_container->set_data(allocated_data.ptr);
 
             unsigned int* result_raw_data = (unsigned int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -2443,7 +2443,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             if(var_this->data() == nullptr)
             {
                 LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                var_this->set_data(allocated_data.ptr, allocated_data.size);
+                var_this->set_data(allocated_data.ptr);
             }
 
             bool* this_raw_data = (bool*)var_this->data();
@@ -2506,7 +2506,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* new_bool_data = new bool;
             *new_bool_data = !*this_raw_data;
             inverted_container->set_type("bool");
-            inverted_container->set_data(new_bool_data, sizeof(bool));
+            inverted_container->set_data(new_bool_data);
 
             return inverted_container;
         });
@@ -2539,7 +2539,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data && *value_raw_data;
             result_container->set_type("bool");
-            result_container->set_data(new_bool_data, sizeof(bool));
+            result_container->set_data(new_bool_data);
 
             return result_container;
         });
@@ -2572,7 +2572,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data || *value_raw_data;
             result_container->set_type("bool");
-            result_container->set_data(new_bool_data, sizeof(bool));
+            result_container->set_data(new_bool_data);
 
             return result_container;
         });
@@ -2605,7 +2605,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data == *value_raw_data;
             result_container->set_type("bool");
-            result_container->set_data(new_bool_data, sizeof(bool));
+            result_container->set_data(new_bool_data);
 
             return result_container;
         });

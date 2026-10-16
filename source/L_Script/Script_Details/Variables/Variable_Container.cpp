@@ -26,17 +26,15 @@ void Variable_Container::reset()
         LV::Type_Manager::clear(m_type, m_data);
 
     m_data = nullptr;
-    m_raw_size = 0;
     m_type.clear();
 }
 
-void Variable_Container::set_data(void* _data, unsigned int _raw_size)
+void Variable_Container::set_data(void* _data)
 {
     if(m_data)
         LV::Type_Manager::clear(m_type, m_data);
 
     m_data = _data;
-    m_raw_size = _raw_size;
 }
 
 void Variable_Container::assign(Variable* _other)
@@ -46,12 +44,11 @@ void Variable_Container::assign(Variable* _other)
 
     m_type = _other->type();
 
-    if(_other->raw_size() == 0)
+    if(!_other->data())
         return;
 
     LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(m_type, 1);
 
-    m_raw_size = allocate_result.size;
     m_data = allocate_result.ptr;
 
     LV::Type_Manager::copy(m_type, m_data, _other->data());
@@ -74,9 +71,4 @@ const std::string& Variable_Container::type() const
 void* Variable_Container::data() const
 {
     return m_data;
-}
-
-unsigned int Variable_Container::raw_size() const
-{
-    return m_raw_size;
 }

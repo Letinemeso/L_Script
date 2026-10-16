@@ -24,11 +24,11 @@ void Variable_Reference::reset()
     m_referencee->reset();
 }
 
-void Variable_Reference::set_data(void* _data, unsigned int _raw_size)
+void Variable_Reference::set_data(void* _data)
 {
     L_ASSERT(m_referencee);
 
-    m_referencee->set_data(_data, _raw_size);
+    m_referencee->set_data(_data);
 }
 
 void Variable_Reference::assign(Variable* _other)
@@ -50,11 +50,4 @@ void* Variable_Reference::data() const
     L_ASSERT(m_referencee);
 
     return m_referencee->data();
-}
-
-unsigned int Variable_Reference::raw_size() const
-{
-    L_ASSERT(m_referencee);
-
-    return m_referencee->raw_size();
 }

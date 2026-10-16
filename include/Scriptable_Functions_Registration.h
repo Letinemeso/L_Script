@@ -36,7 +36,6 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
         LDS::Vector<std::string> arguments_types;
 
 #define SCRIPTABLE_FUNCTION_RETURN_TYPE(TYPE) \
-        using Return_Type = TYPE; \
         std::string return_type_str = #TYPE;
 
 #define SCRIPTABLE_FUNCTION_NAME(FUNCTION_NAME) \
@@ -58,7 +57,7 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
         }
 
 #define SCRIPTABLE_FUNCTION_INITIALIZATION_END \
-        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Return_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
+        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
     }
 
 

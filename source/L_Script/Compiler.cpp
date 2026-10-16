@@ -816,7 +816,7 @@ RValue_Getter* Compiler::M_construct_rvalue_getter(const std::string& _value_as_
 
     RValue_Getter* operation = new RValue_Getter;
     operation->variable().set_type(deduced_type);
-    operation->variable().set_data(allocation_result.ptr, allocation_result.size);
+    operation->variable().set_data(allocation_result.ptr);
 
     return operation;
 }

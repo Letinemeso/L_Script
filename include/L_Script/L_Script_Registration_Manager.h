@@ -18,7 +18,7 @@ namespace LScript
             virtual void register_function() = 0;
         };
 
-        template <typename _Owner_Class, typename _Return_Type, typename _Member_Function_Type>
+        template <typename _Owner_Class, typename _Member_Function_Type>
         class L_Script_Registration_Helper_Typed final : public L_Script_Registration_Helper
         {
         private:
@@ -39,7 +39,7 @@ namespace LScript
         public:
             void register_function() override
             {
-                LScript::register_l_script_function<_Owner_Class, _Return_Type, _Member_Function_Type>(m_owner_class_name, m_member_function_name, m_return_type_name, m_arg_types, m_function_ptr);
+                LScript::register_l_script_function<_Owner_Class, _Member_Function_Type>(m_owner_class_name, m_member_function_name, m_return_type_name, m_arg_types, m_function_ptr);
             }
 
         };
@@ -63,7 +63,7 @@ namespace LScript
         inline static L_Script_Registration_Manager& instance() { static L_Script_Registration_Manager s_instance; return s_instance; }
 
     public:
-        template <typename _Owner_Class, typename _Return_Type, typename _Member_Function_Type>
+        template <typename _Owner_Class, typename _Member_Function_Type>
         void queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
                                 LDS::Vector<std::string>&& _arg_types, _Member_Function_Type _function_ptr);
 
@@ -72,11 +72,11 @@ namespace LScript
     };
 
 
-    template <typename _Owner_Class, typename _Return_Type, typename _Member_Function_Type>
+    template <typename _Owner_Class, typename _Member_Function_Type>
     void L_Script_Registration_Manager::queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
                                                            LDS::Vector<std::string>&& _arg_types, _Member_Function_Type _function_ptr)
     {
-        m_helpers.push( new L_Script_Registration_Helper_Typed<_Owner_Class, _Return_Type, _Member_Function_Type>(_owner_class_name, _return_type, _member_function_name, LST::move(_arg_types), _function_ptr) );
+        m_helpers.push( new L_Script_Registration_Helper_Typed<_Owner_Class, _Member_Function_Type>(_owner_class_name, _return_type, _member_function_name, LST::move(_arg_types), _function_ptr) );
     }
 
 }
