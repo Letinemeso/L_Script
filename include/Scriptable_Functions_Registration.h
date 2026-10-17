@@ -6,7 +6,7 @@
 //      -------------- USAGE EXAMPLE: --------------
 
 /*
-SCRIPTABLE_FUNCTIONS_INITIALIZATION_BEGIN(Test)     // somewhere in cpp file
+SCRIPTABLE_CLASS_BEGIN(Test)     // somewhere in cpp file
 
 SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN;
 SCRIPTABLE_FUNCTION_RETURN_TYPE(void);
@@ -25,7 +25,7 @@ SCRIPTABLE_FUNCTION_RETURN_TYPE(void);
 SCRIPTABLE_FUNCTION_NAME(print_data);
 SCRIPTABLE_FUNCTION_INITIALIZATION_END;
 
-SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
+SCRIPTABLE_CLASS_END;
 */
 
 //      --------------------------------------------
@@ -61,7 +61,7 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
     }
 
 
-#define SCRIPTABLE_FUNCTIONS_INITIALIZATION_BEGIN( CLASS_NAME ) \
+#define SCRIPTABLE_CLASS_BEGIN( CLASS_NAME ) \
     namespace __##CLASS_NAME##_Registration \
     { \
         using Registered_Type = CLASS_NAME; \
@@ -90,7 +90,7 @@ SCRIPTABLE_FUNCTIONS_INITIALIZATION_END;
                 L_ASSERT(!__scriptable_functions_initialized); \
                 __scriptable_functions_initialized = true;
 
-#define SCRIPTABLE_FUNCTIONS_INITIALIZATION_END \
+#define SCRIPTABLE_CLASS_END \
             } \
         }; \
          \
