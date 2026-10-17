@@ -30,3 +30,6 @@ target_include_directories(L_Script PUBLIC
                             "${PROJECT_SOURCE_DIR}/../L_Utility/glm"
                             "${PROJECT_SOURCE_DIR}/../L_Variable/include"
                             )
+
+
+add_subdirectory(tests)
