@@ -16,7 +16,6 @@ namespace LScript
         std::string m_type;
         void* m_data = nullptr;
 
-
     public:
         Variable_Container();
         ~Variable_Container();

@@ -10,12 +10,16 @@ namespace LScript
 
     class Variable
     {
-    public:
-        using Strings_Vector = LDS::Vector<std::string>;
+    private:
+        bool m_temporary = false;
 
     public:
-        Variable() { }
-        virtual ~Variable() { }
+        Variable();
+        virtual ~Variable();
+
+    public:
+        inline void mark_temporary(bool _value) { m_temporary = _value; }
+        inline bool is_temporary() const { return m_temporary; }
 
     public:
         virtual void reset() = 0;

@@ -88,5 +88,14 @@ Variable* Call_Member_Function::process()
         L_ASSERT(function);
     });
 
-    return function->call(arguments);
+    Variable* result = function->call(arguments);
+
+    for(unsigned int i = 1; i < arguments.size(); ++i)      //  deleting from 1 because 0 is "this"
+    {
+        Variable* arg = arguments[i];
+        if(arg->is_temporary())
+            delete arg;
+    }
+
+    return result;
 }

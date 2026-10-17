@@ -21,14 +21,15 @@ namespace LScript
         return raw_data;
     }
 
-    [[nodiscard]] Variable_Container* __construct_return_container(Context& _context, const std::string& _name, const std::string& _type_alias)
+    [[nodiscard]] Variable_Container* __construct_return_container(const std::string& _type_alias)
     {
         Variable_Container* result = new Variable_Container;
         result->set_type(_type_alias);
-        _context.add_variable(_name, result);
 
         LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(_type_alias, 1);
         result->set_data(allocate_result.ptr);
+
+        result->mark_temporary(true);
 
         return result;
     }
@@ -122,7 +123,7 @@ namespace LScript
                 Vector& this_vec = *(Vector*)var_this->data();
                 unsigned int index = *__extract_raw_data<unsigned int>(function->compound_statement().context(), "_index");
 
-                Variable_Container* return_container = __construct_return_container(context, "result", _type_alias);
+                Variable_Container* return_container = __construct_return_container(_type_alias);
                 _Type* return_raw_data = (_Type*)return_container->data();
                 L_ASSERT(return_raw_data);
 
@@ -422,7 +423,7 @@ namespace LScript
 
                 Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
 
-                Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+                Variable_Container* return_container = __construct_return_container("uint");
                 int* return_raw_data = (int*)return_container->data();
 
                 *return_raw_data = this_vec.size();
@@ -450,7 +451,7 @@ namespace LScript
 
                 Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
 
-                Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+                Variable_Container* return_container = __construct_return_container("uint");
                 int* return_raw_data = (int*)return_container->data();
 
                 *return_raw_data = this_vec.capacity();
@@ -800,11 +801,7 @@ void Integrated_Functions::M_register_default_int_functions()
             int* this_raw_data = __extract_raw_data<int>(context, "this");
             int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("bool");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -836,11 +833,7 @@ void Integrated_Functions::M_register_default_int_functions()
             int* this_raw_data = __extract_raw_data<int>(context, "this");
             int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("bool");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -872,11 +865,7 @@ void Integrated_Functions::M_register_default_int_functions()
             int* this_raw_data = __extract_raw_data<int>(context, "this");
             int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("bool");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -908,11 +897,7 @@ void Integrated_Functions::M_register_default_int_functions()
             int* this_raw_data = __extract_raw_data<int>(context, "this");
             int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("bool");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -944,11 +929,7 @@ void Integrated_Functions::M_register_default_int_functions()
             int* this_raw_data = __extract_raw_data<int>(context, "this");
             int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("bool");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
             bool* result_raw_data = (bool*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -978,11 +959,7 @@ void Integrated_Functions::M_register_default_int_functions()
 
             int* this_raw_data = __extract_raw_data<int>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("uint");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("uint");
 
             unsigned int* result_raw_data = (unsigned int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1012,11 +989,7 @@ void Integrated_Functions::M_register_default_int_functions()
 
             int* this_raw_data = __extract_raw_data<int>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("float");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("float");
 
             float* result_raw_data = (float*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1084,27 +1057,27 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
-                                           Variable* var_this = context.get_variable("this");
-                                           L_ASSERT(var_this);
-                                           L_ASSERT(var_this->type() == "uint");
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == "uint");
 
-                                           if(var_this->data() == nullptr)
-                                           {
-                                               LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                                               var_this->set_data(allocated_data.ptr);
-                                           }
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
+                var_this->set_data(allocated_data.ptr);
+            }
 
-                                           unsigned int* this_raw_data = (unsigned int*)var_this->data();
-                                           int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            unsigned int* this_raw_data = (unsigned int*)var_this->data();
+            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
 
-                                           L_ASSERT(this_raw_data);
+            L_ASSERT(this_raw_data);
 
-                                           *this_raw_data = *value_raw_data;
+            *this_raw_data = *value_raw_data;
 
-                                           return nullptr;
-                                       });
+            return nullptr;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "set", function);
@@ -1347,25 +1320,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data == *value_raw_data;
+            *result_raw_data = *this_raw_data == *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "equals", function);
@@ -1383,25 +1352,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data == *value_raw_data;
+            *result_raw_data = *this_raw_data == *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "equals", function);
@@ -1419,25 +1384,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data < *value_raw_data;
+            *result_raw_data = *this_raw_data < *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "less", function);
@@ -1455,25 +1416,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data < *value_raw_data;
+            *result_raw_data = *this_raw_data < *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "less", function);
@@ -1491,25 +1448,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data > *value_raw_data;
+            *result_raw_data = *this_raw_data > *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "more", function);
@@ -1527,25 +1480,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data > *value_raw_data;
+            *result_raw_data = *this_raw_data > *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "more", function);
@@ -1563,25 +1512,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data <= *value_raw_data;
+            *result_raw_data = *this_raw_data <= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "less_or_equal", function);
@@ -1599,25 +1544,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data <= *value_raw_data;
+            *result_raw_data = *this_raw_data <= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "less_or_equal", function);
@@ -1635,25 +1576,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data >= *value_raw_data;
+            *result_raw_data = *this_raw_data >= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "more_or_equal", function);
@@ -1671,25 +1608,21 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            int* value_raw_data = __extract_raw_data<int>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data >= *value_raw_data;
+            *result_raw_data = *this_raw_data >= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "more_or_equal", function);
@@ -1711,11 +1644,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
             unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("int");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("int");
 
             int* result_raw_data = (int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1745,11 +1674,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
             float* this_raw_data = __extract_raw_data<float>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("float");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("float");
 
             float* result_raw_data = (float*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -1779,27 +1704,27 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
-                                           Variable* var_this = context.get_variable("this");
-                                           L_ASSERT(var_this);
-                                           L_ASSERT(var_this->type() == "float");
+        {
+            Context& context = function->compound_statement().context();
+            Variable* var_this = context.get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == "float");
 
-                                           if(var_this->data() == nullptr)
-                                           {
-                                               LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-                                               var_this->set_data(allocated_data.ptr);
-                                           }
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
+                var_this->set_data(allocated_data.ptr);
+            }
 
-                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
-                                           float* this_raw_data = (float*)var_this->data();
+            float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+            float* this_raw_data = (float*)var_this->data();
 
-                                           L_ASSERT(this_raw_data);
+            L_ASSERT(this_raw_data);
 
-                                           *this_raw_data = *value_raw_data;
+            *this_raw_data = *value_raw_data;
 
-                                           return nullptr;
-                                       });
+            return nullptr;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "set", function);
@@ -1917,25 +1842,21 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* value_raw_data = __extract_raw_data<float>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data == *value_raw_data;
+            *result_raw_data = *this_raw_data == *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "equals", function);
@@ -1953,25 +1874,21 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* value_raw_data = __extract_raw_data<float>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data < *value_raw_data;
+            *result_raw_data = *this_raw_data < *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "less", function);
@@ -1989,25 +1906,21 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* value_raw_data = __extract_raw_data<float>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data > *value_raw_data;
+            *result_raw_data = *this_raw_data > *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "more", function);
@@ -2025,25 +1938,21 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* value_raw_data = __extract_raw_data<float>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data <= *value_raw_data;
+            *result_raw_data = *this_raw_data <= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "less_or_equal", function);
@@ -2061,25 +1970,21 @@ void Integrated_Functions::M_register_default_float_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           Context& context = function->compound_statement().context();
+        {
+            Context& context = function->compound_statement().context();
 
-                                           float* this_raw_data = __extract_raw_data<float>(context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* value_raw_data = __extract_raw_data<float>(context, "_value");
 
-                                           Variable_Container* result_container = new Variable_Container;
-                                           context.add_variable("result", result_container);
-                                           result_container->set_type("bool");
-                                           LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                                           result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("bool");
 
-                                           bool* result_raw_data = (bool*)result_container->data();
-                                           L_ASSERT(result_raw_data);
+            bool* result_raw_data = (bool*)result_container->data();
+            L_ASSERT(result_raw_data);
 
-                                           *result_raw_data = *this_raw_data >= *value_raw_data;
+            *result_raw_data = *this_raw_data >= *value_raw_data;
 
-                                           return result_container;
-                                       });
+            return result_container;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("float", "more_or_equal", function);
@@ -2101,11 +2006,7 @@ void Integrated_Functions::M_register_default_float_functions()
 
             float* this_raw_data = __extract_raw_data<float>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("int");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("int");
 
             int* result_raw_data = (int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -2135,11 +2036,7 @@ void Integrated_Functions::M_register_default_float_functions()
 
             float* this_raw_data = __extract_raw_data<float>(context, "this");
 
-            Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
-            result_container->set_type("uint");
-            LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-            result_container->set_data(allocated_data.ptr);
+            Variable_Container* result_container = __construct_return_container("uint");
 
             unsigned int* result_raw_data = (unsigned int*)result_container->data();
             L_ASSERT(result_raw_data);
@@ -2288,7 +2185,7 @@ void Integrated_Functions::M_register_default_string_functions()
             std::string& this_string = *__extract_raw_data<std::string>(context, "this");
             unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
 
-            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
 
             return_string = this_string[index];
@@ -2319,7 +2216,7 @@ void Integrated_Functions::M_register_default_string_functions()
             int index = *__extract_raw_data<int>(context, "_index");
             L_ASSERT(index >= 0);
 
-            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
 
             return_string = this_string[index];
@@ -2347,7 +2244,7 @@ void Integrated_Functions::M_register_default_string_functions()
 
             std::string& this_string = *__extract_raw_data<std::string>(context, "this");
 
-            Variable_Container* return_container = __construct_return_container(context, "result", "uint");
+            Variable_Container* return_container = __construct_return_container("uint");
             unsigned int* return_raw_data = (unsigned int*)return_container->data();
 
             *return_raw_data = this_string.size();
@@ -2408,7 +2305,7 @@ void Integrated_Functions::M_register_default_string_functions()
             L_ASSERT(offset >= 0);
             L_ASSERT(size >= 0);
 
-            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
 
             return_string = this_string.substr(offset, size);
@@ -2440,7 +2337,7 @@ void Integrated_Functions::M_register_default_string_functions()
             unsigned int offset = *__extract_raw_data<unsigned int>(context, "_offset");
             unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
 
-            Variable_Container* return_container = __construct_return_container(context, "result", "string");
+            Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
 
             return_string = this_string.substr(offset, size);
@@ -2567,7 +2464,6 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
             Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
 
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data && *value_raw_data;
@@ -2600,7 +2496,6 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
             Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
 
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data || *value_raw_data;
@@ -2633,7 +2528,6 @@ void Integrated_Functions::M_register_default_bool_functions()
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
             Variable_Container* result_container = new Variable_Container;
-            context.add_variable("result", result_container);
 
             bool* new_bool_data = new bool;
             *new_bool_data = *this_raw_data == *value_raw_data;
