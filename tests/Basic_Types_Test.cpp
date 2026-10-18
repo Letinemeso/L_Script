@@ -44,7 +44,7 @@ public:
     std::string& get_string_ref() { return var_string; }
 
     void set_bool(const bool& _value) { var_bool = _value; }
-    bool get_boolt() { return var_bool; }
+    bool get_bool() { return var_bool; }
     bool& get_bool_ref() { return var_bool; }
 
 };
@@ -52,15 +52,25 @@ public:
 
 SCRIPTABLE_CLASS_BEGIN(Basic_Types_Test_Helper)
 
-INIT_SCRIPTABLE_FUNCTION(const std::string&, test_func, const int&, const std::string&, unsigned int&, const float)
+INIT_SCRIPTABLE_FUNCTION(void, set_int, const int&)
+INIT_SCRIPTABLE_FUNCTION(int, get_int)
+INIT_SCRIPTABLE_FUNCTION(int&, get_int_ref)
 
-INIT_SCRIPTABLE_FUNCTION(void, set_int, int)
+INIT_SCRIPTABLE_FUNCTION(void, set_uint, const unsigned int&)
+INIT_SCRIPTABLE_FUNCTION(unsigned int, get_uint)
+INIT_SCRIPTABLE_FUNCTION(unsigned int&, get_uint_ref)
 
-// SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN
-// SCRIPTABLE_FUNCTION_RETURN_TYPE(void)
-// SCRIPTABLE_FUNCTION_NAME(set_int)
-// SCRIPTABLE_FUNCTION_ARG(int)
-// SCRIPTABLE_FUNCTION_INITIALIZATION_END
+INIT_SCRIPTABLE_FUNCTION(void, set_float, const float&)
+INIT_SCRIPTABLE_FUNCTION(float, get_float)
+INIT_SCRIPTABLE_FUNCTION(float&, get_float_ref)
+
+INIT_SCRIPTABLE_FUNCTION(void, set_string, const std::string&)
+INIT_SCRIPTABLE_FUNCTION(std::string, get_string)
+INIT_SCRIPTABLE_FUNCTION(std::string&, get_string_ref)
+
+INIT_SCRIPTABLE_FUNCTION(void, set_bool, const bool&)
+INIT_SCRIPTABLE_FUNCTION(bool, get_bool)
+INIT_SCRIPTABLE_FUNCTION(bool&, get_bool_ref)
 
 SCRIPTABLE_CLASS_END
 
@@ -107,4 +117,32 @@ void main()
 
     script->run();
     delete script;
+}
+
+INIT_TEST(Script_Test__Int_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    int var;
+    var.set(10);
+    var.add(5);
+    var.subtract(3);
+    var.multiply(50);
+    var.divide(10);
+    var.mod(7);
+
+    helper.set_int(var);
+}
+
+)");
+
+    Basic_Types_Test_Helper helper;
+    script->set_context_object("Basic_Types_Test_Helper", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(helper.get_int(), 4);
 }

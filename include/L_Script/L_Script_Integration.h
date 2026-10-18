@@ -19,6 +19,18 @@ namespace LScript
 
 
     template <typename _Owner_Type, typename _Return_Type, typename... _Arg_Types>
+    struct Member_Function_Type_Extractor
+    {
+        using Type = _Return_Type(_Owner_Type::*)(_Arg_Types...);
+    };
+    template <typename _Owner_Type, typename _Return_Type, typename... _Arg_Types>
+    Member_Function_Type_Extractor<_Owner_Type, _Return_Type, _Arg_Types...> __construct_member_function_type_extractor(const LST::Arguments_Container<_Arg_Types...>&)
+    {
+        return Member_Function_Type_Extractor<_Owner_Type, _Return_Type, _Arg_Types...>();
+    }
+
+
+    template <typename _Owner_Type, typename _Return_Type, typename... _Arg_Types>
     LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(_Owner_Type::*_func)(_Arg_Types...))
     {
         return LST::Arguments_Container<_Arg_Types...>();
