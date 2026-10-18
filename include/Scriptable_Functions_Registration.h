@@ -31,32 +31,14 @@ SCRIPTABLE_CLASS_END;
 //      --------------------------------------------
 
 
-#define SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN \
+#define INIT_SCRIPTABLE_FUNCTION(_RETURN_TYPE, _FUNCTION_NAME, ...) \
     { \
-        LDS::Vector<std::string> arguments_types;
-
-#define SCRIPTABLE_FUNCTION_RETURN_TYPE(TYPE) \
-        std::string return_type_str = #TYPE;
-
-#define SCRIPTABLE_FUNCTION_NAME(FUNCTION_NAME) \
-        auto member_function = &Registered_Type::FUNCTION_NAME; \
+        std::string return_type_str = #_RETURN_TYPE; \
+        auto member_function = &Registered_Type::_FUNCTION_NAME; \
         using Member_Function_Type = decltype(member_function); \
-        std::string member_function_name = #FUNCTION_NAME; \
-        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) );
-
-#define SCRIPTABLE_FUNCTION_NAME_RENAMED(FUNCTION_NAME, FUNCTION_NAME_STR) \
-        auto member_function = &Registered_Type::FUNCTION_NAME; \
-        using Member_Function_Type = decltype(member_function); \
-        std::string member_function_name = FUNCTION_NAME_STR; \
-        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) );
-
-#define SCRIPTABLE_FUNCTION_ARG(TYPE) \
-        { \
-            const std::string& default_type_name = #TYPE; \
-            arguments_types.push(default_type_name); \
-        }
-
-#define SCRIPTABLE_FUNCTION_INITIALIZATION_END \
+        std::string member_function_name = #_FUNCTION_NAME; \
+        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
+        LDS::Vector<std::string> arguments_types = LScript::__construct_args_string_vec(#__VA_ARGS__); \
         LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
     }
 

@@ -14,6 +14,10 @@
 namespace LScript
 {
 
+    std::string __extract_type(const std::string& _raw_type);
+    LDS::Vector<std::string> __construct_args_string_vec(const std::string& _combined_types);
+
+
     template <typename _Owner_Type, typename _Return_Type, typename... _Arg_Types>
     LST::Arguments_Container<_Arg_Types...> __construct_args_container(_Return_Type(_Owner_Type::*_func)(_Arg_Types...))
     {
@@ -25,6 +29,7 @@ namespace LScript
     {
         return LST::Arguments_Container<_Arg_Types...>();
     }
+
 
     template <typename _Return_Type>
     class __Calling_Function_Construction_Helper
@@ -101,7 +106,7 @@ namespace LScript
 
                 LScript::Variable_Weak_Container* return_container = new LScript::Variable_Weak_Container;
                 return_container->set_type(default_return_type_name);
-                return_container->set_data(&return_value);
+                return_container->set_data( (void*)(&return_value) );
 
                 return return_container;
             };

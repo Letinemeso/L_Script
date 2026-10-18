@@ -25,6 +25,8 @@ public:
     bool var_bool;
 
 public:
+    const std::string& test_func(const int& _ass, const std::string& _bass, unsigned int& _karass, const float _brass) { return var_string; }
+
     void set_int(const int& _value) { var_int = _value; }
     int get_int() { return var_int; }
     int& get_int_ref() { return var_int; }
@@ -50,11 +52,15 @@ public:
 
 SCRIPTABLE_CLASS_BEGIN(Basic_Types_Test_Helper)
 
-SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN
-SCRIPTABLE_FUNCTION_RETURN_TYPE(void)
-SCRIPTABLE_FUNCTION_NAME(set_int)
-SCRIPTABLE_FUNCTION_ARG(int)
-SCRIPTABLE_FUNCTION_INITIALIZATION_END
+INIT_SCRIPTABLE_FUNCTION(const std::string&, test_func, const int&, const std::string&, unsigned int&, const float)
+
+INIT_SCRIPTABLE_FUNCTION(void, set_int, int)
+
+// SCRIPTABLE_FUNCTION_INITIALIZATION_BEGIN
+// SCRIPTABLE_FUNCTION_RETURN_TYPE(void)
+// SCRIPTABLE_FUNCTION_NAME(set_int)
+// SCRIPTABLE_FUNCTION_ARG(int)
+// SCRIPTABLE_FUNCTION_INITIALIZATION_END
 
 SCRIPTABLE_CLASS_END
 

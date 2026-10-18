@@ -32,7 +32,7 @@ namespace LScript
         public:
             L_Script_Registration_Helper_Typed(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
                                                LDS::Vector<std::string>&& _arg_types, _Member_Function_Type _function_ptr)
-                : m_owner_class_name(_owner_class_name), m_return_type_name(_return_type), m_member_function_name(_member_function_name)
+                : m_owner_class_name(_owner_class_name), m_return_type_name( __extract_type(_return_type) ), m_member_function_name(_member_function_name)
                 , m_arg_types(LST::move(_arg_types)), m_function_ptr(_function_ptr)
             { }
 
