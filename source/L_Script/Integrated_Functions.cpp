@@ -1295,14 +1295,39 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+        {
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
 
-                                           *this_raw_data %= *value_raw_data;
+            *this_raw_data %= *value_raw_data;
 
-                                           return nullptr;
-                                       });
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function("uint", "mod", function);
+    }
+
+    //  mod(int)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"uint", "this", true});
+        arguments_data.push({"int", "_value", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([function]()->Variable*
+        {
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
+            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+
+            *this_raw_data %= *value_raw_data;
+
+            return nullptr;
+        });
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "mod", function);

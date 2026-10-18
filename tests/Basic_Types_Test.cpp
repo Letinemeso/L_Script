@@ -146,3 +146,31 @@ void main()
 
     EXPECT_EQUAL(helper.get_int(), 4);
 }
+
+INIT_TEST(Script_Test__Unsigned_Int_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    uint var;
+    var.set(10);
+    var.add(5);
+    var.subtract(3);
+    var.multiply(50);
+    var.divide(10);
+    var.mod(7);
+
+    helper.set_uint(var);
+}
+
+)");
+
+    Basic_Types_Test_Helper helper;
+    script->set_context_object("Basic_Types_Test_Helper", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(helper.get_uint(), 4);
+}
