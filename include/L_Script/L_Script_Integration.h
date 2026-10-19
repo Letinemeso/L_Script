@@ -98,6 +98,7 @@ namespace LScript
                 LScript::Variable_Weak_Container* return_container = new LScript::Variable_Weak_Container;
                 return_container->set_type(default_return_type_name);
                 return_container->set_data(&return_value);
+                return_container->mark_temporary(true);
 
                 return return_container;
             };
@@ -119,6 +120,7 @@ namespace LScript
                 LScript::Variable_Weak_Container* return_container = new LScript::Variable_Weak_Container;
                 return_container->set_type(default_return_type_name);
                 return_container->set_data( (void*)(&return_value) );
+                return_container->mark_temporary(true);
 
                 return return_container;
             };

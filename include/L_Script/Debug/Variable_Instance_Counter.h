@@ -42,6 +42,8 @@ namespace LScript
         void count_variable(const Variable* _ptr);
         void remove_variable(const Variable* _ptr);
 
+        void log_registered_variables_ids() const;
+
     };
 
 }

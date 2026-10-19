@@ -63,5 +63,14 @@ Variable* Call_Global_Function::process()
         L_ASSERT(function);
     });
 
-    return function->call(arguments);
+    Variable* result = function->call(arguments);
+
+    for(unsigned int i = 0; i < arguments.size(); ++i)
+    {
+        Variable* arg = arguments[i];
+        if(arg->is_temporary())
+            delete arg;
+    }
+
+    return result;
 }

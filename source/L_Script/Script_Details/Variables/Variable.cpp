@@ -10,7 +10,7 @@ Variable::Variable()
 #ifdef L_DEBUG
     Variable_Instance_Counter::instance().count_variable(this);
 
-    // if(Variable_Instance_Counter::instance().get_variable_id(this) == 8)
+    // if(Variable_Instance_Counter::instance().get_variable_id(this) == 4)
     //     std::cout << "ass" << std::endl;
 
 #endif
