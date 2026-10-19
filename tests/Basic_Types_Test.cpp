@@ -1,16 +1,21 @@
 #include <Testing/Testing.h>
 
+#include <Stuff/Math_Stuff.h>
+
 #include <L_Script/L_Script.h>
 #include <L_Script/Debug/Variable_Instance_Counter.h>
 #include <Scriptable_Functions_Registration.h>
 
 
-LScript::L_Script* __construct_script(const std::string& _source)
+namespace
 {
-    LScript::L_Script_Stub stub;
-    stub.source_code = _source;
+    LScript::L_Script* __construct_script(const std::string& _source)
+    {
+        LScript::L_Script_Stub stub;
+        stub.source_code = _source;
 
-    return LScript::L_Script_Stub::construct_from(&stub);
+        return LScript::L_Script_Stub::construct_from(&stub);
+    }
 }
 
 
@@ -144,6 +149,8 @@ void main()
     script->run();
     delete script;
 
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
     EXPECT_EQUAL(helper.get_int(), 4);
 }
 
@@ -172,5 +179,36 @@ void main()
     script->run();
     delete script;
 
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
     EXPECT_EQUAL(helper.get_uint(), 4);
+}
+
+INIT_TEST(Script_Test__Float_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    float var;
+    var.set(10.0);
+    var.add(5.0);
+    var.subtract(3.0);
+    var.multiply(50.0);
+    var.divide(0.3);
+
+    helper.set_float(var);
+}
+
+)");
+
+    Basic_Types_Test_Helper helper;
+    script->set_context_object("Basic_Types_Test_Helper", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL( LST::Math::floats_are_equal(helper.get_float(), 2000.0f, 0.01f), true );
 }

@@ -45,8 +45,12 @@ bool While_Operation::M_condition_met()
         L_ASSERT(false);
     });
 
-    bool* result_as_bool = (bool*)result_variable->data();
-    return *result_as_bool;
+    bool result_as_bool = *(bool*)result_variable->data();
+
+    if(result_variable->is_temporary())
+        delete result_variable;
+
+    return result_as_bool;
 }
 
 

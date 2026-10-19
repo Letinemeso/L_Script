@@ -2451,19 +2451,14 @@ void Integrated_Functions::M_register_default_bool_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
         {
-            Context& context = function->compound_statement().context();
-
             bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
 
-            Variable_Container* inverted_container = new Variable_Container;
-            context.add_variable("inverted_this", inverted_container);
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_var = *(bool*)return_container->data();
 
-            bool* new_bool_data = new bool;
-            *new_bool_data = !*this_raw_data;
-            inverted_container->set_type("bool");
-            inverted_container->set_data(new_bool_data);
+            return_var = !*this_raw_data;
 
-            return inverted_container;
+            return return_container;
         });
         function->compound_statement().add_operation(operation);
 
@@ -2483,19 +2478,15 @@ void Integrated_Functions::M_register_default_bool_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
         {
-            Context& context = function->compound_statement().context();
-
             bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
-            Variable_Container* result_container = new Variable_Container;
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_var = *(bool*)return_container->data();
 
-            bool* new_bool_data = new bool;
-            *new_bool_data = *this_raw_data && *value_raw_data;
-            result_container->set_type("bool");
-            result_container->set_data(new_bool_data);
+            return_var = *this_raw_data && *value_raw_data;
 
-            return result_container;
+            return return_container;
         });
         function->compound_statement().add_operation(operation);
 
@@ -2515,19 +2506,15 @@ void Integrated_Functions::M_register_default_bool_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
         {
-            Context& context = function->compound_statement().context();
-
             bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
-            Variable_Container* result_container = new Variable_Container;
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_var = *(bool*)return_container->data();
 
-            bool* new_bool_data = new bool;
-            *new_bool_data = *this_raw_data || *value_raw_data;
-            result_container->set_type("bool");
-            result_container->set_data(new_bool_data);
+            return_var = *this_raw_data || *value_raw_data;
 
-            return result_container;
+            return return_container;
         });
         function->compound_statement().add_operation(operation);
 
@@ -2547,19 +2534,15 @@ void Integrated_Functions::M_register_default_bool_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([function]()->Variable*
         {
-            Context& context = function->compound_statement().context();
-
             bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
             bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
 
-            Variable_Container* result_container = new Variable_Container;
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_var = *(bool*)return_container->data();
 
-            bool* new_bool_data = new bool;
-            *new_bool_data = *this_raw_data == *value_raw_data;
-            result_container->set_type("bool");
-            result_container->set_data(new_bool_data);
+            return_var = *this_raw_data == *value_raw_data;
 
-            return result_container;
+            return return_container;
         });
         function->compound_statement().add_operation(operation);
 

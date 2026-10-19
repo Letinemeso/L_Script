@@ -70,8 +70,12 @@ bool If_Operation::M_check_condition(Operation* _condition) const
         L_ASSERT(false);
     });
 
-    bool* result_as_bool = (bool*)condition_result->data();
-    return *result_as_bool;
+    bool result_as_bool = *(bool*)condition_result->data();
+
+    if(condition_result->is_temporary())
+        delete condition_result;
+
+    return result_as_bool;
 }
 
 
