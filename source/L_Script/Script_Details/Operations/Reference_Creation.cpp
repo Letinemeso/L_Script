@@ -2,7 +2,7 @@
 
 #include <Type_Manager.h>
 
-#include <L_Script/Script_Details/Variables/Variable_Weak_Container.h>
+#include <L_Script/Script_Details/Variables/Variable_Reference.h>
 
 using namespace LScript;
 
@@ -24,7 +24,7 @@ Variable* Reference_Creation::process()
         L_ASSERT(false);
     });
 
-    Variable_Weak_Container* variable = new Variable_Weak_Container;
+    Variable_Reference* variable = new Variable_Reference;
     variable->set_bindable(true);
     variable->set_type(m_variable_type);
 

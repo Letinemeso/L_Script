@@ -1,6 +1,6 @@
 #include <L_Script/Script_Details/Function.h>
 
-#include <L_Script/Script_Details/Variables/Variable_Reference.h>
+#include <L_Script/Script_Details/Variables/Variable_Alias.h>
 
 using namespace LScript;
 
@@ -32,7 +32,7 @@ Variable* Function::call(const Arguments& _args)
         Variable* variable = nullptr;
         if(m_expected_arguments_data[i].reference)
         {
-            Variable_Reference* variable_reference = new Variable_Reference;
+            Variable_Alias* variable_reference = new Variable_Alias;
             variable_reference->set_referenced_variable(parameter);
             variable = variable_reference;
         }

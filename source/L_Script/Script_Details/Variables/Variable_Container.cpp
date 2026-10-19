@@ -37,7 +37,7 @@ void Variable_Container::set_data(void* _data)
     m_data = _data;
 }
 
-void Variable_Container::assign(Variable* _other)
+void Variable_Container::assign(const Variable* _other)
 {
     if(m_data)
         LV::Type_Manager::clear(m_type, m_data);
@@ -76,4 +76,12 @@ void* Variable_Container::data() const
 bool Variable_Container::bindable() const
 {
     return false;
+}
+
+
+Variable* Variable_Container::construct_copy() const
+{
+    Variable_Container* result = new Variable_Container;
+    result->assign(this);
+    return result;
 }

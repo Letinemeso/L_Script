@@ -7,8 +7,8 @@
 #include <L_Script/Script_Details/Operations/Custom_Operation.h>
 #include <L_Script/Integrated_Functions.h>
 #include <L_Script/Script_Details/Variables/Variable_Container.h>
+#include <L_Script/Script_Details/Variables/Variable_Alias.h>
 #include <L_Script/Script_Details/Variables/Variable_Reference.h>
-#include <L_Script/Script_Details/Variables/Variable_Weak_Container.h>
 
 
 namespace LScript
@@ -95,7 +95,7 @@ namespace LScript
                 _Return_Type& return_value = _args_container.call_with_args(*_owner_object, _func);
                 std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
 
-                LScript::Variable_Weak_Container* return_container = new LScript::Variable_Weak_Container;
+                LScript::Variable_Reference* return_container = new LScript::Variable_Reference;
                 return_container->set_type(default_return_type_name);
                 return_container->set_data(&return_value);
                 return_container->mark_temporary(true);
@@ -117,7 +117,7 @@ namespace LScript
                 const _Return_Type& return_value = _args_container.call_with_args(*_owner_object, _func);
                 std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
 
-                LScript::Variable_Weak_Container* return_container = new LScript::Variable_Weak_Container;
+                LScript::Variable_Reference* return_container = new LScript::Variable_Reference;
                 return_container->set_type(default_return_type_name);
                 return_container->set_data( (void*)(&return_value) );
                 return_container->mark_temporary(true);

@@ -24,12 +24,14 @@ namespace LScript
     public:
         virtual void reset() = 0;
         virtual void set_data(void* _data) = 0;
-        virtual void assign(Variable* _what) = 0;
+        virtual void assign(const Variable* _what) = 0;
 
     public:
         virtual const std::string& type() const = 0;
         virtual void* data() const = 0;
         virtual bool bindable() const = 0;
+
+        virtual Variable* construct_copy() const = 0;
 
     };
 

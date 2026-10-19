@@ -1,7 +1,7 @@
 #include <L_Script/L_Script.h>
 
 #include <L_Script/Compiler.h>
-#include <L_Script/Script_Details/Variables/Variable_Weak_Container.h>
+#include <L_Script/Script_Details/Variables/Variable_Reference.h>
 
 using namespace LScript;
 
@@ -27,7 +27,7 @@ void L_Script::set_context_object(const std::string& _type_as_string, const std:
         delete variable;
     }
 
-    Variable_Weak_Container* pointer_variable = new Variable_Weak_Container;
+    Variable_Reference* pointer_variable = new Variable_Reference;
     pointer_variable->set_type(_type_as_string);
     pointer_variable->set_data(_ptr);
 

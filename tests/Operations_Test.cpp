@@ -124,33 +124,65 @@ void main()
     EXPECT_EQUAL(helper.get_bool(), false);
 }
 
-// INIT_TEST(Script_Test__If_With_Complex_Condition)
-// {
-//     LScript::L_Script* script = __construct_script(R"(
+INIT_TEST(Script_Test__If_With_Complex_Condition)
+{
+    LScript::L_Script* script = __construct_script(R"(
 
-// void main()
-// {
-//     bool var;
-//     var.set(true);
+void main()
+{
+    bool var;
+    var.set(true);
 
-//     if(var.equals(true).equals(false))
-//     {
-//         helper.set_bool(true);
-//     }
-// }
+    if(var.equals(true).inverted().equals(false))
+    {
+        helper.set_bool(true);
+    }
+}
 
-// )");
+)");
 
-//     Operations_Test_Helper helper;
-//     script->set_context_object("Operations_Test_Helper", "helper", &helper);
+    Operations_Test_Helper helper;
+    script->set_context_object("Operations_Test_Helper", "helper", &helper);
 
-//     script->run();
-//     delete script;
+    script->run();
+    delete script;
 
-//     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
 
-//     EXPECT_EQUAL(helper.get_bool(), true);
-// }
+    EXPECT_EQUAL(helper.get_bool(), true);
+}
+
+INIT_TEST(Script_Test__If_With_Complex_Condition_With_Function)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+int get_int_123()
+{
+    int result;
+    result.set(123);
+    return result;
+}
+
+void main()
+{
+    if(get_int_123().equals(123))
+    {
+        helper.set_bool(true);
+    }
+}
+
+)");
+
+    Operations_Test_Helper helper;
+    script->set_context_object("Operations_Test_Helper", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL(helper.get_bool(), true);
+}
 
 INIT_TEST(Script_Test__If_Inverted)
 {

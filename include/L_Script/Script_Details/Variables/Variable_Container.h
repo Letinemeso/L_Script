@@ -23,7 +23,7 @@ namespace LScript
     public:
         void reset() override;
         void set_data(void* _data) override;
-        void assign(Variable* _other) override;
+        void assign(const Variable* _other) override;
 
         void set_type(const std::string& _type);
 
@@ -31,6 +31,8 @@ namespace LScript
         const std::string& type() const override;
         void* data() const override;
         bool bindable() const override;
+
+        [[nodiscard]] Variable* construct_copy() const override;
 
     };
 

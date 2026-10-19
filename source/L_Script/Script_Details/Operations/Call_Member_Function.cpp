@@ -90,7 +90,7 @@ Variable* Call_Member_Function::process()
 
     Variable* result = function->call(arguments);
 
-    for(unsigned int i = 1; i < arguments.size(); ++i)      //  deleting from 1 because 0 is "this"
+    for(unsigned int i = 0; i < arguments.size(); ++i)
     {
         Variable* arg = arguments[i];
         if(arg->is_temporary())

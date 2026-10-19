@@ -13,6 +13,7 @@
 #include <L_Script/Script_Details/Operations/Custom_Operation.h>
 #include <L_Script/Script_Details/Operations/If_Operation.h>
 #include <L_Script/Script_Details/Operations/While_Operation.h>
+#include <L_Script/Script_Details/Operations/Return_Operation.h>
 
 using namespace LScript;
 
@@ -291,6 +292,21 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
 }
 
 
+[[nodiscard]] Operation* Compiler::M_construct_variable_extraction_operation(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+{
+    Extract_Variable* operation = new Extract_Variable;
+    operation->set_context(&_context);
+    operation->set_variable_name(_name);
+
+    L_DEBUG_FUNC_NOARG([&]()
+    {
+        operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+    });
+
+    return operation;
+}
+
+
 LDS::Vector<Function::Argument_Data> Compiler::M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const
 {
     LDS::Vector<Function::Argument_Data> result;
@@ -389,9 +405,14 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
         M_print_debug_error_message(expression_goal != Expression_Goal::Unknown, _source, after_first_word_offset, Unlimited_Size, "Could not parse an expression");
 
         if(expression_goal == Expression_Goal::Member_Access)
-            parse_result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, _max_size);
+        {
+            Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, _max_size);
+            parse_result = M_parse_member_access(_context, variable_extractor, _source, after_first_word_offset, _max_size);
+        }
         else if(expression_goal == Expression_Goal::Function_Call)
+        {
             parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, _max_size);
+        }
 
         parse_result.offset_after = M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);
     }
@@ -459,7 +480,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Context& _context, Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     M_print_debug_error_message(_source[_offset] == '.', _source, _offset, 1, "Expected \".\"");
 
@@ -472,28 +493,24 @@ Compiler::Operation_Parse_Result Compiler::M_parse_operation_with_variable(Conte
 
     LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, args_borders.begin, args_borders.end);
 
-    Extract_Variable* extract_variable_operation = new Extract_Variable;
-    extract_variable_operation->set_context(&_context);
-    extract_variable_operation->set_variable_name(_name);
+    Call_Member_Function* operation = new Call_Member_Function;
+    operation->set_context(&_context);
+    operation->set_function_name(operation_name);
+    operation->set_owner_object_getter_operation(_variable_extractor);
+    operation->set_arguments_getter_operations(LST::move(argument_getters));
 
     L_DEBUG_FUNC_NOARG([&]()
     {
-        extract_variable_operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
+        operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
     });
 
-    Call_Member_Function* call_member_function_operation = new Call_Member_Function;
-    call_member_function_operation->set_context(&_context);
-    call_member_function_operation->set_function_name(operation_name);
-    call_member_function_operation->set_owner_object_getter_operation(extract_variable_operation);
-    call_member_function_operation->set_arguments_getter_operations(LST::move(argument_getters));
-
-    L_DEBUG_FUNC_NOARG([&]()
-    {
-        call_member_function_operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
-    });
+    unsigned int symbol_after_args_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, args_borders.end + 1, _max_size);
+    L_ASSERT(symbol_after_args_index < _max_size);
+    if( _source[symbol_after_args_index] == '.' )
+        return M_parse_member_access(_context, operation, _source, symbol_after_args_index, _max_size);
 
     Operation_Parse_Result result;
-    result.operation = call_member_function_operation;
+    result.operation = operation;
     result.offset_after = args_borders.end + 1;
     return result;
 }
@@ -513,6 +530,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
     {
         operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
     });
+
+    unsigned int symbol_after_args_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, args_borders.end + 1, _max_size);
+    L_ASSERT(symbol_after_args_index < _max_size);
+    if( _source[symbol_after_args_index] == '.' )
+        return M_parse_member_access(_context, operation, _source, symbol_after_args_index, _max_size);
 
     Operation_Parse_Result result;
     result.operation = operation;
@@ -549,20 +571,13 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
 
             if(expression_goal == Expression_Goal::Unknown)
             {
-                Extract_Variable* operation = new Extract_Variable;
-                operation->set_context(&_context);
-                operation->set_variable_name(argument);
-
-                L_DEBUG_FUNC_NOARG([&]()
-                {
-                    operation->set_debug_info(M_parse_line(_source, 0), M_calculate_line_number(_source, 0));
-                });
-
+                Operation* operation = M_construct_variable_extraction_operation(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(operation);
             }
             else if(expression_goal == Expression_Goal::Member_Access)
             {
-                Operation_Parse_Result parse_result = M_parse_operation_with_variable(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation_Parse_Result parse_result = M_parse_member_access(_context, variable_extractor, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(parse_result.operation);
 
                 L_DEBUG_FUNC_NOARG([&]()
@@ -687,22 +702,21 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
     unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
     M_print_debug_error_message(offset < _max_size, _source, offset, 1, "Expected expression or \";\"");
 
+    Return_Operation* return_operation = new Return_Operation;
+
+    Operation_Parse_Result result;
+    result.operation = return_operation;
+
     if(_source[offset] == ';' && _expected_return_type == Void_Type_Name)
     {
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](){ return nullptr; });     //  do nothing, just return
-        operation->set_stop_required(true);
-
-        Operation_Parse_Result result;
         result.offset_after = offset + 1;
-        result.operation = operation;
-        return result;
     }
-
-    Operation_Parse_Result result = M_parse_subexpression(_context, _source, offset, _max_size);
-    result.offset_after = M_skip_past_semicolon(_source, result.offset_after, _max_size);
-
-    result.operation->set_stop_required(true);
+    else
+    {
+        Operation_Parse_Result subexpression_result = M_parse_subexpression(_context, _source, offset, _max_size);
+        result.offset_after = M_skip_past_semicolon(_source, subexpression_result.offset_after, _max_size);
+        return_operation->set_operation(subexpression_result.operation);
+    }
 
     return result;
 }
@@ -714,7 +728,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     If_Operation* if_operation = new If_Operation;
     result.operation = if_operation;
 
-    unsigned int conditions_amount = 0;
     while(true)
     {
         String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
@@ -746,8 +759,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
             break;
 
         _offset = M_skip_past_first_word(_source, _offset, _max_size);
-
-        ++conditions_amount;
     }
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, _offset, _max_size);
@@ -809,21 +820,13 @@ Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _conte
 
         if(expression_goal == Expression_Goal::Unknown)
         {
-            Extract_Variable* operation = new Extract_Variable;
-            operation->set_context(&_context);
-            operation->set_variable_name(first_word);
-
-            L_DEBUG_FUNC_NOARG([&]()
-            {
-                operation->set_debug_info(M_parse_line(_source, _offset), M_calculate_line_number(_source, _offset));
-            });
-
-            result.operation = operation;
+            result.operation = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
             result.offset_after = after_first_word_offset;
         }
         else if(expression_goal == Expression_Goal::Member_Access)
         {
-            result = M_parse_operation_with_variable(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            result = M_parse_member_access(_context, variable_extractor, _source, after_first_word_offset, Unlimited_Size);
         }
         else if(expression_goal == Expression_Goal::Function_Call)
         {
