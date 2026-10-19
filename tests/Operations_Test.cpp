@@ -124,6 +124,63 @@ void main()
     EXPECT_EQUAL(helper.get_bool(), false);
 }
 
+// INIT_TEST(Script_Test__If_With_Complex_Condition)
+// {
+//     LScript::L_Script* script = __construct_script(R"(
+
+// void main()
+// {
+//     bool var;
+//     var.set(true);
+
+//     if(var.equals(true).equals(false))
+//     {
+//         helper.set_bool(true);
+//     }
+// }
+
+// )");
+
+//     Operations_Test_Helper helper;
+//     script->set_context_object("Operations_Test_Helper", "helper", &helper);
+
+//     script->run();
+//     delete script;
+
+//     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+//     EXPECT_EQUAL(helper.get_bool(), true);
+// }
+
+INIT_TEST(Script_Test__If_Inverted)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    bool var;
+    var.set(false);
+    var.set(var.inverted());
+
+    if(var.equals(true))
+    {
+        helper.set_bool(true);
+    }
+}
+
+)");
+
+    Operations_Test_Helper helper;
+    script->set_context_object("Operations_Test_Helper", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL(helper.get_bool(), true);
+}
+
 INIT_TEST(Script_Test__While)
 {
     LScript::L_Script* script = __construct_script(R"(
