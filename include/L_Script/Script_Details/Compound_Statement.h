@@ -13,8 +13,6 @@ namespace LScript
     class Compound_Statement
     {
     private:
-        Context m_context;
-
         using Operations_List = LDS::List<Operation*>;
         Operations_List m_operations;
 
@@ -28,9 +26,6 @@ namespace LScript
         ~Compound_Statement();
 
     public:
-        inline Context& context() { return m_context; }
-        inline const Context& context() const { return m_context; }
-
         inline bool stop_required() const { return m_stop_required; }
 
     public:
@@ -38,7 +33,7 @@ namespace LScript
         void clear_operations();
 
     public:
-        [[nodiscard]] Variable* process();
+        [[nodiscard]] Variable* process(Context* _context);
 
     };
 

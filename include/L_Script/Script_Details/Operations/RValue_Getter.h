@@ -17,7 +17,7 @@ namespace LScript
         inline const Variable_Container& variable() const { return m_variable; }
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

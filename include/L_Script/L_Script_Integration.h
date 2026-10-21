@@ -167,18 +167,18 @@ namespace LScript
         LScript::Function* function = new LScript::Function;
         function->set_return_type(_return_type == "void" ? _return_type : LV::Type_Manager::get_default_type_name(_return_type));
         LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation;
-        call_scriptable_function_operation->set_operation_logic([_owner_name, function, _function, construct_result]()
+        call_scriptable_function_operation->set_operation_logic([_owner_name, _function, construct_result](Context* _context)
         {
             Arguments_Container_Type args_container;
             for(unsigned int i = 0; i < args_container.arguments_amount(); ++i)
             {
                 void*& arg_raw = args_container.get_arg_pointer(i);
-                LScript::Variable* variable = function->compound_statement().context().get_variable("_" + std::to_string(i));
+                LScript::Variable* variable = _context->get_variable("_" + std::to_string(i));
                 L_ASSERT(variable);
                 void* variable_raw = (void*)variable->data();
                 arg_raw = variable_raw;
             }
-            LScript::Variable* context_object_variable = function->compound_statement().context().get_variable("this");
+            LScript::Variable* context_object_variable = _context->get_variable("this");
             L_ASSERT(context_object_variable);
             L_ASSERT(_owner_name == context_object_variable->type());
             _Owner_Type* context_object = (_Owner_Type*)context_object_variable->data();

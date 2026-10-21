@@ -41,7 +41,7 @@ namespace LScript
         void set_arguments_getter_operations(Arguments_Getter_Operations&& _operations);
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

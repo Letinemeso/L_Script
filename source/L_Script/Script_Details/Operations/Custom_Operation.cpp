@@ -3,9 +3,9 @@
 using namespace LScript;
 
 
-Variable* Custom_Operation::process()
+Variable* Custom_Operation::process(Context* _context)
 {
     L_ASSERT(m_operation_logic);
 
-    return m_operation_logic();
+    return m_operation_logic(_context);
 }

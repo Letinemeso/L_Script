@@ -17,11 +17,13 @@ Function::~Function()
 
 
 
-Variable* Function::call(const Arguments& _args)
+Variable* Function::call(Context* _context, const Arguments& _args)
 {
     L_ASSERT(_args.size() == m_expected_arguments_data.size());
 
     m_should_stop_execution = false;
+
+    Context local_context(_context);
 
     for(unsigned int i = 0; i < _args.size(); ++i)
     {
@@ -42,10 +44,10 @@ Variable* Function::call(const Arguments& _args)
             variable->assign(parameter);
         }
 
-        m_compound_statement.context().add_variable(m_expected_arguments_data[i].name, variable);
+        local_context.add_variable(m_expected_arguments_data[i].name, variable);
     }
 
-    Variable* result = m_compound_statement.process();
+    Variable* result = m_compound_statement.process(&local_context);
     L_ASSERT( (!result && m_return_type == "void") || (result && (result->type() == m_return_type)) );
 
     return result;

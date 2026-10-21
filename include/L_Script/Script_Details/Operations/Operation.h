@@ -1,6 +1,7 @@
 #pragma once
 
 #include <L_Script/Script_Details/Variables/Variable.h>
+#include <L_Script/Script_Details/Context.h>
 
 
 namespace LScript
@@ -19,7 +20,7 @@ namespace LScript
         inline bool stop_required() const { return m_stop_required; }
 
     public:
-        [[nodiscard]] virtual Variable* process() = 0;
+        [[nodiscard]] virtual Variable* process(Context* _context) = 0;
 
     };
 

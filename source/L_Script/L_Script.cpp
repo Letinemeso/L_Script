@@ -66,7 +66,7 @@ void L_Script::run()
     Function* main_func = get_function("main");
     L_ASSERT(main_func);
 
-    Variable* main_result = main_func->call({});
+    Variable* main_result = main_func->call(&m_global_context, {});
     L_ASSERT(!main_result);
 }
 

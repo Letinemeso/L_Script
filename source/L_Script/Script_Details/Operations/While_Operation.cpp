@@ -15,11 +15,11 @@ While_Operation::~While_Operation()
 
 
 
-bool While_Operation::M_condition_met()
+bool While_Operation::M_condition_met(Context* _context)
 {
     L_ASSERT(m_condition_operation);
 
-    Variable* result_variable = m_condition_operation->process();
+    Variable* result_variable = m_condition_operation->process(_context);
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -55,15 +55,16 @@ bool While_Operation::M_condition_met()
 
 
 
-Variable* While_Operation::process()
+Variable* While_Operation::process(Context* _context)
 {
     set_stop_required(false);
 
     Variable* result = nullptr;
 
-    while(M_condition_met())
+    while(M_condition_met(_context))
     {
-        result = m_cycle_compound_statement.process();
+        Context local_context(_context);
+        result = m_cycle_compound_statement.process(&local_context);
         if(!m_cycle_compound_statement.stop_required())
             continue;
 

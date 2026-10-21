@@ -7,13 +7,11 @@
 using namespace LScript;
 
 
-Variable* Variable_Creation::process()
+Variable* Variable_Creation::process(Context* _context)
 {
-    L_ASSERT(m_context);
-
     L_DEBUG_FUNC_NOARG([&]()
     {
-        if(!m_context->get_local_variable(m_variable_name))
+        if(!_context->get_local_variable(m_variable_name))
             return;
 
         L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
@@ -30,7 +28,7 @@ Variable* Variable_Creation::process()
     LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(m_variable_type, 1);
     variable->set_data(allocate_result.ptr);
 
-    m_context->add_variable(m_variable_name, variable);
+    _context->add_variable(m_variable_name, variable);
 
     return nullptr;
 }

@@ -247,20 +247,22 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     if(expression_goal == Expression_Goal::Function_Declaration)
         return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset, _max_size);
     else if(expression_goal == Expression_Goal::Variable_Declaration)
-        return M_parse_global_variable_declaration(m_script_target->global_context(), _source, first_word, second_word, after_second_word_offset);
+        return M_parse_global_variable_declaration(_source, first_word, second_word, after_second_word_offset);
 
     return Unlimited_Size;
 }
 
-unsigned int Compiler::M_parse_global_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
+unsigned int Compiler::M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
 {
+    Context& global_context = m_script_target->global_context();
+
     M_print_debug_error_message(_type != Void_Type_Name, _source, _offset_after_name, Unlimited_Size, "Unable to create variable with type \"void\"");
-    M_print_debug_error_message(_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
+    M_print_debug_error_message(global_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
 
     Variable_Container* variable = new Variable_Container;
     variable->set_type(_type);
 
-    _context.add_variable(_name, variable);
+    global_context.add_variable(_name, variable);
 
     unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset_after_name);
     M_print_debug_error_message(semicolon_index != Unlimited_Size, _source, _offset_after_name, 1, "Expected \";\"");
@@ -282,7 +284,6 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
     Function* function = new Function;
     function->set_return_type(_type);
     function->set_expected_arguments_data(arguments_data);
-    function->compound_statement().context().set_parent_context(&m_script_target->global_context());
 
     M_parse_compound_statement(function->compound_statement(), function->return_type(), _source, compound_statement_borders.begin, compound_statement_borders.end);
 
@@ -292,10 +293,9 @@ unsigned int Compiler::M_parse_function_declaration(const std::string& _source, 
 }
 
 
-[[nodiscard]] Operation* Compiler::M_construct_variable_extraction_operation(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+[[nodiscard]] Operation* Compiler::M_construct_variable_extraction_operation(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     Extract_Variable* operation = new Extract_Variable;
-    operation->set_context(&_context);
     operation->set_variable_name(_name);
 
     L_DEBUG_FUNC_NOARG([&]()
@@ -353,7 +353,7 @@ void Compiler::M_parse_compound_statement(Compound_Statement& _compound_statemen
     unsigned int offset = _begin;
     while(offset < _end)
     {
-        Operation_Parse_Result parse_result = M_parse_dynamic_expression(_compound_statement.context(), _owner_function_return_type, _source, offset, _end);
+        Operation_Parse_Result parse_result = M_parse_dynamic_expression(_owner_function_return_type, _source, offset, _end);
 
         if(!parse_result.operation)
             break;
@@ -363,7 +363,7 @@ void Compiler::M_parse_compound_statement(Compound_Statement& _compound_statemen
     }
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     if(_max_size == Unlimited_Size)
         _max_size = _source.size();
@@ -380,23 +380,23 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
 
     if(expression_type == Expression_Type::If)
     {
-        parse_result = M_parse_if(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_if(_owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::While)
     {
-        parse_result = M_parse_while(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_while(_owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Return)
     {
-        parse_result = M_parse_return(_context, _owner_function_return_type, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_return(_owner_function_return_type, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Type_Name)
     {
-        parse_result = M_parse_dynamic_declaration(_context, first_word, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_dynamic_declaration(first_word, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Reference_Declaration)
     {
-        parse_result = M_parse_reference_declaration(_context, first_word, _source, after_first_word_offset, _max_size);
+        parse_result = M_parse_reference_declaration(first_word, _source, after_first_word_offset, _max_size);
     }
     else if(expression_type == Expression_Type::Variable_Name)
     {
@@ -406,12 +406,12 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
 
         if(expression_goal == Expression_Goal::Member_Access)
         {
-            Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, _max_size);
-            parse_result = M_parse_member_access(_context, variable_extractor, _source, after_first_word_offset, _max_size);
+            Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, _source, after_first_word_offset, _max_size);
+            parse_result = M_parse_member_access(variable_extractor, _source, after_first_word_offset, _max_size);
         }
         else if(expression_goal == Expression_Goal::Function_Call)
         {
-            parse_result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, _max_size);
+            parse_result = M_parse_function_call(first_word, _source, after_first_word_offset, _max_size);
         }
 
         parse_result.offset_after = M_skip_past_semicolon(_source, parse_result.offset_after, _max_size);
@@ -422,7 +422,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_expression(Context& _
     return parse_result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_reference_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_reference_declaration(const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     const std::string& referenceless_type = _type.substr(0, _type.size() - 1);
 
@@ -437,7 +437,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_reference_declaration(Context
                                 _source, after_name_offset, 1, "Unable to declare a function inside a function");
 
     Reference_Creation* operation = new Reference_Creation;
-    operation->set_context(&_context);
     operation->set_variable_type(referenceless_type);
     operation->set_variable_name(name);
 
@@ -452,7 +451,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_reference_declaration(Context
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int name_offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset);
     unsigned int after_name_offset = M_skip_until_symbol_met(_source, Variable_Name_Symbols, false, name_offset);
@@ -465,7 +464,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
                                 _source, after_name_offset, 1, "Unable to declare a function inside a function");
 
     Variable_Creation* operation = new Variable_Creation;
-    operation->set_context(&_context);
     operation->set_variable_type(_type);
     operation->set_variable_name(name);
 
@@ -480,7 +478,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(Context& 
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Context& _context, Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     M_print_debug_error_message(_source[_offset] == '.', _source, _offset, 1, "Expected \".\"");
 
@@ -491,10 +489,9 @@ Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Context& _conte
 
     String_Borders args_borders = M_calculate_arguments_borders(_source, after_operation_offset, _max_size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, args_borders.begin, args_borders.end);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, args_borders.begin, args_borders.end);
 
     Call_Member_Function* operation = new Call_Member_Function;
-    operation->set_context(&_context);
     operation->set_function_name(operation_name);
     operation->set_owner_object_getter_operation(_variable_extractor);
     operation->set_arguments_getter_operations(LST::move(argument_getters));
@@ -507,7 +504,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Context& _conte
     unsigned int symbol_after_args_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, args_borders.end + 1, _max_size);
     L_ASSERT(symbol_after_args_index < _max_size);
     if( _source[symbol_after_args_index] == '.' )
-        return M_parse_member_access(_context, operation, _source, symbol_after_args_index, _max_size);
+        return M_parse_member_access(operation, _source, symbol_after_args_index, _max_size);
 
     Operation_Parse_Result result;
     result.operation = operation;
@@ -515,11 +512,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_member_access(Context& _conte
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_function_call(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
 
-    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_context, _source, args_borders.begin, args_borders.end);
+    LDS::Vector<Operation*> argument_getters = M_construct_argument_getter_operations(_source, args_borders.begin, args_borders.end);
 
     Call_Global_Function* operation = new Call_Global_Function;
     operation->set_function_name(_name);
@@ -534,7 +531,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
     unsigned int symbol_after_args_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, args_borders.end + 1, _max_size);
     L_ASSERT(symbol_after_args_index < _max_size);
     if( _source[symbol_after_args_index] == '.' )
-        return M_parse_member_access(_context, operation, _source, symbol_after_args_index, _max_size);
+        return M_parse_member_access(operation, _source, symbol_after_args_index, _max_size);
 
     Operation_Parse_Result result;
     result.operation = operation;
@@ -542,7 +539,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(Context& _conte
     return result;
 }
 
-LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
+LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
 {
     LDS::Vector<std::string> arguments = M_parse_passed_arguments(_source, _args_begin, _args_end);
 
@@ -571,13 +568,13 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
 
             if(expression_goal == Expression_Goal::Unknown)
             {
-                Operation* operation = M_construct_variable_extraction_operation(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation* operation = M_construct_variable_extraction_operation(first_word, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(operation);
             }
             else if(expression_goal == Expression_Goal::Member_Access)
             {
-                Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
-                Operation_Parse_Result parse_result = M_parse_member_access(_context, variable_extractor, argument, after_first_word_offset, Unlimited_Size);
+                Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation_Parse_Result parse_result = M_parse_member_access(variable_extractor, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(parse_result.operation);
 
                 L_DEBUG_FUNC_NOARG([&]()
@@ -588,7 +585,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(Context
             }
             else if(expression_goal == Expression_Goal::Function_Call)
             {
-                Operation_Parse_Result parse_result = M_parse_function_call(_context, first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation_Parse_Result parse_result = M_parse_function_call(first_word, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(parse_result.operation);
 
                 L_DEBUG_FUNC_NOARG([&]()
@@ -697,7 +694,7 @@ std::string Compiler::M_deduce_rvalue_type(const std::string& _rvalue) const
     return "";
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_return(const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     unsigned int offset = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset, _max_size);
     M_print_debug_error_message(offset < _max_size, _source, offset, 1, "Expected expression or \";\"");
@@ -713,7 +710,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
     }
     else
     {
-        Operation_Parse_Result subexpression_result = M_parse_subexpression(_context, _source, offset, _max_size);
+        Operation_Parse_Result subexpression_result = M_parse_subexpression(_source, offset, _max_size);
         result.offset_after = M_skip_past_semicolon(_source, subexpression_result.offset_after, _max_size);
         return_operation->set_operation(subexpression_result.operation);
     }
@@ -721,7 +718,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(Context& _context, con
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_if(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     Operation_Parse_Result result;
 
@@ -731,10 +728,9 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     while(true)
     {
         String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
-        Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
+        Operation_Parse_Result condition_parse_result = M_parse_subexpression(_source, args_borders.begin, args_borders.end);
 
         Compound_Statement* compound_statement = new Compound_Statement;
-        compound_statement->context().set_parent_context(&_context);
         String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
         M_parse_compound_statement(*compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
@@ -763,7 +759,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, _offset, _max_size);
     Compound_Statement* compound_statement = new Compound_Statement;
-    compound_statement->context().set_parent_context(&_context);
     M_parse_compound_statement(*compound_statement, _owner_function_return_type, _source, compound_statement_borders.begin, compound_statement_borders.end);
 
     if_operation->add_fail_case(compound_statement);
@@ -773,12 +768,11 @@ Compiler::Operation_Parse_Result Compiler::M_parse_if(Context& _context, const s
     return result;
 }
 
-Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_while(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     Operation_Parse_Result result;
 
     While_Operation* while_operation = new While_Operation;
-    while_operation->cycle_compound_statement().context().set_parent_context(&_context);
     result.operation = while_operation;
 
     L_DEBUG_FUNC_NOARG([&]()
@@ -787,7 +781,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, cons
     });
 
     String_Borders args_borders = M_calculate_arguments_borders(_source, _offset, _max_size);
-    Operation_Parse_Result condition_parse_result = M_parse_subexpression(_context, _source, args_borders.begin, args_borders.end);
+    Operation_Parse_Result condition_parse_result = M_parse_subexpression(_source, args_borders.begin, args_borders.end);
     while_operation->set_condition_operation(condition_parse_result.operation);
 
     String_Borders compound_statement_borders = M_calculate_compound_statement_borders(_source, args_borders.end + 1, _max_size);
@@ -798,7 +792,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_while(Context& _context, cons
 }
 
 
-Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const
+Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(const std::string& _source, unsigned int _offset, unsigned int _max_size) const
 {
     std::string first_word = M_parse_first_word(_source, _offset, _max_size);
     M_print_debug_error_message(first_word.size() > 0, _source, _offset, Unlimited_Size, "Trying to parse subexpression from empty string");
@@ -820,17 +814,17 @@ Compiler::Operation_Parse_Result Compiler::M_parse_subexpression(Context& _conte
 
         if(expression_goal == Expression_Goal::Unknown)
         {
-            result.operation = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            result.operation = M_construct_variable_extraction_operation(first_word, _source, after_first_word_offset, Unlimited_Size);
             result.offset_after = after_first_word_offset;
         }
         else if(expression_goal == Expression_Goal::Member_Access)
         {
-            Operation* variable_extractor = M_construct_variable_extraction_operation(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
-            result = M_parse_member_access(_context, variable_extractor, _source, after_first_word_offset, Unlimited_Size);
+            Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, _source, after_first_word_offset, Unlimited_Size);
+            result = M_parse_member_access(variable_extractor, _source, after_first_word_offset, Unlimited_Size);
         }
         else if(expression_goal == Expression_Goal::Function_Call)
         {
-            result = M_parse_function_call(_context, first_word, _source, after_first_word_offset, Unlimited_Size);
+            result = M_parse_function_call(first_word, _source, after_first_word_offset, Unlimited_Size);
         }
     }
 

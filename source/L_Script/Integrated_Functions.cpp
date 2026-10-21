@@ -10,9 +10,9 @@ using namespace LScript;
 namespace LScript
 {
     template<typename _Type>
-    _Type* __extract_raw_data(Context& _context, const std::string& _variable_name)
+    _Type* __extract_raw_data(Context* _context, const std::string& _variable_name)
     {
-        Variable* var = _context.get_variable(_variable_name);
+        Variable* var = _context->get_variable(_variable_name);
         L_ASSERT(var);
 
         _Type* raw_data = (_Type*)var->data();
@@ -51,17 +51,15 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
-                _Type* value_raw_data = __extract_raw_data<_Type>(context, "_value");
+                unsigned int index = *__extract_raw_data<unsigned int>(_context, "_index");
+                _Type* value_raw_data = __extract_raw_data<_Type>(_context, "_value");
 
                 L_ASSERT(value_raw_data);
 
@@ -85,12 +83,10 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
-                Vector& value_vec = *__extract_raw_data<Vector>(context, "_value");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
+                Vector& value_vec = *__extract_raw_data<Vector>(_context, "_value");
 
                 this_vec = value_vec;
 
@@ -112,16 +108,14 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                unsigned int index = *__extract_raw_data<unsigned int>(function->compound_statement().context(), "_index");
+                unsigned int index = *__extract_raw_data<unsigned int>(_context, "_index");
 
                 Variable_Container* return_container = __construct_return_container(_type_alias);
                 _Type* return_raw_data = (_Type*)return_container->data();
@@ -147,16 +141,14 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                _Type* value_raw_data = __extract_raw_data<_Type>(context, "_value");
+                _Type* value_raw_data = __extract_raw_data<_Type>(_context, "_value");
 
                 L_ASSERT(value_raw_data);
 
@@ -180,12 +172,10 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
-                unsigned int index = *__extract_raw_data<unsigned int>(context, "_value");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
+                unsigned int index = *__extract_raw_data<unsigned int>(_context, "_value");
 
                 this_vec.pop(index);
 
@@ -207,12 +197,10 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
-                int index = *__extract_raw_data<int>(context, "_value");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
+                int index = *__extract_raw_data<int>(_context, "_value");
                 L_ASSERT(index >= 0);
 
                 this_vec.pop(index);
@@ -234,11 +222,9 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
 
                 this_vec.pop(this_vec.size() - 1);
 
@@ -260,16 +246,14 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
+                unsigned int size = *__extract_raw_data<unsigned int>(_context, "_size");
 
                 this_vec.resize(size);
 
@@ -291,16 +275,14 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                int size = *__extract_raw_data<int>(context, "_size");
+                int size = *__extract_raw_data<int>(_context, "_size");
                 L_ASSERT(size > 0);
 
                 this_vec.resize(size);
@@ -324,17 +306,15 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
-                _Type value = *__extract_raw_data<_Type>(context, "_value");
+                unsigned int size = *__extract_raw_data<unsigned int>(_context, "_size");
+                _Type value = *__extract_raw_data<_Type>(_context, "_value");
 
                 L_ASSERT(size > 0);
 
@@ -359,17 +339,15 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Variable* var_this = context.get_variable("this");
+                Variable* var_this = _context->get_variable("this");
                 L_ASSERT(var_this);
                 L_ASSERT(var_this->type() == _alias);
 
                 Vector& this_vec = *(Vector*)var_this->data();
-                int size = *__extract_raw_data<int>(context, "_size");
-                _Type value = *__extract_raw_data<_Type>(context, "_value");
+                int size = *__extract_raw_data<int>(_context, "_size");
+                _Type value = *__extract_raw_data<_Type>(_context, "_value");
 
                 L_ASSERT(size > 0);
 
@@ -392,11 +370,9 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
 
                 this_vec.clear();
 
@@ -417,11 +393,9 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
 
                 Variable_Container* return_container = __construct_return_container("uint");
                 int* return_raw_data = (int*)return_container->data();
@@ -445,11 +419,9 @@ namespace LScript
             function->set_expected_arguments_data(LST::move(arguments_data));
 
             Custom_Operation* operation = new Custom_Operation;
-            operation->set_operation_logic([function, _alias, _type_alias]()->Variable*
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Context& context = function->compound_statement().context();
-
-                Vector& this_vec = *__extract_raw_data<Vector>(context, "this");
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
 
                 Variable_Container* return_container = __construct_return_container("uint");
                 int* return_raw_data = (int*)return_container->data();
@@ -505,9 +477,9 @@ void Integrated_Functions::M_register_default_global_functions()
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* what_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_what");
+            int* what_raw_data = __extract_raw_data<int>(_context, "_what");
 
             std::cout << "[debug_print] [int] " << *what_raw_data << std::endl;
 
@@ -527,9 +499,9 @@ void Integrated_Functions::M_register_default_global_functions()
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* what_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_what");
+                                           unsigned int* what_raw_data = __extract_raw_data<unsigned int>(_context, "_what");
 
                                            std::cout << "[debug_print] [uint] " << *what_raw_data << std::endl;
 
@@ -549,9 +521,9 @@ void Integrated_Functions::M_register_default_global_functions()
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            float* what_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_what");
+            float* what_raw_data = __extract_raw_data<float>(_context, "_what");
 
             std::cout << "[debug_print] [float] " << *what_raw_data << std::endl;
 
@@ -571,9 +543,9 @@ void Integrated_Functions::M_register_default_global_functions()
         function->set_expected_arguments_data(arguments_data);
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            std::string* what_raw_data = __extract_raw_data<std::string>(function->compound_statement().context(), "_what");
+            std::string* what_raw_data = __extract_raw_data<std::string>(_context, "_what");
 
             std::cout << "[debug_print] [string] " << *what_raw_data << std::endl;
 
@@ -597,12 +569,10 @@ void Integrated_Functions::M_register_default_global_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            Variable* var_reference = context.get_variable("_reference");
-            Variable* var_target = context.get_variable("_target");
+            Variable* var_reference = _context->get_variable("_reference");
+            Variable* var_target = _context->get_variable("_target");
 
             L_ASSERT(var_reference && var_target);
             L_ASSERT(var_reference->bindable());
@@ -631,10 +601,9 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
+            Variable* var_this = _context->get_variable("this");
             L_ASSERT(var_this);
             L_ASSERT(var_this->type() == "int");
 
@@ -644,7 +613,7 @@ void Integrated_Functions::M_register_default_int_functions()
                 var_this->set_data(allocated_data.ptr);
             }
 
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
             int* this_raw_data = (int*)var_this->data();
 
             L_ASSERT(this_raw_data);
@@ -669,10 +638,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* this_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data += *value_raw_data;
 
@@ -694,10 +663,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* this_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data -= *value_raw_data;
 
@@ -719,10 +688,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* this_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data *= *value_raw_data;
 
@@ -744,10 +713,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* this_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data /= *value_raw_data;
 
@@ -769,10 +738,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            int* this_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data %= *value_raw_data;
 
@@ -794,12 +763,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -826,12 +793,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -858,12 +823,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -890,12 +853,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -922,12 +883,10 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -953,11 +912,9 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("uint");
 
@@ -983,11 +940,9 @@ void Integrated_Functions::M_register_default_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            int* this_raw_data = __extract_raw_data<int>(context, "this");
+            int* this_raw_data = __extract_raw_data<int>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("float");
 
@@ -1018,10 +973,9 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
+            Variable* var_this = _context->get_variable("this");
             L_ASSERT(var_this);
             L_ASSERT(var_this->type() == "uint");
 
@@ -1031,7 +985,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
                 var_this->set_data(allocated_data.ptr);
             }
 
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
             unsigned int* this_raw_data = (unsigned int*)var_this->data();
 
             L_ASSERT(this_raw_data);
@@ -1056,10 +1010,9 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
+            Variable* var_this = _context->get_variable("this");
             L_ASSERT(var_this);
             L_ASSERT(var_this->type() == "uint");
 
@@ -1070,7 +1023,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
             }
 
             unsigned int* this_raw_data = (unsigned int*)var_this->data();
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             L_ASSERT(this_raw_data);
 
@@ -1094,10 +1047,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
                                            *this_raw_data += *value_raw_data;
 
@@ -1119,10 +1072,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
                                            *this_raw_data += *value_raw_data;
 
@@ -1144,10 +1097,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
                                            *this_raw_data -= *value_raw_data;
 
@@ -1169,10 +1122,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
                                            *this_raw_data -= *value_raw_data;
 
@@ -1194,10 +1147,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
                                            *this_raw_data *= *value_raw_data;
 
@@ -1219,10 +1172,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
                                            *this_raw_data *= *value_raw_data;
 
@@ -1244,10 +1197,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
                                            *this_raw_data /= *value_raw_data;
 
@@ -1269,10 +1222,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-                                           int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
                                            *this_raw_data /= *value_raw_data;
 
@@ -1294,10 +1247,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             *this_raw_data %= *value_raw_data;
 
@@ -1319,10 +1272,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(function->compound_statement().context(), "this");
-            int* value_raw_data = __extract_raw_data<int>(function->compound_statement().context(), "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             *this_raw_data %= *value_raw_data;
 
@@ -1344,12 +1297,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1376,12 +1327,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1408,12 +1357,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1440,12 +1387,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1472,12 +1417,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1504,12 +1447,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1536,12 +1477,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1568,12 +1507,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1600,12 +1537,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1632,12 +1567,10 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
-            int* value_raw_data = __extract_raw_data<int>(context, "_value");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
+            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1663,11 +1596,9 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(context, "this");
+            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("int");
 
@@ -1693,11 +1624,9 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("float");
 
@@ -1728,10 +1657,9 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
+            Variable* var_this = _context->get_variable("this");
             L_ASSERT(var_this);
             L_ASSERT(var_this->type() == "float");
 
@@ -1741,7 +1669,7 @@ void Integrated_Functions::M_register_default_float_functions()
                 var_this->set_data(allocated_data.ptr);
             }
 
-            float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
             float* this_raw_data = (float*)var_this->data();
 
             L_ASSERT(this_raw_data);
@@ -1766,10 +1694,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
-                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
                                            *this_raw_data += *value_raw_data;
 
@@ -1791,10 +1719,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
-                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
                                            *this_raw_data -= *value_raw_data;
 
@@ -1816,10 +1744,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
-                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
                                            *this_raw_data *= *value_raw_data;
 
@@ -1841,10 +1769,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
                                        {
-                                           float* this_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "this");
-                                           float* value_raw_data = __extract_raw_data<float>(function->compound_statement().context(), "_value");
+                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
+                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
                                            *this_raw_data /= *value_raw_data;
 
@@ -1866,12 +1794,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
-            float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1898,12 +1824,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
-            float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1930,12 +1854,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
-            float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1962,12 +1884,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
-            float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -1994,12 +1914,10 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
-            float* value_raw_data = __extract_raw_data<float>(context, "_value");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
 
             Variable_Container* result_container = __construct_return_container("bool");
 
@@ -2025,11 +1943,9 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("int");
 
@@ -2055,11 +1971,9 @@ void Integrated_Functions::M_register_default_float_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            float* this_raw_data = __extract_raw_data<float>(context, "this");
+            float* this_raw_data = __extract_raw_data<float>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("uint");
 
@@ -2090,12 +2004,10 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            std::string& value_string = *__extract_raw_data<std::string>(context, "_value");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            std::string& value_string = *__extract_raw_data<std::string>(_context, "_value");
 
             this_string = value_string;
 
@@ -2116,11 +2028,9 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
 
             this_string.clear();
 
@@ -2143,13 +2053,11 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
-            std::string& symbol_string = *__extract_raw_data<std::string>(context, "_symbol");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            unsigned int index = *__extract_raw_data<unsigned int>(_context, "_index");
+            std::string& symbol_string = *__extract_raw_data<std::string>(_context, "_symbol");
             L_ASSERT(symbol_string.size() == 1);
 
             this_string[index] = symbol_string[0];
@@ -2173,13 +2081,11 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            int index = *__extract_raw_data<int>(context, "_index");
-            std::string& symbol_string = *__extract_raw_data<std::string>(context, "_symbol");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            int index = *__extract_raw_data<int>(_context, "_index");
+            std::string& symbol_string = *__extract_raw_data<std::string>(_context, "_symbol");
             L_ASSERT(index >= 0);
             L_ASSERT(symbol_string.size() == 1);
 
@@ -2203,12 +2109,10 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            unsigned int index = *__extract_raw_data<unsigned int>(context, "_index");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            unsigned int index = *__extract_raw_data<unsigned int>(_context, "_index");
 
             Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
@@ -2233,12 +2137,10 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            int index = *__extract_raw_data<int>(context, "_index");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            int index = *__extract_raw_data<int>(_context, "_index");
             L_ASSERT(index >= 0);
 
             Variable_Container* return_container = __construct_return_container("string");
@@ -2263,11 +2165,9 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
 
             Variable_Container* return_container = __construct_return_container("uint");
             unsigned int* return_raw_data = (unsigned int*)return_container->data();
@@ -2292,12 +2192,10 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            std::string& value_string = *__extract_raw_data<std::string>(context, "_value");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            std::string& value_string = *__extract_raw_data<std::string>(_context, "_value");
 
             this_string += value_string;
 
@@ -2320,13 +2218,11 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            int offset = *__extract_raw_data<int>(context, "_offset");
-            int size = *__extract_raw_data<int>(context, "_size");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            int offset = *__extract_raw_data<int>(_context, "_offset");
+            int size = *__extract_raw_data<int>(_context, "_size");
             L_ASSERT(offset >= 0);
             L_ASSERT(size >= 0);
 
@@ -2354,13 +2250,11 @@ void Integrated_Functions::M_register_default_string_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-
-            std::string& this_string = *__extract_raw_data<std::string>(context, "this");
-            unsigned int offset = *__extract_raw_data<unsigned int>(context, "_offset");
-            unsigned int size = *__extract_raw_data<unsigned int>(context, "_size");
+            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
+            unsigned int offset = *__extract_raw_data<unsigned int>(_context, "_offset");
+            unsigned int size = *__extract_raw_data<unsigned int>(_context, "_size");
 
             Variable_Container* return_container = __construct_return_container("string");
             std::string& return_string = *(std::string*)return_container->data();
@@ -2389,10 +2283,9 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Context& context = function->compound_statement().context();
-            Variable* var_this = context.get_variable("this");
+            Variable* var_this = _context->get_variable("this");
             L_ASSERT(var_this);
 
             if(var_this->data() == nullptr)
@@ -2402,7 +2295,7 @@ void Integrated_Functions::M_register_default_bool_functions()
             }
 
             bool* this_raw_data = (bool*)var_this->data();
-            bool* value_raw_data = __extract_raw_data<bool>(context, "_value");
+            bool* value_raw_data = __extract_raw_data<bool>(_context, "_value");
 
             L_ASSERT(this_raw_data);
             L_ASSERT(value_raw_data);
@@ -2426,9 +2319,9 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
+            bool* this_raw_data = __extract_raw_data<bool>(_context, "this");
 
             *this_raw_data = !*this_raw_data;
 
@@ -2449,9 +2342,9 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
+            bool* this_raw_data = __extract_raw_data<bool>(_context, "this");
 
             Variable_Container* return_container = __construct_return_container("bool");
             bool& return_var = *(bool*)return_container->data();
@@ -2476,10 +2369,10 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
-            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+            bool* this_raw_data = __extract_raw_data<bool>(_context, "this");
+            bool* value_raw_data = __extract_raw_data<bool>(_context, "_value");
 
             Variable_Container* return_container = __construct_return_container("bool");
             bool& return_var = *(bool*)return_container->data();
@@ -2504,10 +2397,10 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
-            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+            bool* this_raw_data = __extract_raw_data<bool>(_context, "this");
+            bool* value_raw_data = __extract_raw_data<bool>(_context, "_value");
 
             Variable_Container* return_container = __construct_return_container("bool");
             bool& return_var = *(bool*)return_container->data();
@@ -2532,10 +2425,10 @@ void Integrated_Functions::M_register_default_bool_functions()
         function->set_expected_arguments_data(LST::move(arguments_data));
 
         Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([function]()->Variable*
+        operation->set_operation_logic([](Context* _context)->Variable*
         {
-            bool* this_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "this");
-            bool* value_raw_data = __extract_raw_data<bool>(function->compound_statement().context(), "_value");
+            bool* this_raw_data = __extract_raw_data<bool>(_context, "this");
+            bool* value_raw_data = __extract_raw_data<bool>(_context, "_value");
 
             Variable_Container* return_container = __construct_return_container("bool");
             bool& return_var = *(bool*)return_container->data();

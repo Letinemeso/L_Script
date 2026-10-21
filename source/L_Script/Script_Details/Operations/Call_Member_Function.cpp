@@ -33,12 +33,11 @@ void Call_Member_Function::set_arguments_getter_operations(Arguments_Getter_Oper
 
 
 
-Variable* Call_Member_Function::process()
+Variable* Call_Member_Function::process(Context* _context)
 {
-    L_ASSERT(m_context);
     L_ASSERT(m_owner_object_getter_operation);
 
-    Variable* owner_object = m_owner_object_getter_operation->process();
+    Variable* owner_object = m_owner_object_getter_operation->process(_context);
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -66,7 +65,7 @@ Variable* Call_Member_Function::process()
     argument_types.push(owner_object->type());
     for(unsigned int i = 0; i < m_arguments_getter_operations.size(); ++i)
     {
-        Variable* argument = m_arguments_getter_operations[i]->process();
+        Variable* argument = m_arguments_getter_operations[i]->process(_context);
         L_ASSERT(argument);
 
         arguments.push(argument);
@@ -88,7 +87,7 @@ Variable* Call_Member_Function::process()
         L_ASSERT(function);
     });
 
-    Variable* result = function->call(arguments);
+    Variable* result = function->call(_context, arguments);
 
     for(unsigned int i = 0; i < arguments.size(); ++i)
     {

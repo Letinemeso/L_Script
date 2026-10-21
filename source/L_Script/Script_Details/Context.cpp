@@ -3,9 +3,9 @@
 using namespace LScript;
 
 
-Context::Context()
+Context::Context(const Context* _parent_context)
 {
-
+    m_parent_context = _parent_context;
 }
 
 Context::~Context()

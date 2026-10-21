@@ -30,10 +30,10 @@ namespace LScript
         inline void set_debug_info(const std::string& _line, unsigned int _line_number) { m_source_line = _line; m_source_line_number = _line_number; }
 
     private:
-        bool M_condition_met();
+        bool M_condition_met(Context* _context);
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

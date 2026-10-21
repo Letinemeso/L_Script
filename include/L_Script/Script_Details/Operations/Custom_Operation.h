@@ -12,7 +12,7 @@ namespace LScript
     class Custom_Operation : public Operation
     {
     public:
-        using Operation_Logic = LST::Function<Variable*()>;
+        using Operation_Logic = LST::Function<Variable*(Context*)>;
 
     private:
         Operation_Logic m_operation_logic;
@@ -21,7 +21,7 @@ namespace LScript
         inline void set_operation_logic(const Operation_Logic& _logic) { m_operation_logic = _logic; }
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

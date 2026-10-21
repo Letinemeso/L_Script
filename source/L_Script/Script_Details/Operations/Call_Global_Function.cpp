@@ -30,7 +30,7 @@ void Call_Global_Function::set_arguments_getter_operations(Arguments_Getter_Oper
 
 
 
-Variable* Call_Global_Function::process()
+Variable* Call_Global_Function::process(Context* _context)
 {
     L_ASSERT(m_script);
 
@@ -40,7 +40,7 @@ Variable* Call_Global_Function::process()
     Function::Arguments arguments(arguments_amount);
     for(unsigned int i = 0; i < m_arguments_getter_operations.size(); ++i)
     {
-        Variable* argument = m_arguments_getter_operations[i]->process();
+        Variable* argument = m_arguments_getter_operations[i]->process(_context);
         L_ASSERT(argument);
 
         arguments.push(argument);
@@ -63,7 +63,7 @@ Variable* Call_Global_Function::process()
         L_ASSERT(function);
     });
 
-    Variable* result = function->call(arguments);
+    Variable* result = function->call(_context, arguments);
 
     for(unsigned int i = 0; i < arguments.size(); ++i)
     {

@@ -20,7 +20,7 @@ namespace LScript
         inline void set_operation(Operation* _ptr) { delete m_operation; m_operation = _ptr; }
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

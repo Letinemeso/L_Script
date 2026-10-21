@@ -30,7 +30,7 @@ void Compound_Statement::clear_operations()
 
 
 
-Variable* Compound_Statement::process()
+Variable* Compound_Statement::process(Context* _context)
 {
     m_stop_required = false;
 
@@ -39,14 +39,12 @@ Variable* Compound_Statement::process()
     for(Operations_List::Iterator it = m_operations.begin(); !it.end_reached(); ++it)
     {
         Operation* operation = *it;
-        result = operation->process();
+        result = operation->process(_context);
 
         m_stop_required = operation->stop_required();
         if(m_stop_required)
             break;
     }
-
-    m_context.clear();
 
     return result;
 }

@@ -71,26 +71,26 @@ namespace LScript
         void M_parse_global_space(const std::string& _source) const;
 
         unsigned int M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
-        unsigned int M_parse_global_variable_declaration(Context& _context, const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
+        unsigned int M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
         unsigned int M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name, unsigned int _max_size) const;
 
-        [[nodiscard]] Operation* M_construct_variable_extraction_operation(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation* M_construct_variable_extraction_operation(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
         LDS::Vector<Function::Argument_Data> M_parse_function_arguments_data(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         void M_parse_compound_statement(Compound_Statement& _compound_statement, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _begin, unsigned int _end) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_dynamic_expression(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_reference_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_dynamic_declaration(Context& _context, const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_member_access(Context& _context, Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Compiler::Operation_Parse_Result M_parse_function_call(Context& _context, const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] LDS::Vector<Operation*> M_construct_argument_getter_operations(Context& _context, const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_dynamic_expression(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_reference_declaration(const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_dynamic_declaration(const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_member_access(Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Compiler::Operation_Parse_Result M_parse_function_call(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] LDS::Vector<Operation*> M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_return(Context& _context, const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_if(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
-        [[nodiscard]] Operation_Parse_Result M_parse_while(Context& _context, const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_return(const std::string& _expected_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_if(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_while(const std::string& _owner_function_return_type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
 
-        [[nodiscard]] Operation_Parse_Result M_parse_subexpression(Context& _context, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation_Parse_Result M_parse_subexpression(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         [[nodiscard]] RValue_Getter* M_construct_rvalue_getter(const std::string& _value_as_string) const;
 
         std::string M_parse_first_word(const std::string& _source, unsigned int _offset, unsigned int _max_size) const;

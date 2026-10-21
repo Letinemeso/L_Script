@@ -22,7 +22,7 @@ namespace LScript
         Context(Context&) = delete;
         Context(Context&&) = delete;
 
-        Context();
+        Context(const Context* _parent_context = nullptr);
         ~Context();
 
     public:

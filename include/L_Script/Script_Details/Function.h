@@ -53,7 +53,7 @@ namespace LScript
         inline void stop_execution() { m_should_stop_execution = true; }
 
     public:
-        [[nodiscard]] Variable* call(const Arguments& _args);
+        [[nodiscard]] Variable* call(Context* _context, const Arguments& _args);
 
     };
 

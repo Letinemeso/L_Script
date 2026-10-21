@@ -58,10 +58,10 @@ namespace LScript
         void add_fail_case(Compound_Statement* _compound_statement);
 
     private:
-        bool M_check_condition(Operation* _condition) const;
+        bool M_check_condition(Context* _context, Operation* _condition) const;
 
     public:
-        Variable* process() override;
+        Variable* process(Context* _context) override;
 
     };
 

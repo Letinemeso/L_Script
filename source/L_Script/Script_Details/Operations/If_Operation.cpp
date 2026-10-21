@@ -28,9 +28,9 @@ void If_Operation::add_fail_case(Compound_Statement* _compound_statement)
 
 
 
-bool If_Operation::M_check_condition(Operation* _condition) const
+bool If_Operation::M_check_condition(Context* _context, Operation* _condition) const
 {
-    Variable* condition_result = _condition->process();
+    Variable* condition_result = _condition->process(_context);
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -80,7 +80,7 @@ bool If_Operation::M_check_condition(Operation* _condition) const
 
 
 
-Variable* If_Operation::process()
+Variable* If_Operation::process(Context* _context)
 {
     L_ASSERT(m_case_list.size() > 0);
 
@@ -90,7 +90,7 @@ Variable* If_Operation::process()
     for(Case_List::Iterator it = m_case_list.begin(); !it.end_reached(); ++it)
     {
         Case& current_case = *it;
-        if(!M_check_condition(current_case.condition))
+        if(!M_check_condition(_context, current_case.condition))
             continue;
 
         compound_statement = current_case.compound_statement;
@@ -103,7 +103,8 @@ Variable* If_Operation::process()
     if(!compound_statement)
         return nullptr;
 
-    Variable* result = compound_statement->process();
+    Context local_context(_context);
+    Variable* result = compound_statement->process(&local_context);
 
     set_stop_required(compound_statement->stop_required());
 

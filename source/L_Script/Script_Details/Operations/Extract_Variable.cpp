@@ -3,11 +3,9 @@
 using namespace LScript;
 
 
-Variable* Extract_Variable::process()
+Variable* Extract_Variable::process(Context* _context)
 {
-    L_ASSERT(m_context);
-
-    Variable* result = m_context->get_variable(m_variable_name);
+    Variable* result = _context->get_variable(m_variable_name);
 
     L_DEBUG_FUNC_NOARG([&]()
     {

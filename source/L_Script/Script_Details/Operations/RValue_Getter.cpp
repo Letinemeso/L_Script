@@ -3,7 +3,7 @@
 using namespace LScript;
 
 
-Variable* RValue_Getter::process()
+Variable* RValue_Getter::process(Context* _context)
 {
     return &m_variable;
 }

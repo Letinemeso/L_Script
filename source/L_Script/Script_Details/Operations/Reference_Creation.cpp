@@ -7,13 +7,11 @@
 using namespace LScript;
 
 
-Variable* Reference_Creation::process()
+Variable* Reference_Creation::process(Context* _context)
 {
-    L_ASSERT(m_context);
-
     L_DEBUG_FUNC_NOARG([&]()
     {
-        if(!m_context->get_local_variable(m_variable_name))
+        if(!_context->get_local_variable(m_variable_name))
             return;
 
         L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
@@ -28,7 +26,7 @@ Variable* Reference_Creation::process()
     variable->set_bindable(true);
     variable->set_type(m_variable_type);
 
-    m_context->add_variable(m_variable_name, variable);
+    _context->add_variable(m_variable_name, variable);
 
     return nullptr;
 }

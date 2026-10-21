@@ -217,43 +217,43 @@ void main()
     EXPECT_EQUAL(helper.get_bool(), true);
 }
 
-// INIT_TEST(Script_Test__Function_Recursive_Call)
-// {
-//     LScript::L_Script* script = __construct_script(R"(
+INIT_TEST(Script_Test__Function_Recursive_Call)
+{
+    LScript::L_Script* script = __construct_script(R"(
 
-// void func(int& _var)
-// {
-//     if(_var.equals(10))
-//     {
-//         return;
-//     }
+void func(int& _var)
+{
+    if(_var.equals(10))
+    {
+        return;
+    }
 
-//     _var.add(1);
-//     func(_var);
-// }
+    _var.add(1);
+    func(_var);
+}
 
-// void main()
-// {
-//     int var;
-//     var.set(0);
+void main()
+{
+    int var;
+    var.set(0);
 
-//     func(var);
+    func(var);
 
-//     if(var.equals(10))
-//     {
-//         helper.set_bool(true);
-//     }
-// }
+    if(var.equals(10))
+    {
+        helper.set_bool(true);
+    }
+}
 
-// )");
+)");
 
-//     Functions_Test_Helper helper;
-//     script->set_context_object("Functions_Test_Helper", "helper", &helper);
+    Functions_Test_Helper helper;
+    script->set_context_object("Functions_Test_Helper", "helper", &helper);
 
-//     script->run();
-//     delete script;
+    script->run();
+    delete script;
 
-//     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
 
-//     EXPECT_EQUAL(helper.get_bool(), true);
-// }
+    EXPECT_EQUAL(helper.get_bool(), true);
+}
