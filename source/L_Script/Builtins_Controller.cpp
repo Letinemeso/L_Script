@@ -34,6 +34,297 @@ namespace LScript
         return result;
     }
 
+    template<typename _This_Type, typename _Other_Type>
+    void __register_basic_type(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
+    {
+        //  set
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
+            {
+                Variable* var_this = _context->get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _this_type_alias);
+
+                if(var_this->data() == nullptr)
+                {
+                    LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(_this_type_alias, 1);
+                    var_this->set_data(allocated_data.ptr);
+                }
+
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                _This_Type* this_raw_data = (_This_Type*)var_this->data();
+
+                L_ASSERT(this_raw_data);
+
+                *this_raw_data = *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "set", function);
+        }
+
+        //  add
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                *this_raw_data += *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "add", function);
+        }
+
+        //  subtract
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                *this_raw_data -= *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "subtract", function);
+        }
+
+        //  multiply
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                *this_raw_data *= *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "multiply", function);
+        }
+
+        //  divide
+        {
+            Function* function = new Function;
+            function->set_return_type("void");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                *this_raw_data /= *value_raw_data;
+
+                return nullptr;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "divide", function);
+        }
+
+        //  equals
+        {
+            Function* function = new Function;
+            function->set_return_type("bool");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                Variable_Container* result_container = __construct_return_container("bool");
+
+                bool* result_raw_data = (bool*)result_container->data();
+                L_ASSERT(result_raw_data);
+
+                *result_raw_data = *this_raw_data == *value_raw_data;
+
+                return result_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "equals", function);
+        }
+
+        //  less
+        {
+            Function* function = new Function;
+            function->set_return_type("bool");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                Variable_Container* result_container = __construct_return_container("bool");
+
+                bool* result_raw_data = (bool*)result_container->data();
+                L_ASSERT(result_raw_data);
+
+                *result_raw_data = *this_raw_data < *value_raw_data;
+
+                return result_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "less", function);
+        }
+
+        //  more
+        {
+            Function* function = new Function;
+            function->set_return_type("bool");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                Variable_Container* result_container = __construct_return_container("bool");
+
+                bool* result_raw_data = (bool*)result_container->data();
+                L_ASSERT(result_raw_data);
+
+                *result_raw_data = *this_raw_data > *value_raw_data;
+
+                return result_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "more", function);
+        }
+
+        //  less_or_equal
+        {
+            Function* function = new Function;
+            function->set_return_type("bool");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                Variable_Container* result_container = __construct_return_container("bool");
+
+                bool* result_raw_data = (bool*)result_container->data();
+                L_ASSERT(result_raw_data);
+
+                *result_raw_data = *this_raw_data <= *value_raw_data;
+
+                return result_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "less_or_equal", function);
+        }
+
+        //  more_or_equal
+        {
+            Function* function = new Function;
+            function->set_return_type("bool");
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_value", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([](Context* _context)->Variable*
+            {
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+
+                Variable_Container* result_container = __construct_return_container("bool");
+
+                bool* result_raw_data = (bool*)result_container->data();
+                L_ASSERT(result_raw_data);
+
+                *result_raw_data = *this_raw_data >= *value_raw_data;
+
+                return result_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "more_or_equal", function);
+        }
+    }
+
     template<typename _Type>
     void __register_vector_with_type(Builtins_Controller& _builtins_controller, const std::string& _alias, const std::string& _type_alias)
     {
@@ -590,142 +881,7 @@ void Builtins_Controller::M_register_default_global_functions()
 
 void Builtins_Controller::M_register_default_int_functions()
 {
-    //  set
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == "int");
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("int", 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-            int* this_raw_data = (int*)var_this->data();
-
-            L_ASSERT(this_raw_data);
-
-            *this_raw_data = *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "set", function);
-    }
-
-    //  add
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            *this_raw_data += *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "add", function);
-    }
-
-    //  subtract
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            *this_raw_data -= *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "subtract", function);
-    }
-
-    //  multiply
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            *this_raw_data *= *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "multiply", function);
-    }
-
-    //  divide
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            *this_raw_data /= *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "divide", function);
-    }
+    __register_basic_type<int, int>(*this, "int", "int");
 
     //  mod
     {
@@ -750,156 +906,6 @@ void Builtins_Controller::M_register_default_int_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function("int", "mod", function);
-    }
-
-    //  equals
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data == *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "equals", function);
-    }
-
-    //  less
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data < *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "less", function);
-    }
-
-    //  more
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data > *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "more", function);
-    }
-
-    //  less_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data <= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "less_or_equal", function);
-    }
-
-    //  more_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"int", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            int* this_raw_data = __extract_raw_data<int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data >= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("int", "more_or_equal", function);
     }
 
     //  to_uint
@@ -962,279 +968,8 @@ void Builtins_Controller::M_register_default_int_functions()
 
 void Builtins_Controller::M_register_default_unsigned_int_functions()
 {
-    //  set
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == "uint");
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-            unsigned int* this_raw_data = (unsigned int*)var_this->data();
-
-            L_ASSERT(this_raw_data);
-
-            *this_raw_data = *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "set", function);
-    }
-
-    //  set(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == "uint");
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("uint", 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            unsigned int* this_raw_data = (unsigned int*)var_this->data();
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            L_ASSERT(this_raw_data);
-
-            *this_raw_data = *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "set", function);
-    }
-
-    //  add
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-                                           *this_raw_data += *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "add", function);
-    }
-
-    //  add(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-                                           *this_raw_data += *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "add", function);
-    }
-
-    //  subtract
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-                                           *this_raw_data -= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "subtract", function);
-    }
-
-    //  subtract(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-                                           *this_raw_data -= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "subtract", function);
-    }
-
-    //  multiply
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-                                           *this_raw_data *= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "multiply", function);
-    }
-
-    //  multiply(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-                                           *this_raw_data *= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "multiply", function);
-    }
-
-    //  divide
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-                                           *this_raw_data /= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "divide", function);
-    }
-
-    //  divide(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-                                           int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-                                           *this_raw_data /= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "divide", function);
-    }
+    __register_basic_type<unsigned int, unsigned int>(*this, "uint", "uint");
+    __register_basic_type<unsigned int, int>(*this, "uint", "int");
 
     //  mod
     {
@@ -1284,306 +1019,6 @@ void Builtins_Controller::M_register_default_unsigned_int_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function("uint", "mod", function);
-    }
-
-    //  equals
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data == *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "equals", function);
-    }
-
-    //  equals(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data == *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "equals", function);
-    }
-
-    //  less
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data < *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "less", function);
-    }
-
-    //  less(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data < *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "less", function);
-    }
-
-    //  more
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data > *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "more", function);
-    }
-
-    //  more(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data > *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "more", function);
-    }
-
-    //  less_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data <= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "less_or_equal", function);
-    }
-
-    //  less_or_equal(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data <= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "less_or_equal", function);
-    }
-
-    //  more_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"uint", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            unsigned int* value_raw_data = __extract_raw_data<unsigned int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data >= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "more_or_equal", function);
-    }
-
-    //  more_or_equal(int)
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"uint", "this", true});
-        arguments_data.push({"int", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            unsigned int* this_raw_data = __extract_raw_data<unsigned int>(_context, "this");
-            int* value_raw_data = __extract_raw_data<int>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data >= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("uint", "more_or_equal", function);
     }
 
     //  to_int
@@ -1646,292 +1081,7 @@ void Builtins_Controller::M_register_default_unsigned_int_functions()
 
 void Builtins_Controller::M_register_default_float_functions()
 {
-    //  set
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == "float");
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("float", 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-            float* this_raw_data = (float*)var_this->data();
-
-            L_ASSERT(this_raw_data);
-
-            *this_raw_data = *value_raw_data;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "set", function);
-    }
-
-    //  add
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-                                           *this_raw_data += *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "add", function);
-    }
-
-    //  subtract
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-                                           *this_raw_data -= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "subtract", function);
-    }
-
-    //  multiply
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-                                           *this_raw_data *= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "multiply", function);
-    }
-
-    //  divide
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-                                       {
-                                           float* this_raw_data = __extract_raw_data<float>(_context, "this");
-                                           float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-                                           *this_raw_data /= *value_raw_data;
-
-                                           return nullptr;
-                                       });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "divide", function);
-    }
-
-    //  equals
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data == *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "equals", function);
-    }
-
-    //  less
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data < *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "less", function);
-    }
-
-    //  more
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data > *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "more", function);
-    }
-
-    //  less_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data <= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "less_or_equal", function);
-    }
-
-    //  more_or_equal
-    {
-        Function* function = new Function;
-        function->set_return_type("bool");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"float", "this", true});
-        arguments_data.push({"float", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
-            float* value_raw_data = __extract_raw_data<float>(_context, "_value");
-
-            Variable_Container* result_container = __construct_return_container("bool");
-
-            bool* result_raw_data = (bool*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = *this_raw_data >= *value_raw_data;
-
-            return result_container;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("float", "more_or_equal", function);
-    }
+    __register_basic_type<float, float>(*this, "float", "float");
 
     //  to_int
     {
