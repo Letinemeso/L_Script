@@ -51,6 +51,16 @@ SCRIPTABLE_CLASS_END;
         using Registered_Type = CLASS_NAME; \
         constexpr const char* Registered_Type_Str = #CLASS_NAME; \
          \
+        class __Class_Name_Registrator \
+        { \
+        public: \
+            __Class_Name_Registrator() \
+            { \
+                LScript::Builtins_Controller::instance().register_class(Registered_Type_Str); \
+            } \
+        }; \
+        __Class_Name_Registrator __class_name_registrator; \
+         \
         class __Registrator \
         { \
         public: \

@@ -2578,6 +2578,13 @@ void Builtins_Controller::register_member_function(const std::string& _owner_typ
 }
 
 
+void Builtins_Controller::register_class(const std::string& _class_name)
+{
+    L_ASSERT(!m_registered_classes.find(_class_name).is_ok());
+    m_registered_classes.insert(_class_name);
+}
+
+
 
 Function* Builtins_Controller::get_global_function(const std::string& _name, const Argument_Types& _arg_types) const
 {
@@ -2603,4 +2610,10 @@ Function* Builtins_Controller::get_member_function(const std::string& _owner_typ
         return *maybe_function_it;
 
     return nullptr;
+}
+
+
+bool Builtins_Controller::is_class_registered(const std::string& _class_name) const
+{
+    return m_registered_classes.find(_class_name).is_ok();
 }

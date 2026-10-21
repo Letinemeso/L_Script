@@ -18,10 +18,13 @@ namespace LScript
         using Functions = LDS::Map<std::string, Function*>;
         using Functions_By_Name = LDS::Map<std::string, Functions_Vec>;;
         using Member_Functions = LDS::Map<std::string, Functions>;
+        using Registered_Classes = LDS::AVL_Tree<std::string>;
 
         Functions m_global_functions;
         Functions_By_Name m_global_functions_by_name;
         Member_Functions m_member_functions;
+
+        Registered_Classes m_registered_classes;
 
     private:
         Builtins_Controller();
@@ -54,9 +57,13 @@ namespace LScript
         void register_global_function(const std::string& _name, Function* _function);
         void register_member_function(const std::string& _owner_type, const std::string& _name, Function* _function);
 
+        void register_class(const std::string& _class_name);
+
     public:
         Function* get_global_function(const std::string& _name, const Argument_Types& _arg_types) const;
         Function* get_member_function(const std::string& _owner_type, const std::string& _name, const Argument_Types& _arg_types) const;
+
+        bool is_class_registered(const std::string& _class_name) const;
 
     };
 

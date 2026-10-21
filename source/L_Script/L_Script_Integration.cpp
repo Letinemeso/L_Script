@@ -2,6 +2,7 @@
 
 using namespace LScript;
 
+
 namespace LScript
 {
     void remove_const_if_present(std::string& _type)
@@ -54,4 +55,17 @@ LDS::Vector<std::string> LScript::__construct_args_string_vec(const std::string&
     }
 
     return result;
+}
+
+
+
+const std::string& LScript::__get_default_type(const std::string& _type)
+{
+    if(_type == "void")
+        return _type;
+
+    if(Builtins_Controller::instance().is_class_registered(_type))
+        return _type;
+
+    return LV::Type_Manager::get_default_type_name(_type);
 }

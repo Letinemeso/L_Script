@@ -43,6 +43,9 @@ namespace LScript
     }
 
 
+    const std::string& __get_default_type(const std::string& _type);
+
+
     template <typename _Return_Type>
     class __Calling_Function_Construction_Helper
     {
@@ -55,7 +58,7 @@ namespace LScript
             {
                 _Return_Type return_value = _args_container.call_with_args(*_owner_object, _func);
 
-                std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
+                std::string default_return_type_name = __get_default_type(_return_type_str);
                 LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(default_return_type_name, 1);
                 LScript::Variable_Container* return_container = new LScript::Variable_Container;
                 return_container->set_type(default_return_type_name);
@@ -66,7 +69,6 @@ namespace LScript
             };
         }
     };
-
     template <>
     class __Calling_Function_Construction_Helper<void>
     {
@@ -93,7 +95,7 @@ namespace LScript
             return [_return_type_str](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)
             {
                 _Return_Type& return_value = _args_container.call_with_args(*_owner_object, _func);
-                std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
+                std::string default_return_type_name = __get_default_type(_return_type_str);
 
                 LScript::Variable_Reference* return_container = new LScript::Variable_Reference;
                 return_container->set_type(default_return_type_name);
@@ -115,7 +117,7 @@ namespace LScript
             return [_return_type_str](_Owner_Class* _owner_object, _Func_Type _func, _Args_Container_Type& _args_container)
             {
                 const _Return_Type& return_value = _args_container.call_with_args(*_owner_object, _func);
-                std::string default_return_type_name = LV::Type_Manager::get_default_type_name(_return_type_str);
+                std::string default_return_type_name = __get_default_type(_return_type_str);
 
                 LScript::Variable_Reference* return_container = new LScript::Variable_Reference;
                 return_container->set_type(default_return_type_name);
@@ -160,12 +162,12 @@ namespace LScript
         arguments_data.push({_owner_name, "this", true});
         for(unsigned int i = 0; i < _arguments_types.size(); ++i)
         {
-            const std::string& default_type_name = LV::Type_Manager::get_default_type_name(_arguments_types[i]);
+            const std::string& default_type_name = __get_default_type(_arguments_types[i]);
             arguments_data.push({default_type_name, "_" + std::to_string(arguments_data.size() - 1), true});
         }
 
         LScript::Function* function = new LScript::Function;
-        function->set_return_type(_return_type == "void" ? _return_type : LV::Type_Manager::get_default_type_name(_return_type));
+        function->set_return_type(__get_default_type(_return_type));
         LScript::Custom_Operation* call_scriptable_function_operation = new LScript::Custom_Operation;
         call_scriptable_function_operation->set_operation_logic([_owner_name, _function, construct_result](Context* _context)
         {
