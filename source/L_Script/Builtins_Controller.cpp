@@ -1,4 +1,4 @@
-#include <L_Script/Integrated_Functions.h>
+#include <L_Script/Builtins_Controller.h>
 
 #include <Type_Manager.h>
 
@@ -35,7 +35,7 @@ namespace LScript
     }
 
     template<typename _Type>
-    void __register_vector_with_type(Integrated_Functions& _integrated_functions, const std::string& _alias, const std::string& _type_alias)
+    void __register_vector_with_type(Builtins_Controller& _builtins_controller, const std::string& _alias, const std::string& _type_alias)
     {
         using Vector = LDS::Vector<_Type>;
 
@@ -69,7 +69,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "set", function);
+            _builtins_controller.register_member_function(_alias, "set", function);
         }
 
         //  set(Vector)
@@ -94,7 +94,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "set", function);
+            _builtins_controller.register_member_function(_alias, "set", function);
         }
 
         //  get
@@ -127,7 +127,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "get", function);
+            _builtins_controller.register_member_function(_alias, "get", function);
         }
 
         //  push
@@ -158,7 +158,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "push", function);
+            _builtins_controller.register_member_function(_alias, "push", function);
         }
 
         //  pop(uint)
@@ -183,7 +183,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "pop", function);
+            _builtins_controller.register_member_function(_alias, "pop", function);
         }
 
         //  pop(int)
@@ -209,7 +209,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "pop", function);
+            _builtins_controller.register_member_function(_alias, "pop", function);
         }
 
         //  pop
@@ -232,7 +232,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "pop", function);
+            _builtins_controller.register_member_function(_alias, "pop", function);
         }
 
         //  resize(uint)
@@ -261,7 +261,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "resize", function);
+            _builtins_controller.register_member_function(_alias, "resize", function);
         }
 
         //  resize(int)
@@ -291,7 +291,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "resize", function);
+            _builtins_controller.register_member_function(_alias, "resize", function);
         }
 
         //  resize_and_fill(uint, _Type)
@@ -324,7 +324,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "resize_and_fill", function);
+            _builtins_controller.register_member_function(_alias, "resize_and_fill", function);
         }
 
         //  resize_and_fill(int, _Type)
@@ -357,7 +357,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "resize_and_fill", function);
+            _builtins_controller.register_member_function(_alias, "resize_and_fill", function);
         }
 
         //  clear
@@ -380,7 +380,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "clear", function);
+            _builtins_controller.register_member_function(_alias, "clear", function);
         }
 
         //  size
@@ -406,7 +406,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "size", function);
+            _builtins_controller.register_member_function(_alias, "size", function);
         }
 
         //  capacity
@@ -432,7 +432,7 @@ namespace LScript
             });
             function->compound_statement().add_operation(operation);
 
-            _integrated_functions.register_member_function(_alias, "capacity", function);
+            _builtins_controller.register_member_function(_alias, "capacity", function);
         }
 
     }
@@ -441,7 +441,7 @@ namespace LScript
 
 
 
-Integrated_Functions::Integrated_Functions()
+Builtins_Controller::Builtins_Controller()
 {
     M_register_default_global_functions();
     M_register_default_int_functions();
@@ -452,7 +452,7 @@ Integrated_Functions::Integrated_Functions()
     M_register_default_vector_functions();
 }
 
-Integrated_Functions::~Integrated_Functions()
+Builtins_Controller::~Builtins_Controller()
 {
     for(Functions::Iterator it = m_global_functions.iterator(); !it.end_reached(); ++it)
         delete *it;
@@ -466,7 +466,7 @@ Integrated_Functions::~Integrated_Functions()
 
 
 
-void Integrated_Functions::M_register_default_global_functions()
+void Builtins_Controller::M_register_default_global_functions()
 {
     //  debug_print(int)
     {
@@ -588,7 +588,7 @@ void Integrated_Functions::M_register_default_global_functions()
     }
 }
 
-void Integrated_Functions::M_register_default_int_functions()
+void Builtins_Controller::M_register_default_int_functions()
 {
     //  set
     {
@@ -960,7 +960,7 @@ void Integrated_Functions::M_register_default_int_functions()
 
 }
 
-void Integrated_Functions::M_register_default_unsigned_int_functions()
+void Builtins_Controller::M_register_default_unsigned_int_functions()
 {
     //  set
     {
@@ -1644,7 +1644,7 @@ void Integrated_Functions::M_register_default_unsigned_int_functions()
 
 }
 
-void Integrated_Functions::M_register_default_float_functions()
+void Builtins_Controller::M_register_default_float_functions()
 {
     //  set
     {
@@ -1991,7 +1991,7 @@ void Integrated_Functions::M_register_default_float_functions()
 
 }
 
-void Integrated_Functions::M_register_default_string_functions()
+void Builtins_Controller::M_register_default_string_functions()
 {
     //  set
     {
@@ -2270,7 +2270,7 @@ void Integrated_Functions::M_register_default_string_functions()
 
 }
 
-void Integrated_Functions::M_register_default_bool_functions()
+void Builtins_Controller::M_register_default_bool_functions()
 {
     //  set
     {
@@ -2444,7 +2444,7 @@ void Integrated_Functions::M_register_default_bool_functions()
 
 }
 
-void Integrated_Functions::M_register_default_vector_functions()
+void Builtins_Controller::M_register_default_vector_functions()
 {
     __register_vector_with_type<int>(*this, "Int_Vector", "int");
     __register_vector_with_type<unsigned int>(*this, "Uint_Vector", "uint");
@@ -2455,7 +2455,7 @@ void Integrated_Functions::M_register_default_vector_functions()
 
 
 
-bool Integrated_Functions::M_function_arguments_match(const Function* _function, const Argument_Types& _arg_types) const
+bool Builtins_Controller::M_function_arguments_match(const Function* _function, const Argument_Types& _arg_types) const
 {
     L_ASSERT(_function);
 
@@ -2475,7 +2475,7 @@ bool Integrated_Functions::M_function_arguments_match(const Function* _function,
     return true;
 }
 
-Function* Integrated_Functions::M_find_matching_function_by_name(const std::string& _name, const Argument_Types& _arg_types) const
+Function* Builtins_Controller::M_find_matching_function_by_name(const std::string& _name, const Argument_Types& _arg_types) const
 {
     Functions_By_Name::Const_Iterator maybe_functions_it = m_global_functions_by_name.find(_name);
     if(!maybe_functions_it.is_ok())
@@ -2509,7 +2509,7 @@ Function* Integrated_Functions::M_find_matching_function_by_name(const std::stri
 
 
 
-std::string Integrated_Functions::construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type) const
+std::string Builtins_Controller::construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type) const
 {
     std::string result;
 
@@ -2530,7 +2530,7 @@ std::string Integrated_Functions::construct_function_name(const std::string& _na
     return result;
 }
 
-std::string Integrated_Functions::construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type) const
+std::string Builtins_Controller::construct_function_name(const std::string& _name, const Argument_Types& _arg_types, const std::string& _owner_type) const
 {
     std::string result;
 
@@ -2552,7 +2552,7 @@ std::string Integrated_Functions::construct_function_name(const std::string& _na
 
 
 
-void Integrated_Functions::register_global_function(const std::string& _name, Function* _function)
+void Builtins_Controller::register_global_function(const std::string& _name, Function* _function)
 {
     std::string full_name = construct_function_name(_name, _function);
     L_ASSERT(!m_global_functions.find(full_name).is_ok());
@@ -2563,7 +2563,7 @@ void Integrated_Functions::register_global_function(const std::string& _name, Fu
     by_name_it->push(_function);
 }
 
-void Integrated_Functions::register_member_function(const std::string& _owner_type, const std::string& _name, Function* _function)
+void Builtins_Controller::register_member_function(const std::string& _owner_type, const std::string& _name, Function* _function)
 {
     Member_Functions::Iterator functions_it = m_member_functions.find(_owner_type);
     if(!functions_it.is_ok())
@@ -2579,7 +2579,7 @@ void Integrated_Functions::register_member_function(const std::string& _owner_ty
 
 
 
-Function* Integrated_Functions::get_global_function(const std::string& _name, const Argument_Types& _arg_types) const
+Function* Builtins_Controller::get_global_function(const std::string& _name, const Argument_Types& _arg_types) const
 {
     std::string full_name = construct_function_name(_name, _arg_types);
     Functions::Const_Iterator maybe_function_it = m_global_functions.find(full_name);
@@ -2589,7 +2589,7 @@ Function* Integrated_Functions::get_global_function(const std::string& _name, co
     return M_find_matching_function_by_name(_name, _arg_types);
 }
 
-Function* Integrated_Functions::get_member_function(const std::string& _owner_type, const std::string& _name, const Argument_Types& _arg_types) const
+Function* Builtins_Controller::get_member_function(const std::string& _owner_type, const std::string& _name, const Argument_Types& _arg_types) const
 {
     Member_Functions::Const_Iterator functions_it = m_member_functions.find(_owner_type);
     if(!functions_it.is_ok())

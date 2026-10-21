@@ -36,7 +36,7 @@ Variable* Call_Global_Function::process(Context* _context)
 
     unsigned int arguments_amount = m_arguments_getter_operations.size();
 
-    Integrated_Functions::Argument_Types argument_types(arguments_amount);
+    Builtins_Controller::Argument_Types argument_types(arguments_amount);
     Function::Arguments arguments(arguments_amount);
     for(unsigned int i = 0; i < m_arguments_getter_operations.size(); ++i)
     {
@@ -49,7 +49,7 @@ Variable* Call_Global_Function::process(Context* _context)
 
     Function* function = m_script->get_function(m_function_name);
     if(!function)
-        function = Integrated_Functions::instance().get_global_function(m_function_name, argument_types);
+        function = Builtins_Controller::instance().get_global_function(m_function_name, argument_types);
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -57,7 +57,7 @@ Variable* Call_Global_Function::process(Context* _context)
             return;
 
         L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
-        L_LOG("LScript_Debug", "Calling unregistered function \"" + Integrated_Functions::instance().construct_function_name(m_function_name, argument_types) + "\"");
+        L_LOG("LScript_Debug", "Calling unregistered function \"" + Builtins_Controller::instance().construct_function_name(m_function_name, argument_types) + "\"");
         L_LOG("LScript_Debug", m_source_line);
         L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
         L_ASSERT(function);

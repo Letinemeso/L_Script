@@ -2,7 +2,7 @@
 
 #include <Data_Structures/AVL_Tree.h>
 
-#include <L_Script/Integrated_Functions.h>
+#include <L_Script/Builtins_Controller.h>
 #include <L_Script/Script_Details/Operations/Operation.h>
 #include <L_Script/Script_Details/Operations/Variable_Creation.h>
 #include <L_Script/Script_Details/Operations/Reference_Creation.h>

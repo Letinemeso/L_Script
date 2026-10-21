@@ -59,7 +59,7 @@ Variable* Call_Member_Function::process(Context* _context)
 
     unsigned int arguments_amount = m_arguments_getter_operations.size() + 1;
 
-    Integrated_Functions::Argument_Types argument_types(arguments_amount);
+    Builtins_Controller::Argument_Types argument_types(arguments_amount);
     Function::Arguments arguments(arguments_amount);
     arguments.push(owner_object);
     argument_types.push(owner_object->type());
@@ -72,7 +72,7 @@ Variable* Call_Member_Function::process(Context* _context)
         argument_types.push(argument->type());
     }
 
-    Function* function = Integrated_Functions::instance().get_member_function(owner_object->type(), m_function_name, argument_types);
+    Function* function = Builtins_Controller::instance().get_member_function(owner_object->type(), m_function_name, argument_types);
 
     L_DEBUG_FUNC_NOARG([&]()
     {
@@ -80,7 +80,7 @@ Variable* Call_Member_Function::process(Context* _context)
             return;
 
         L_LOG("LScript_Debug", "Error at line " + std::to_string(m_source_line_number) + ": ");
-        L_LOG("LScript_Debug", "Calling unregistered function \"" + Integrated_Functions::instance().construct_function_name(m_function_name, argument_types, owner_object->type()) + "\"");
+        L_LOG("LScript_Debug", "Calling unregistered function \"" + Builtins_Controller::instance().construct_function_name(m_function_name, argument_types, owner_object->type()) + "\"");
         L_LOG("LScript_Debug", m_source_line);
         L_LOG("LScript_Debug", std::string(m_source_line.size(), '^'));
 

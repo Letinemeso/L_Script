@@ -8,7 +8,7 @@
 namespace LScript
 {
 
-    class Integrated_Functions
+    class Builtins_Controller
     {
     public:
         using Argument_Types = LDS::Vector<std::string>;
@@ -24,11 +24,11 @@ namespace LScript
         Member_Functions m_member_functions;
 
     private:
-        Integrated_Functions();
-        ~Integrated_Functions();
+        Builtins_Controller();
+        ~Builtins_Controller();
 
-        Integrated_Functions(const Integrated_Functions&) = delete;
-        Integrated_Functions(Integrated_Functions&&) = delete;
+        Builtins_Controller(const Builtins_Controller&) = delete;
+        Builtins_Controller(Builtins_Controller&&) = delete;
 
     private:
         void M_register_default_global_functions();
@@ -44,7 +44,7 @@ namespace LScript
         Function* M_find_matching_function_by_name(const std::string& _name, const Argument_Types& _arg_types) const;
 
     public:
-        static inline Integrated_Functions& instance() { static Integrated_Functions s_instance; return s_instance; }
+        static inline Builtins_Controller& instance() { static Builtins_Controller s_instance; return s_instance; }
 
     public:
         std::string construct_function_name(const std::string& _name, const Function* _function, const std::string& _owner_type = {}) const;

@@ -5,7 +5,7 @@
 
 #include <L_Script/L_Script.h>
 #include <L_Script/Script_Details/Operations/Custom_Operation.h>
-#include <L_Script/Integrated_Functions.h>
+#include <L_Script/Builtins_Controller.h>
 #include <L_Script/Script_Details/Variables/Variable_Container.h>
 #include <L_Script/Script_Details/Variables/Variable_Alias.h>
 #include <L_Script/Script_Details/Variables/Variable_Reference.h>
@@ -188,7 +188,7 @@ namespace LScript
 
         function->compound_statement().add_operation(call_scriptable_function_operation);
         function->set_expected_arguments_data(arguments_data);
-        LScript::Integrated_Functions::instance().register_member_function(_owner_name, _function_name, function);
+        LScript::Builtins_Controller::instance().register_member_function(_owner_name, _function_name, function);
     }
 
 }
