@@ -40,7 +40,7 @@ SCRIPTABLE_CLASS_END;
         static_assert(std::is_same_v<Member_Function_Type, decltype(type_extractor)::Type>); \
         std::string member_function_name = #_FUNCTION_NAME; \
         m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
-        LDS::Vector<std::string> arguments_types = LScript::__construct_args_string_vec(#__VA_ARGS__); \
+        LDS::Vector<std::string> arguments_types = LScript::__construct_args_string_vec("" #__VA_ARGS__); \
         LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
     }
 
