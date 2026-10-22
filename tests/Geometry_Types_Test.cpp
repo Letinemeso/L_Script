@@ -101,6 +101,48 @@ void main()
     EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {40, 90} ), true);
 }
 
+INIT_TEST(Script_Test__Vec2_Copy_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    vec2 var;
+    var.set(10.0, 10.0);
+
+    helper.set(var);
+
+    helper_plus.set(var.plus(2.0, 2.0));
+    helper_minus.set(var.minus(2.0, 2.0));
+    helper_multiplied_by.set(var.multiplied_by(2.0, 2.0));
+    helper_divided_by.set(var.divided_by(2.0, 2.0));
+}
+
+)");
+
+    Geometry_Types_Test_Helper helper;
+    script->set_context_object("Geometry_Types_Test_Helper", "helper", &helper);
+    Geometry_Types_Test_Helper helper_plus;
+    script->set_context_object("Geometry_Types_Test_Helper", "helper_plus", &helper_plus);
+    Geometry_Types_Test_Helper helper_minus;
+    script->set_context_object("Geometry_Types_Test_Helper", "helper_minus", &helper_minus);
+    Geometry_Types_Test_Helper helper_multiplied_by;
+    script->set_context_object("Geometry_Types_Test_Helper", "helper_multiplied_by", &helper_multiplied_by);
+    Geometry_Types_Test_Helper helper_divided_by;
+    script->set_context_object("Geometry_Types_Test_Helper", "helper_divided_by", &helper_divided_by);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {10, 10} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_plus.get(), {12, 12} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_minus.get(), {8, 8} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_multiplied_by.get(), {20, 20} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_divided_by.get(), {5, 5} ), true);
+}
+
 INIT_TEST(Script_Test__Vec3_Operations)
 {
     LScript::L_Script* script = __construct_script(R"(
@@ -139,4 +181,46 @@ void main()
     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
 
     EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {40, 90, 200} ), true);
+}
+
+INIT_TEST(Script_Test__Vec3_Copy_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    vec3 var;
+    var.set(10.0, 10.0, 10.0);
+
+    helper.set(var);
+
+    helper_plus.set(var.plus(2.0, 2.0, 2.0));
+    helper_minus.set(var.minus(2.0, 2.0, 2.0));
+    helper_multiplied_by.set(var.multiplied_by(2.0, 2.0, 2.0));
+    helper_divided_by.set(var.divided_by(2.0, 2.0, 2.0));
+}
+
+)");
+
+    Geometry_Types_Test_Helper_Vec3 helper;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper", &helper);
+    Geometry_Types_Test_Helper_Vec3 helper_plus;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper_plus", &helper_plus);
+    Geometry_Types_Test_Helper_Vec3 helper_minus;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper_minus", &helper_minus);
+    Geometry_Types_Test_Helper_Vec3 helper_multiplied_by;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper_multiplied_by", &helper_multiplied_by);
+    Geometry_Types_Test_Helper_Vec3 helper_divided_by;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper_divided_by", &helper_divided_by);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {10, 10, 10} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_plus.get(), {12, 12, 12} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_minus.get(), {8, 8, 8} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_multiplied_by.get(), {20, 20, 20} ), true);
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper_divided_by.get(), {5, 5, 5} ), true);
 }

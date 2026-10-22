@@ -139,12 +139,28 @@ void main()
     var.mod(7);
 
     helper.set_int(var);
+
+    helper_plus.set_int(var.plus(6));
+
+    helper_minus.set_int(var.minus(3));
+
+    helper_multiplied_by.set_int(var.multiplied_by(4));
+
+    helper_divided_by.set_int(var.divided_by(2));
 }
 
 )");
 
     Basic_Types_Test_Helper helper;
     script->set_context_object("Basic_Types_Test_Helper", "helper", &helper);
+    Basic_Types_Test_Helper helper_plus;
+    script->set_context_object("Basic_Types_Test_Helper", "helper_plus", &helper_plus);
+    Basic_Types_Test_Helper helper_minus;
+    script->set_context_object("Basic_Types_Test_Helper", "helper_minus", &helper_minus);
+    Basic_Types_Test_Helper helper_multiplied_by;
+    script->set_context_object("Basic_Types_Test_Helper", "helper_multiplied_by", &helper_multiplied_by);
+    Basic_Types_Test_Helper helper_divided_by;
+    script->set_context_object("Basic_Types_Test_Helper", "helper_divided_by", &helper_divided_by);
 
     script->run();
     delete script;
@@ -152,6 +168,10 @@ void main()
     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
 
     EXPECT_EQUAL(helper.get_int(), 4);
+    EXPECT_EQUAL(helper_plus.get_int(), 10);
+    EXPECT_EQUAL(helper_minus.get_int(), 1);
+    EXPECT_EQUAL(helper_multiplied_by.get_int(), 16);
+    EXPECT_EQUAL(helper_divided_by.get_int(), 2);
 }
 
 INIT_TEST(Script_Test__Unsigned_Int_Operations)

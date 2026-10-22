@@ -49,7 +49,7 @@ namespace LScript
     }
 
     template<typename _This_Type, typename _Other_Type>
-    void __register_basic_type_arithmetics(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
+    void __register_basic_type_utility(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
     {
         //  set
         {
@@ -87,7 +87,11 @@ namespace LScript
 
             _builtins_controller.register_member_function(_this_type_alias, "set", function);
         }
+    }
 
+    template<typename _This_Type, typename _Other_Type>
+    void __register_basic_type_arithmetics(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
+    {
         //  add
         {
             Function* function = new Function;
@@ -111,6 +115,34 @@ namespace LScript
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "add", function);
+        }
+
+        //  plus
+        {
+            Function* function = new Function;
+            function->set_return_type(_this_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_other", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
+            {
+                _This_Type& this_raw_data = *__extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type& other_raw_data = *__extract_raw_data<_Other_Type>(_context, "_other");
+
+                Variable_Container* return_container = __construct_return_container(_this_type_alias);
+                _This_Type& return_raw_data = *LST::raw_cast<_This_Type>(return_container->data());
+
+                return_raw_data = this_raw_data + other_raw_data;
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "plus", function);
         }
 
         //  subtract
@@ -138,6 +170,34 @@ namespace LScript
             _builtins_controller.register_member_function(_this_type_alias, "subtract", function);
         }
 
+        //  minus
+        {
+            Function* function = new Function;
+            function->set_return_type(_this_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_other", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
+            {
+                _This_Type& this_raw_data = *__extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type& other_raw_data = *__extract_raw_data<_Other_Type>(_context, "_other");
+
+                Variable_Container* return_container = __construct_return_container(_this_type_alias);
+                _This_Type& return_raw_data = *LST::raw_cast<_This_Type>(return_container->data());
+
+                return_raw_data = this_raw_data - other_raw_data;
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "minus", function);
+        }
+
         //  multiply
         {
             Function* function = new Function;
@@ -163,6 +223,34 @@ namespace LScript
             _builtins_controller.register_member_function(_this_type_alias, "multiply", function);
         }
 
+        //  multiplied_by
+        {
+            Function* function = new Function;
+            function->set_return_type(_this_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_other", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
+            {
+                _This_Type& this_raw_data = *__extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type& other_raw_data = *__extract_raw_data<_Other_Type>(_context, "_other");
+
+                Variable_Container* return_container = __construct_return_container(_this_type_alias);
+                _This_Type& return_raw_data = *LST::raw_cast<_This_Type>(return_container->data());
+
+                return_raw_data = this_raw_data * other_raw_data;
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "multiplied_by", function);
+        }
+
         //  divide
         {
             Function* function = new Function;
@@ -186,6 +274,34 @@ namespace LScript
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "divide", function);
+        }
+
+        //  divided_by
+        {
+            Function* function = new Function;
+            function->set_return_type(_this_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_this_type_alias, "this", true});
+            arguments_data.push({_other_type_alias, "_other", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
+            {
+                _This_Type& this_raw_data = *__extract_raw_data<_This_Type>(_context, "this");
+                _Other_Type& other_raw_data = *__extract_raw_data<_Other_Type>(_context, "_other");
+
+                Variable_Container* return_container = __construct_return_container(_this_type_alias);
+                _This_Type& return_raw_data = *LST::raw_cast<_This_Type>(return_container->data());
+
+                return_raw_data = this_raw_data / other_raw_data;
+
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_this_type_alias, "divided_by", function);
         }
     }
 
@@ -923,6 +1039,7 @@ void Builtins_Controller::M_register_default_global_functions()
 
 void Builtins_Controller::M_register_default_int_functions()
 {
+    __register_basic_type_utility<int, int>(*this, "int", "int");
     __register_basic_type_arithmetics<int, int>(*this, "int", "int");
     __register_basic_type_comparison<int, int>(*this, "int", "int");
 
@@ -1011,9 +1128,11 @@ void Builtins_Controller::M_register_default_int_functions()
 
 void Builtins_Controller::M_register_default_unsigned_int_functions()
 {
+    __register_basic_type_utility<unsigned int, unsigned int>(*this, "uint", "uint");
     __register_basic_type_arithmetics<unsigned int, unsigned int>(*this, "uint", "uint");
     __register_basic_type_comparison<unsigned int, unsigned int>(*this, "uint", "uint");
 
+    __register_basic_type_utility<unsigned int, int>(*this, "uint", "int");
     __register_basic_type_arithmetics<unsigned int, int>(*this, "uint", "int");
     __register_basic_type_comparison<unsigned int, int>(*this, "uint", "int");
 
@@ -1127,6 +1246,7 @@ void Builtins_Controller::M_register_default_unsigned_int_functions()
 
 void Builtins_Controller::M_register_default_float_functions()
 {
+    __register_basic_type_utility<float, float>(*this, "float", "float");
     __register_basic_type_arithmetics<float, float>(*this, "float", "float");
     __register_basic_type_comparison<float, float>(*this, "float", "float");
 
@@ -1190,30 +1310,7 @@ void Builtins_Controller::M_register_default_float_functions()
 
 void Builtins_Controller::M_register_default_string_functions()
 {
-    //  set
-    {
-        Function* function = new Function;
-        function->set_return_type("void");
-
-        Function::Arguments_Data arguments_data(2);
-        arguments_data.push({"string", "this", true});
-        arguments_data.push({"string", "_value", false});
-        function->set_expected_arguments_data(LST::move(arguments_data));
-
-        Custom_Operation* operation = new Custom_Operation;
-        operation->set_operation_logic([](Context* _context)->Variable*
-        {
-            std::string& this_string = *__extract_raw_data<std::string>(_context, "this");
-            std::string& value_string = *__extract_raw_data<std::string>(_context, "_value");
-
-            this_string = value_string;
-
-            return nullptr;
-        });
-        function->compound_statement().add_operation(operation);
-
-        register_member_function("string", "set", function);
-    }
+    __register_basic_type_utility<std::string, std::string>(*this, "string", "string");
 
     //  clear
     {
@@ -1654,6 +1751,7 @@ void Builtins_Controller::M_register_default_vec2_functions()
 {
     const std::string type_name = "vec2";
 
+    __register_basic_type_utility<glm::vec2, glm::vec2>(*this, type_name, type_name);
     __register_basic_type_arithmetics<glm::vec2, glm::vec2>(*this, type_name, type_name);
 
     //  set(floats)
@@ -1770,6 +1868,36 @@ void Builtins_Controller::M_register_default_vec2_functions()
         register_member_function(type_name, "add", function);
     }
 
+    //  plus
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec2& return_raw_data = *LST::raw_cast<glm::vec2>(return_container->data());
+
+            return_raw_data = this_raw_data + glm::vec2(x_raw_data, y_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "plus", function);
+    }
+
     //  subtract
     {
         Function* function = new Function;
@@ -1798,6 +1926,36 @@ void Builtins_Controller::M_register_default_vec2_functions()
         register_member_function(type_name, "subtract", function);
     }
 
+    //  minus
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec2& return_raw_data = *LST::raw_cast<glm::vec2>(return_container->data());
+
+            return_raw_data = this_raw_data - glm::vec2(x_raw_data, y_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "minus", function);
+    }
+
     //  multiply
     {
         Function* function = new Function;
@@ -1821,6 +1979,36 @@ void Builtins_Controller::M_register_default_vec2_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function(type_name, "multiply", function);
+    }
+
+    //  multiplied_by
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec2& return_raw_data = *LST::raw_cast<glm::vec2>(return_container->data());
+
+            return_raw_data = this_raw_data * glm::vec2(x_raw_data, y_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "multiplied_by", function);
     }
 
     //  divide
@@ -1847,12 +2035,43 @@ void Builtins_Controller::M_register_default_vec2_functions()
 
         register_member_function(type_name, "divide", function);
     }
+
+    //  divided_by
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec2& return_raw_data = *LST::raw_cast<glm::vec2>(return_container->data());
+
+            return_raw_data = this_raw_data / glm::vec2(x_raw_data, y_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "divided_by", function);
+    }
 }
 
 void Builtins_Controller::M_register_default_vec3_functions()
 {
     const std::string type_name = "vec3";
 
+    __register_basic_type_utility<glm::vec3, glm::vec3>(*this, type_name, type_name);
     __register_basic_type_arithmetics<glm::vec3, glm::vec3>(*this, type_name, type_name);
 
     //  set(floats)
@@ -1999,6 +2218,38 @@ void Builtins_Controller::M_register_default_vec3_functions()
         register_member_function(type_name, "add", function);
     }
 
+    //  plus
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = this_raw_data + glm::vec3(x_raw_data, y_raw_data, z_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "plus", function);
+    }
+
     //  subtract
     {
         Function* function = new Function;
@@ -2030,6 +2281,38 @@ void Builtins_Controller::M_register_default_vec3_functions()
         register_member_function(type_name, "subtract", function);
     }
 
+    //  minus
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = this_raw_data - glm::vec3(x_raw_data, y_raw_data, z_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "minus", function);
+    }
+
     //  multiply
     {
         Function* function = new Function;
@@ -2055,6 +2338,38 @@ void Builtins_Controller::M_register_default_vec3_functions()
         register_member_function(type_name, "multiply", function);
     }
 
+    //  multiplied_by
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = this_raw_data * glm::vec3(x_raw_data, y_raw_data, z_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "multiplied_by", function);
+    }
+
     //  divide
     {
         Function* function = new Function;
@@ -2078,6 +2393,38 @@ void Builtins_Controller::M_register_default_vec3_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function(type_name, "divide", function);
+    }
+
+    //  divided_by
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = this_raw_data / glm::vec3(x_raw_data, y_raw_data, z_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "divided_by", function);
     }
 }
 
