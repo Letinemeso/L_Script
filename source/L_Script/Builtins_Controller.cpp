@@ -760,6 +760,7 @@ Builtins_Controller::Builtins_Controller()
     M_register_default_bool_functions();
     M_register_default_vector_functions();
     M_register_default_vec2_functions();
+    M_register_default_vec3_functions();
 }
 
 Builtins_Controller::~Builtins_Controller()
@@ -1836,6 +1837,238 @@ void Builtins_Controller::M_register_default_vec2_functions()
         operation->set_operation_logic([](Context* _context)->Variable*
         {
             glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float divider = *__extract_raw_data<float>(_context, "_divider");
+
+            this_raw_data /= divider;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "divide", function);
+    }
+}
+
+void Builtins_Controller::M_register_default_vec3_functions()
+{
+    const std::string type_name = "vec3";
+
+    __register_basic_type_arithmetics<glm::vec3, glm::vec3>(*this, type_name, type_name);
+
+    //  set(floats)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            Variable* var_this = _context->get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == type_name);
+
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(type_name, 1);
+                var_this->set_data(allocated_data.ptr);
+            }
+
+            glm::vec3& this_raw_data = *LST::raw_cast<glm::vec3>(var_this->data());
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            this_raw_data.x = x_raw_data;
+            this_raw_data.y = y_raw_data;
+            this_raw_data.z = z_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "set", function);
+    }
+
+    //  x
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({type_name, "this", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data.x);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "x", function);
+    }
+
+    //  y
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({type_name, "this", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data.y);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "y", function);
+    }
+
+    //  z
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({type_name, "this", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data.z);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "z", function);
+    }
+
+    //  add
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            this_raw_data.x += x_raw_data;
+            this_raw_data.y += y_raw_data;
+            this_raw_data.z += z_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "add", function);
+    }
+
+    //  subtract
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        arguments_data.push({"float", "_z", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+            float z_raw_data = *__extract_raw_data<float>(_context, "_z");
+
+            this_raw_data.x -= x_raw_data;
+            this_raw_data.y -= y_raw_data;
+            this_raw_data.z -= z_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "subtract", function);
+    }
+
+    //  multiply
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_multiplier", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float multiplier = *__extract_raw_data<float>(_context, "_multiplier");
+
+            this_raw_data *= multiplier;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "multiply", function);
+    }
+
+    //  divide
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_divider", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
             float divider = *__extract_raw_data<float>(_context, "_divider");
 
             this_raw_data /= divider;

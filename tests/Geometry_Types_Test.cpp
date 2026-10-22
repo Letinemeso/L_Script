@@ -41,6 +41,27 @@ SCRIPTABLE_CLASS_END
 
 
 
+class Geometry_Types_Test_Helper_Vec3
+{
+public:
+    glm::vec3 var;
+
+public:
+    void set(const glm::vec3& _value) { var = _value; }
+    glm::vec3 get() { return var; }
+
+};
+
+
+SCRIPTABLE_CLASS_BEGIN(Geometry_Types_Test_Helper_Vec3)
+
+INIT_SCRIPTABLE_FUNCTION(void, set, const glm::vec3&)
+INIT_SCRIPTABLE_FUNCTION(glm::vec3, get)
+
+SCRIPTABLE_CLASS_END
+
+
+
 INIT_TEST(Script_Test__Vec2_Operations)
 {
     LScript::L_Script* script = __construct_script(R"(
@@ -78,4 +99,44 @@ void main()
     EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
 
     EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {40, 90} ), true);
+}
+
+INIT_TEST(Script_Test__Vec3_Operations)
+{
+    LScript::L_Script* script = __construct_script(R"(
+
+void main()
+{
+    vec3 var;
+
+    var.set(123.0, 321.0, 623.0);
+
+    var.x().add(7.0);
+    var.y().subtract(21.0);
+    var.z().subtract(3.0);
+
+    var.add(1.0, 2.0, -7.0);
+    var.subtract(11.0, 32.0, 13.0);
+
+    var.divide(3.0);
+    var.multiply(0.5);
+
+    vec3 var2;
+    var2.set(20.0, 45.0, 100.0);
+    var.add(var2);
+
+    helper.set(var);
+}
+
+)");
+
+    Geometry_Types_Test_Helper_Vec3 helper;
+    script->set_context_object("Geometry_Types_Test_Helper_Vec3", "helper", &helper);
+
+    script->run();
+    delete script;
+
+    EXPECT_EQUAL(LScript::Variable_Instance_Counter::instance().counter(), 0);
+
+    EXPECT_EQUAL(LST::Math::vecs_are_equal( helper.get(), {40, 90, 200} ), true);
 }
