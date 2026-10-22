@@ -1,8 +1,13 @@
 #include <L_Script/Builtins_Controller.h>
 
+#include <vec2.hpp>
+#include <vec3.hpp>
+
 #include <Type_Manager.h>
 
 #include <L_Script/Script_Details/Operations/Custom_Operation.h>
+#include <L_Script/Script_Details/Variables/Variable_Container.h>
+#include <L_Script/Script_Details/Variables/Variable_Reference.h>
 
 using namespace LScript;
 
@@ -34,8 +39,17 @@ namespace LScript
         return result;
     }
 
+    [[nodiscard]] Variable_Reference* __construct_return_reference(const std::string& _type_alias)
+    {
+        Variable_Reference* result = new Variable_Reference;
+        result->set_type(_type_alias);
+        result->mark_temporary(true);
+
+        return result;
+    }
+
     template<typename _This_Type, typename _Other_Type>
-    void __register_basic_type(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
+    void __register_basic_type_arithmetics(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
     {
         //  set
         {
@@ -173,7 +187,11 @@ namespace LScript
 
             _builtins_controller.register_member_function(_this_type_alias, "divide", function);
         }
+    }
 
+    template<typename _This_Type, typename _Other_Type>
+    void __register_basic_type_comparison(Builtins_Controller& _builtins_controller, const std::string& _this_type_alias, const std::string& _other_type_alias)
+    {
         //  equals
         {
             Function* function = new Function;
@@ -186,19 +204,19 @@ namespace LScript
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([](Context* _context)->Variable*
-            {
-                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
-                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                                           {
+                                               _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                                               _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
 
-                Variable_Container* result_container = __construct_return_container("bool");
+                                               Variable_Container* result_container = __construct_return_container("bool");
 
-                bool* result_raw_data = (bool*)result_container->data();
-                L_ASSERT(result_raw_data);
+                                               bool* result_raw_data = (bool*)result_container->data();
+                                               L_ASSERT(result_raw_data);
 
-                *result_raw_data = *this_raw_data == *value_raw_data;
+                                               *result_raw_data = *this_raw_data == *value_raw_data;
 
-                return result_container;
-            });
+                                               return result_container;
+                                           });
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "equals", function);
@@ -216,19 +234,19 @@ namespace LScript
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([](Context* _context)->Variable*
-            {
-                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
-                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                                           {
+                                               _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                                               _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
 
-                Variable_Container* result_container = __construct_return_container("bool");
+                                               Variable_Container* result_container = __construct_return_container("bool");
 
-                bool* result_raw_data = (bool*)result_container->data();
-                L_ASSERT(result_raw_data);
+                                               bool* result_raw_data = (bool*)result_container->data();
+                                               L_ASSERT(result_raw_data);
 
-                *result_raw_data = *this_raw_data < *value_raw_data;
+                                               *result_raw_data = *this_raw_data < *value_raw_data;
 
-                return result_container;
-            });
+                                               return result_container;
+                                           });
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "less", function);
@@ -246,19 +264,19 @@ namespace LScript
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([](Context* _context)->Variable*
-            {
-                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
-                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                                           {
+                                               _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                                               _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
 
-                Variable_Container* result_container = __construct_return_container("bool");
+                                               Variable_Container* result_container = __construct_return_container("bool");
 
-                bool* result_raw_data = (bool*)result_container->data();
-                L_ASSERT(result_raw_data);
+                                               bool* result_raw_data = (bool*)result_container->data();
+                                               L_ASSERT(result_raw_data);
 
-                *result_raw_data = *this_raw_data > *value_raw_data;
+                                               *result_raw_data = *this_raw_data > *value_raw_data;
 
-                return result_container;
-            });
+                                               return result_container;
+                                           });
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "more", function);
@@ -276,19 +294,19 @@ namespace LScript
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([](Context* _context)->Variable*
-            {
-                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
-                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                                           {
+                                               _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                                               _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
 
-                Variable_Container* result_container = __construct_return_container("bool");
+                                               Variable_Container* result_container = __construct_return_container("bool");
 
-                bool* result_raw_data = (bool*)result_container->data();
-                L_ASSERT(result_raw_data);
+                                               bool* result_raw_data = (bool*)result_container->data();
+                                               L_ASSERT(result_raw_data);
 
-                *result_raw_data = *this_raw_data <= *value_raw_data;
+                                               *result_raw_data = *this_raw_data <= *value_raw_data;
 
-                return result_container;
-            });
+                                               return result_container;
+                                           });
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "less_or_equal", function);
@@ -306,19 +324,19 @@ namespace LScript
 
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([](Context* _context)->Variable*
-            {
-                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
-                _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
+                                           {
+                                               _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
+                                               _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
 
-                Variable_Container* result_container = __construct_return_container("bool");
+                                               Variable_Container* result_container = __construct_return_container("bool");
 
-                bool* result_raw_data = (bool*)result_container->data();
-                L_ASSERT(result_raw_data);
+                                               bool* result_raw_data = (bool*)result_container->data();
+                                               L_ASSERT(result_raw_data);
 
-                *result_raw_data = *this_raw_data >= *value_raw_data;
+                                               *result_raw_data = *this_raw_data >= *value_raw_data;
 
-                return result_container;
-            });
+                                               return result_container;
+                                           });
             function->compound_statement().add_operation(operation);
 
             _builtins_controller.register_member_function(_this_type_alias, "more_or_equal", function);
@@ -741,6 +759,7 @@ Builtins_Controller::Builtins_Controller()
     M_register_default_string_functions();
     M_register_default_bool_functions();
     M_register_default_vector_functions();
+    M_register_default_vec2_functions();
 }
 
 Builtins_Controller::~Builtins_Controller()
@@ -847,6 +866,28 @@ void Builtins_Controller::M_register_default_global_functions()
         register_global_function("debug_print", function);
     }
 
+    //  debug_print(vec2)
+    {
+        Function* function = new Function;
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec2", "_what", false});
+        function->set_expected_arguments_data(arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2* what_raw_data = __extract_raw_data<glm::vec2>(_context, "_what");
+
+            std::cout << "[debug_print] [vec2] x: " << what_raw_data->x << " y: " << what_raw_data->y << std::endl;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("debug_print", function);
+    }
+
     //  reference utility
 
     //  ref_bind
@@ -881,7 +922,8 @@ void Builtins_Controller::M_register_default_global_functions()
 
 void Builtins_Controller::M_register_default_int_functions()
 {
-    __register_basic_type<int, int>(*this, "int", "int");
+    __register_basic_type_arithmetics<int, int>(*this, "int", "int");
+    __register_basic_type_comparison<int, int>(*this, "int", "int");
 
     //  mod
     {
@@ -968,8 +1010,11 @@ void Builtins_Controller::M_register_default_int_functions()
 
 void Builtins_Controller::M_register_default_unsigned_int_functions()
 {
-    __register_basic_type<unsigned int, unsigned int>(*this, "uint", "uint");
-    __register_basic_type<unsigned int, int>(*this, "uint", "int");
+    __register_basic_type_arithmetics<unsigned int, unsigned int>(*this, "uint", "uint");
+    __register_basic_type_comparison<unsigned int, unsigned int>(*this, "uint", "uint");
+
+    __register_basic_type_arithmetics<unsigned int, int>(*this, "uint", "int");
+    __register_basic_type_comparison<unsigned int, int>(*this, "uint", "int");
 
     //  mod
     {
@@ -1081,7 +1126,8 @@ void Builtins_Controller::M_register_default_unsigned_int_functions()
 
 void Builtins_Controller::M_register_default_float_functions()
 {
-    __register_basic_type<float, float>(*this, "float", "float");
+    __register_basic_type_arithmetics<float, float>(*this, "float", "float");
+    __register_basic_type_comparison<float, float>(*this, "float", "float");
 
     //  to_int
     {
@@ -1601,6 +1647,205 @@ void Builtins_Controller::M_register_default_vector_functions()
     __register_vector_with_type<bool>(*this, "Bool_Vector", "bool");
     __register_vector_with_type<std::string>(*this, "String_Vector", "string");
     __register_vector_with_type<float>(*this, "Float_Vector", "float");
+}
+
+void Builtins_Controller::M_register_default_vec2_functions()
+{
+    const std::string type_name = "vec2";
+
+    __register_basic_type_arithmetics<glm::vec2, glm::vec2>(*this, type_name, type_name);
+
+    //  set(floats)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            Variable* var_this = _context->get_variable("this");
+            L_ASSERT(var_this);
+            L_ASSERT(var_this->type() == type_name);
+
+            if(var_this->data() == nullptr)
+            {
+                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(type_name, 1);
+                var_this->set_data(allocated_data.ptr);
+            }
+
+            glm::vec2& this_raw_data = *LST::raw_cast<glm::vec2>(var_this->data());
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            this_raw_data.x = x_raw_data;
+            this_raw_data.y = y_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "set", function);
+    }
+
+    //  x
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({type_name, "this", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data.x);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "x", function);
+    }
+
+    //  y
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({type_name, "this", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data.y);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "y", function);
+    }
+
+    //  add
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            this_raw_data.x += x_raw_data;
+            this_raw_data.y += y_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "add", function);
+    }
+
+    //  subtract
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_x", false});
+        arguments_data.push({"float", "_y", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float x_raw_data = *__extract_raw_data<float>(_context, "_x");
+            float y_raw_data = *__extract_raw_data<float>(_context, "_y");
+
+            this_raw_data.x -= x_raw_data;
+            this_raw_data.y -= y_raw_data;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "subtract", function);
+    }
+
+    //  multiply
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_multiplier", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float multiplier = *__extract_raw_data<float>(_context, "_multiplier");
+
+            this_raw_data *= multiplier;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "multiply", function);
+    }
+
+    //  divide
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_divider", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            float divider = *__extract_raw_data<float>(_context, "_divider");
+
+            this_raw_data /= divider;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "divide", function);
+    }
 }
 
 
