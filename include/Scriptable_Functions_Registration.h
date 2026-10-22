@@ -36,26 +36,10 @@ SCRIPTABLE_CLASS_END;
         std::string return_type_str = #_RETURN_TYPE; \
         auto member_function = &Registered_Type::_FUNCTION_NAME; \
         using Member_Function_Type = decltype(member_function); \
-        auto type_extractor = LScript::__construct_member_function_type_extractor<Registered_Type, _RETURN_TYPE>(LST::Arguments_Container<__VA_ARGS__>()); \
-        static_assert(std::is_same_v<Member_Function_Type, decltype(type_extractor)::Type>); \
         std::string member_function_name = #_FUNCTION_NAME; \
         m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
-        LDS::Vector<std::string> arguments_types = LScript::__construct_args_string_vec("" #__VA_ARGS__); \
-        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
+        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, _RETURN_TYPE, __VA_ARGS__>(Registered_Type_Str, return_type_str, member_function_name, "" #__VA_ARGS__, member_function); \
     }
-
-#define INIT_SCRIPTABLE_FUNCTION_CONST(_RETURN_TYPE, _FUNCTION_NAME, ...) \
-{ \
-        std::string return_type_str = #_RETURN_TYPE; \
-        auto member_function = &Registered_Type::_FUNCTION_NAME; \
-        using Member_Function_Type = decltype(member_function); \
-        auto type_extractor = LScript::__construct_member_function_type_extractor_const<Registered_Type, _RETURN_TYPE>(LST::Arguments_Container<__VA_ARGS__>()); \
-        static_assert(std::is_same_v<Member_Function_Type, decltype(type_extractor)::Type>); \
-        std::string member_function_name = #_FUNCTION_NAME; \
-        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
-        LDS::Vector<std::string> arguments_types = LScript::__construct_args_string_vec(#__VA_ARGS__); \
-        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, Member_Function_Type>(Registered_Type_Str, return_type_str, member_function_name, LST::move(arguments_types), member_function); \
-}
 
 
 #define SCRIPTABLE_CLASS_BEGIN( CLASS_NAME ) \
