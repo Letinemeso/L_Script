@@ -34,12 +34,22 @@ SCRIPTABLE_CLASS_END;
 #define INIT_SCRIPTABLE_FUNCTION(_RETURN_TYPE, _FUNCTION_NAME, ...) \
     { \
         std::string return_type_str = #_RETURN_TYPE; \
-        auto member_function = &Registered_Type::_FUNCTION_NAME; \
+        _RETURN_TYPE(Registered_Type::*member_function)(__VA_ARGS__) = &Registered_Type::_FUNCTION_NAME; \
         using Member_Function_Type = decltype(member_function); \
         std::string member_function_name = #_FUNCTION_NAME; \
         m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
         LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, _RETURN_TYPE, __VA_ARGS__>(Registered_Type_Str, return_type_str, member_function_name, "" #__VA_ARGS__, member_function); \
     }
+
+#define INIT_SCRIPTABLE_CONST_FUNCTION(_RETURN_TYPE, _FUNCTION_NAME, ...) \
+{ \
+        std::string return_type_str = #_RETURN_TYPE; \
+        _RETURN_TYPE(Registered_Type::*member_function)(__VA_ARGS__) const = &Registered_Type::_FUNCTION_NAME; \
+        using Member_Function_Type = decltype(member_function); \
+        std::string member_function_name = #_FUNCTION_NAME; \
+        m_registration_helpers.push( new LScript::Python_Function_Registrator_Helper_Typed<Registered_Type, Member_Function_Type>(member_function, member_function_name) ); \
+        LScript::L_Script_Registration_Manager::instance().queue_registration<Registered_Type, _RETURN_TYPE, __VA_ARGS__>(Registered_Type_Str, return_type_str, member_function_name, "" #__VA_ARGS__, member_function); \
+}
 
 
 #define SCRIPTABLE_CLASS_BEGIN( CLASS_NAME ) \
