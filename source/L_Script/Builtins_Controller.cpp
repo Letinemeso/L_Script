@@ -997,9 +997,31 @@ void Builtins_Controller::M_register_default_global_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([](Context* _context)->Variable*
         {
-            glm::vec2* what_raw_data = __extract_raw_data<glm::vec2>(_context, "_what");
+            glm::vec2& what_raw_data = *__extract_raw_data<glm::vec2>(_context, "_what");
 
-            std::cout << "[debug_print] [vec2] x: " << what_raw_data->x << " y: " << what_raw_data->y << std::endl;
+            std::cout << "[debug_print] [vec2] x: " << what_raw_data.x << " y: " << what_raw_data.y << std::endl;
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("debug_print", function);
+    }
+
+    //  debug_print(vec3)
+    {
+        Function* function = new Function;
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_what", false});
+        function->set_expected_arguments_data(arguments_data);
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& what_raw_data = *__extract_raw_data<glm::vec3>(_context, "_what");
+
+            std::cout << "[debug_print] [vec3] x: " << what_raw_data.x << " y: " << what_raw_data.y << " z: " << what_raw_data.z << std::endl;
 
             return nullptr;
         });
@@ -1843,6 +1865,34 @@ void Builtins_Controller::M_register_default_vec2_functions()
         register_member_function(type_name, "y", function);
     }
 
+    //  get
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"uint", "_index", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
+            unsigned int index_raw_data = *__extract_raw_data<unsigned int>(_context, "_index");
+
+            L_ASSERT(index_raw_data < 2);
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data[index_raw_data]);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "get", function);
+    }
+
     //  add
     {
         Function* function = new Function;
@@ -2188,6 +2238,34 @@ void Builtins_Controller::M_register_default_vec3_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function(type_name, "z", function);
+    }
+
+    //  get
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"uint", "_index", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            unsigned int index_raw_data = *__extract_raw_data<unsigned int>(_context, "_index");
+
+            L_ASSERT(index_raw_data < 3);
+
+            Variable_Reference* return_ref = __construct_return_reference("float");
+            return_ref->set_data(&this_raw_data[index_raw_data]);
+
+            return return_ref;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "get", function);
     }
 
     //  add
