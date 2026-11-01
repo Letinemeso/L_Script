@@ -66,18 +66,8 @@ namespace LScript
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([_this_type_alias](Context* _context)->Variable*
             {
-                Variable* var_this = _context->get_variable("this");
-                L_ASSERT(var_this);
-                L_ASSERT(var_this->type() == _this_type_alias);
-
-                if(var_this->data() == nullptr)
-                {
-                    LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(_this_type_alias, 1);
-                    var_this->set_data(allocated_data.ptr);
-                }
-
+                _This_Type* this_raw_data = __extract_raw_data<_This_Type>(_context, "this");
                 _Other_Type* value_raw_data = __extract_raw_data<_Other_Type>(_context, "_value");
-                _This_Type* this_raw_data = (_This_Type*)var_this->data();
 
                 L_ASSERT(this_raw_data);
 
@@ -570,16 +560,10 @@ namespace LScript
             Custom_Operation* operation = new Custom_Operation;
             operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
             {
-                Variable* var_this = _context->get_variable("this");
-                L_ASSERT(var_this);
-                L_ASSERT(var_this->type() == _alias);
+                Vector& this_vec = *__extract_raw_data<Vector>(_context, "this");
+                _Type& value_raw_data = *__extract_raw_data<_Type>(_context, "_value");
 
-                Vector& this_vec = *(Vector*)var_this->data();
-                _Type* value_raw_data = __extract_raw_data<_Type>(_context, "_value");
-
-                L_ASSERT(value_raw_data);
-
-                this_vec.push(*value_raw_data);
+                this_vec.push(value_raw_data);
 
                 return nullptr;
             });
@@ -1604,22 +1588,10 @@ void Builtins_Controller::M_register_default_bool_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([](Context* _context)->Variable*
         {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
+            bool& this_raw_data = *__extract_raw_data<bool>(_context, "this");
+            bool value_raw_data = *__extract_raw_data<bool>(_context, "_value");
 
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate("bool", 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            bool* this_raw_data = (bool*)var_this->data();
-            bool* value_raw_data = __extract_raw_data<bool>(_context, "_value");
-
-            L_ASSERT(this_raw_data);
-            L_ASSERT(value_raw_data);
-
-            *this_raw_data = *value_raw_data;
+            this_raw_data = value_raw_data;
 
             return nullptr;
         });
@@ -1770,6 +1742,8 @@ void Builtins_Controller::M_register_default_vector_functions()
     __register_vector_with_type<bool>(*this, "Bool_Vector", "bool");
     __register_vector_with_type<std::string>(*this, "String_Vector", "string");
     __register_vector_with_type<float>(*this, "Float_Vector", "float");
+    __register_vector_with_type<glm::vec2>(*this, "Vec2_Vector", "vec2");
+    __register_vector_with_type<glm::vec3>(*this, "Vec3_Vector", "vec3");
 }
 
 void Builtins_Controller::M_register_default_vec2_functions()
@@ -1793,17 +1767,7 @@ void Builtins_Controller::M_register_default_vec2_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([type_name](Context* _context)->Variable*
         {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == type_name);
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(type_name, 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            glm::vec2& this_raw_data = *LST::raw_cast<glm::vec2>(var_this->data());
+            glm::vec2& this_raw_data = *__extract_raw_data<glm::vec2>(_context, "this");
             float x_raw_data = *__extract_raw_data<float>(_context, "_x");
             float y_raw_data = *__extract_raw_data<float>(_context, "_y");
 
@@ -2142,17 +2106,7 @@ void Builtins_Controller::M_register_default_vec3_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([type_name](Context* _context)->Variable*
         {
-            Variable* var_this = _context->get_variable("this");
-            L_ASSERT(var_this);
-            L_ASSERT(var_this->type() == type_name);
-
-            if(var_this->data() == nullptr)
-            {
-                LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(type_name, 1);
-                var_this->set_data(allocated_data.ptr);
-            }
-
-            glm::vec3& this_raw_data = *LST::raw_cast<glm::vec3>(var_this->data());
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
             float x_raw_data = *__extract_raw_data<float>(_context, "_x");
             float y_raw_data = *__extract_raw_data<float>(_context, "_y");
             float z_raw_data = *__extract_raw_data<float>(_context, "_z");

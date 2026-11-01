@@ -260,7 +260,9 @@ unsigned int Compiler::M_parse_global_variable_declaration(const std::string& _s
     M_print_debug_error_message(global_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
 
     Variable_Container* variable = new Variable_Container;
+    LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(_type, 1);
     variable->set_type(_type);
+    variable->set_data(allocated_data.ptr);
 
     global_context.add_variable(_name, variable);
 

@@ -23,10 +23,9 @@ Variable* Variable_Creation::process(Context* _context)
     });
 
     Variable_Container* variable = new Variable_Container;
+    LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(m_variable_type, 1);
     variable->set_type(m_variable_type);
-
-    LV::Type_Utility::Allocate_Result allocate_result = LV::Type_Manager::allocate(m_variable_type, 1);
-    variable->set_data(allocate_result.ptr);
+    variable->set_data(allocated_data.ptr);
 
     _context->add_variable(m_variable_name, variable);
 
