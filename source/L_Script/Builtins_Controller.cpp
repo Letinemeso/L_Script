@@ -3,6 +3,8 @@
 #include <vec2.hpp>
 #include <vec3.hpp>
 
+#include <Stuff/Math_Stuff.h>
+
 #include <Type_Manager.h>
 
 #include <L_Script/Script_Details/Operations/Custom_Operation.h>
@@ -877,6 +879,7 @@ Builtins_Controller::Builtins_Controller()
     M_register_default_vector_functions();
     M_register_default_vec2_functions();
     M_register_default_vec3_functions();
+    M_register_math_functions();
 }
 
 Builtins_Controller::~Builtins_Controller()
@@ -2425,6 +2428,756 @@ void Builtins_Controller::M_register_default_vec3_functions()
         function->compound_statement().add_operation(operation);
 
         register_member_function(type_name, "divided_by", function);
+    }
+}
+
+void Builtins_Controller::M_register_math_functions()
+{
+    //  vector_length (vec2)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec2", "_vec", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec2& raw_data = *__extract_raw_data<glm::vec2>(_context, "_vec");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::vector_length(raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("vector_length", function);
+    }
+
+    //  vector_length (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec3", "_vec", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& raw_data = *__extract_raw_data<glm::vec3>(_context, "_vec");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::vector_length(raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("vector_length", function);
+    }
+
+    //  vector_length_squared (vec2)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec2", "_vec", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec2& raw_data = *__extract_raw_data<glm::vec2>(_context, "_vec");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::vector_length_squared(raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("vector_length_squared", function);
+    }
+
+    //  vector_length_squared (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec3", "_vec", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& raw_data = *__extract_raw_data<glm::vec3>(_context, "_vec");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::vector_length_squared(raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("vector_length_squared", function);
+    }
+
+    //  shrink_vector_to_1 (vec2)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec2", "_vec", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& raw_data = *__extract_raw_data<glm::vec2>(_context, "_vec");
+
+            LST::Math::shrink_vector_to_1(raw_data);
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("shrink_vector_to_1", function);
+    }
+
+    //  shrink_vector_to_1 (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec3", "_vec", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& raw_data = *__extract_raw_data<glm::vec3>(_context, "_vec");
+
+            LST::Math::shrink_vector_to_1(raw_data);
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("shrink_vector_to_1", function);
+    }
+
+    //  extend_vector_to_length (vec2)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec2", "_vec", true});
+        arguments_data.push({"float", "_length", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2& vec_raw_data = *__extract_raw_data<glm::vec2>(_context, "_vec");
+            float length_raw_data = *__extract_raw_data<float>(_context, "_length");
+
+            LST::Math::extend_vector_to_length(vec_raw_data, length_raw_data);
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("extend_vector_to_length", function);
+    }
+
+    //  extend_vector_to_length (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("void");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"vec3", "_vec", true});
+        arguments_data.push({"float", "_length", true});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3& vec_raw_data = *__extract_raw_data<glm::vec3>(_context, "_vec");
+            float length_raw_data = *__extract_raw_data<float>(_context, "_length");
+
+            LST::Math::extend_vector_to_length(vec_raw_data, length_raw_data);
+
+            return nullptr;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("extend_vector_to_length", function);
+    }
+
+    //  calculate_direction_vec
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_from", false});
+        arguments_data.push({"vec3", "_to", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& from_raw_data = *__extract_raw_data<glm::vec3>(_context, "_from");
+            const glm::vec3& to_raw_data = *__extract_raw_data<glm::vec3>(_context, "_to");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::calculate_direction_vec(from_raw_data, to_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("calculate_direction_vec", function);
+    }
+
+    //  calculate_distance (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_first", false});
+        arguments_data.push({"vec3", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& first_raw_data = *__extract_raw_data<glm::vec3>(_context, "_first");
+            const glm::vec3& second_raw_data = *__extract_raw_data<glm::vec3>(_context, "_second");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::calculate_distance(first_raw_data, second_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("calculate_distance", function);
+    }
+
+    //  calculate_distance_squared (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_first", false});
+        arguments_data.push({"vec3", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& first_raw_data = *__extract_raw_data<glm::vec3>(_context, "_first");
+            const glm::vec3& second_raw_data = *__extract_raw_data<glm::vec3>(_context, "_second");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::calculate_distance_squared(first_raw_data, second_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("calculate_distance_squared", function);
+    }
+
+    //  dot_product (vec2)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec2", "_first", false});
+        arguments_data.push({"vec2", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec2& first_raw_data = *__extract_raw_data<glm::vec2>(_context, "_first");
+            const glm::vec2& second_raw_data = *__extract_raw_data<glm::vec2>(_context, "_second");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::dot_product(first_raw_data, second_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("dot_product", function);
+    }
+
+    //  dot_product (vec3)
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_first", false});
+        arguments_data.push({"vec3", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& first_raw_data = *__extract_raw_data<glm::vec3>(_context, "_first");
+            const glm::vec3& second_raw_data = *__extract_raw_data<glm::vec3>(_context, "_second");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::dot_product(first_raw_data, second_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("dot_product", function);
+    }
+
+    //  cross_product
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_first", false});
+        arguments_data.push({"vec3", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& first_raw_data = *__extract_raw_data<glm::vec3>(_context, "_first");
+            const glm::vec3& second_raw_data = *__extract_raw_data<glm::vec3>(_context, "_second");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::cross_product(first_raw_data, second_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("cross_product", function);
+    }
+
+    //  calculate_perpendicular
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_first", false});
+        arguments_data.push({"vec3", "_second", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+                                       {
+                                           const glm::vec3& first_raw_data = *__extract_raw_data<glm::vec3>(_context, "_first");
+                                           const glm::vec3& second_raw_data = *__extract_raw_data<glm::vec3>(_context, "_second");
+
+                                           Variable_Container* return_container = __construct_return_container("vec3");
+                                           glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+                                           return_raw_data = LST::Math::calculate_perpendicular(first_raw_data, second_raw_data);
+
+                                           return return_container;
+                                       });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("calculate_perpendicular", function);
+    }
+
+    //  rotate_vector
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(3);
+        arguments_data.push({"vec3", "_vector", false});
+        arguments_data.push({"vec3", "_axis", false});
+        arguments_data.push({"float", "_angle", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& vector_raw_data = *__extract_raw_data<glm::vec3>(_context, "_vector");
+            const glm::vec3& axis_raw_data = *__extract_raw_data<glm::vec3>(_context, "_axis");
+            float angle_raw_data = *__extract_raw_data<float>(_context, "_angle");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::rotate_vector(vector_raw_data, axis_raw_data, angle_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("rotate_vector", function);
+    }
+
+    //  calculate_angles
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_direction", false});
+        arguments_data.push({"vec3", "_top", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            const glm::vec3& direction_raw_data = *__extract_raw_data<glm::vec3>(_context, "_direction");
+            const glm::vec3& top_raw_data = *__extract_raw_data<glm::vec3>(_context, "_top");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::calculate_angles(direction_raw_data, top_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("calculate_angles", function);
+    }
+
+    //  random_number
+    {
+        Function* function = new Function;
+        function->set_return_type("uint");
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            Variable_Container* return_container = __construct_return_container("uint");
+            unsigned int& return_raw_data = *LST::raw_cast<unsigned int>(return_container->data());
+
+            return_raw_data = LST::Math::random_number();
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_number", function);
+    }
+
+    //  random_number (limits)
+    {
+        Function* function = new Function;
+        function->set_return_type("uint");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"uint", "_lower_limit", false});
+        arguments_data.push({"uint", "_upper_limit", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            unsigned int lower_limit_raw_data = *__extract_raw_data<unsigned int>(_context, "_lower_limit");
+            unsigned int upper_limit_raw_data = *__extract_raw_data<unsigned int>(_context, "_upper_limit");
+
+            Variable_Container* return_container = __construct_return_container("uint");
+            unsigned int& return_raw_data = *LST::raw_cast<unsigned int>(return_container->data());
+
+            return_raw_data = LST::Math::random_number(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_number", function);
+    }
+
+    //  random_number_float
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "_lower_limit", false});
+        arguments_data.push({"float", "_upper_limit", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            float lower_limit_raw_data = *__extract_raw_data<float>(_context, "_lower_limit");
+            float upper_limit_raw_data = *__extract_raw_data<float>(_context, "_upper_limit");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::random_number_float(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_number_float", function);
+    }
+
+    //  random_number_float_normal_distribution
+    {
+        Function* function = new Function;
+        function->set_return_type("float");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"float", "_lower_limit", false});
+        arguments_data.push({"float", "_upper_limit", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            float lower_limit_raw_data = *__extract_raw_data<float>(_context, "_lower_limit");
+            float upper_limit_raw_data = *__extract_raw_data<float>(_context, "_upper_limit");
+
+            Variable_Container* return_container = __construct_return_container("float");
+            float& return_raw_data = *LST::raw_cast<float>(return_container->data());
+
+            return_raw_data = LST::Math::random_number_float_normal_distribution(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_number_float_normal_distribution", function);
+    }
+
+    //  random_bool
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_raw_data = *LST::raw_cast<bool>(return_container->data());
+
+            return_raw_data = LST::Math::random_bool();
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_bool", function);
+    }
+
+    //  random_bool (limits)
+    {
+        Function* function = new Function;
+        function->set_return_type("bool");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"uint", "_chance", false});
+        arguments_data.push({"uint", "_out_of", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            unsigned int chance_raw_data = *__extract_raw_data<unsigned int>(_context, "_chance");
+            unsigned int out_of_raw_data = *__extract_raw_data<unsigned int>(_context, "_out_of");
+
+            Variable_Container* return_container = __construct_return_container("bool");
+            bool& return_raw_data = *LST::raw_cast<bool>(return_container->data());
+
+            return_raw_data = LST::Math::random_bool(chance_raw_data, out_of_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_bool", function);
+    }
+
+    //  random_vec2
+    {
+        Function* function = new Function;
+        function->set_return_type("vec2");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec2", "_lower_limit", false});
+        arguments_data.push({"vec2", "_upper_limit", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec2 lower_limit_raw_data = *__extract_raw_data<glm::vec2>(_context, "_lower_limit");
+            glm::vec2 upper_limit_raw_data = *__extract_raw_data<glm::vec2>(_context, "_upper_limit");
+
+            Variable_Container* return_container = __construct_return_container("vec2");
+            glm::vec2& return_raw_data = *LST::raw_cast<glm::vec2>(return_container->data());
+
+            return_raw_data = LST::Math::random_vec2(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_vec2", function);
+    }
+
+    //  random_vec3 (length)
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(1);
+        arguments_data.push({"float", "_length", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            float length_raw_data = *__extract_raw_data<float>(_context, "_length");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::random_vec3(length_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_vec3", function);
+    }
+
+    //  random_vec3 (limits)
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_lower_limit", false});
+        arguments_data.push({"vec3", "_upper_limit", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3 lower_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_lower_limit");
+            glm::vec3 upper_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_upper_limit");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::random_vec3(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_vec3", function);
+    }
+
+    //  random_vec3_rotation (limitless)
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({"vec3", "_initial_vec", false});
+        arguments_data.push({"vec3", "_rotation_axis", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3 lower_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_initial_vec");
+            glm::vec3 upper_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_rotation_axis");
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::random_vec3_rotation(lower_limit_raw_data, upper_limit_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_vec3_rotation", function);
+    }
+
+    //  random_vec3_rotation (limits)
+    {
+        Function* function = new Function;
+        function->set_return_type("vec3");
+
+        Function::Arguments_Data arguments_data(4);
+        arguments_data.push({"vec3", "_initial_vec", false});
+        arguments_data.push({"vec3", "_rotation_axis", false});
+        arguments_data.push({"float", "_min_angle", false});
+        arguments_data.push({"float", "_max_angle", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([](Context* _context)->Variable*
+        {
+            glm::vec3 lower_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_initial_vec");
+            glm::vec3 upper_limit_raw_data = *__extract_raw_data<glm::vec3>(_context, "_rotation_axis");
+            float min_angle_raw_data = *__extract_raw_data<float>(_context, "_min_angle");
+            float max_angle_raw_data = *__extract_raw_data<float>(_context, "_max_angle");
+
+            Variable_Container* return_container = __construct_return_container("vec3");
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = LST::Math::random_vec3_rotation(lower_limit_raw_data, upper_limit_raw_data, min_angle_raw_data, max_angle_raw_data);
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_global_function("random_vec3_rotation", function);
     }
 }
 

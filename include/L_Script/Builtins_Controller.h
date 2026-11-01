@@ -43,6 +43,7 @@ namespace LScript
         void M_register_default_vector_functions();
         void M_register_default_vec2_functions();
         void M_register_default_vec3_functions();
+        void M_register_math_functions();
 
     private:
         bool M_function_arguments_match(const Function* _function, const Argument_Types& _arg_types) const;
