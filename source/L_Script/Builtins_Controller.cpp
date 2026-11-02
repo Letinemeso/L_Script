@@ -514,7 +514,7 @@ namespace LScript
             _builtins_controller.register_member_function(_alias, "set", function);
         }
 
-        //  get
+        //  get(uint)
         {
             Function* function = new Function;
             function->set_return_type(_type_alias);
@@ -534,11 +534,39 @@ namespace LScript
                 Vector& this_vec = *(Vector*)var_this->data();
                 unsigned int index = *__extract_raw_data<unsigned int>(_context, "_index");
 
-                Variable_Container* return_container = __construct_return_container(_type_alias);
-                _Type* return_raw_data = (_Type*)return_container->data();
-                L_ASSERT(return_raw_data);
+                Variable_Reference* return_container = __construct_return_reference(_type_alias);
+                return_container->set_data(&this_vec[index]);
 
-                *return_raw_data = this_vec[index];
+                return return_container;
+            });
+            function->compound_statement().add_operation(operation);
+
+            _builtins_controller.register_member_function(_alias, "get", function);
+        }
+
+        //  get(int)
+        {
+            Function* function = new Function;
+            function->set_return_type(_type_alias);
+
+            Function::Arguments_Data arguments_data(2);
+            arguments_data.push({_alias, "this", true});
+            arguments_data.push({"int", "_index", false});
+            function->set_expected_arguments_data(LST::move(arguments_data));
+
+            Custom_Operation* operation = new Custom_Operation;
+            operation->set_operation_logic([_alias, _type_alias](Context* _context)->Variable*
+            {
+                Variable* var_this = _context->get_variable("this");
+                L_ASSERT(var_this);
+                L_ASSERT(var_this->type() == _alias);
+
+                Vector& this_vec = *(Vector*)var_this->data();
+                int index = *__extract_raw_data<int>(_context, "_index");
+                L_ASSERT(index >= 0);
+
+                Variable_Reference* return_container = __construct_return_reference(_type_alias);
+                return_container->set_data(&this_vec[index]);
 
                 return return_container;
             });
@@ -1235,14 +1263,12 @@ void Builtins_Controller::M_register_default_unsigned_int_functions()
         Custom_Operation* operation = new Custom_Operation;
         operation->set_operation_logic([](Context* _context)->Variable*
         {
-            float* this_raw_data = __extract_raw_data<float>(_context, "this");
+            unsigned int this_raw_data = *__extract_raw_data<unsigned int>(_context, "this");
 
             Variable_Container* result_container = __construct_return_container("float");
+            float& result_raw_data = *(float*)result_container->data();
 
-            float* result_raw_data = (float*)result_container->data();
-            L_ASSERT(result_raw_data);
-
-            *result_raw_data = (float)(*this_raw_data);
+            result_raw_data = (float)this_raw_data;
 
             return result_container;
         });
@@ -2374,6 +2400,34 @@ void Builtins_Controller::M_register_default_vec3_functions()
     }
 
     //  multiplied_by
+    {
+        Function* function = new Function;
+        function->set_return_type(type_name);
+
+        Function::Arguments_Data arguments_data(2);
+        arguments_data.push({type_name, "this", true});
+        arguments_data.push({"float", "_value", false});
+        function->set_expected_arguments_data(LST::move(arguments_data));
+
+        Custom_Operation* operation = new Custom_Operation;
+        operation->set_operation_logic([type_name](Context* _context)->Variable*
+        {
+            glm::vec3& this_raw_data = *__extract_raw_data<glm::vec3>(_context, "this");
+            float value_raw_data = *__extract_raw_data<float>(_context, "_value");
+
+            Variable_Container* return_container = __construct_return_container(type_name);
+            glm::vec3& return_raw_data = *LST::raw_cast<glm::vec3>(return_container->data());
+
+            return_raw_data = this_raw_data * value_raw_data;
+
+            return return_container;
+        });
+        function->compound_statement().add_operation(operation);
+
+        register_member_function(type_name, "multiplied_by", function);
+    }
+
+    //  multiplied_by (multiple floats)
     {
         Function* function = new Function;
         function->set_return_type(type_name);
