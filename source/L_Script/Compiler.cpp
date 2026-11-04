@@ -532,7 +532,7 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(const std::stri
     });
 
     unsigned int symbol_after_args_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, args_borders.end + 1, _max_size);
-    L_ASSERT(symbol_after_args_index < _max_size);
+    L_ASSERT_WITH_INFO(symbol_after_args_index < _max_size, "Unable to find symbols after \"" + _name + "\" call");
     if( _source[symbol_after_args_index] == '.' )
         return M_parse_member_access(operation, _source, symbol_after_args_index, _max_size);
 
