@@ -47,11 +47,19 @@ namespace LScript
         INIT_VARIABLE(LScript::L_Script_Stub, LScript::Script_Stub)
 
         INIT_FIELDS
-        ADD_FIELD(std::string, source_code)
+        ADD_FIELD(LDS::Vector<std::string>, source_code)
         FIELDS_END
 
+        OVERRIDE_ON_VALUES_ASSIGNED
+
     public:
-        std::string source_code;
+        LDS::Vector<std::string> source_code;
+
+    public:
+        std::string source_code_str;
+
+    public:
+        void update_source_code_str();
 
     public:
         INIT_BUILDER_STUB(L_Script)

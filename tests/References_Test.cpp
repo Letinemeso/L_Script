@@ -12,7 +12,7 @@ namespace
     LScript::L_Script* __construct_script(const std::string& _source)
     {
         LScript::L_Script_Stub stub;
-        stub.source_code = _source;
+        stub.source_code_str = _source;
 
         return LScript::L_Script_Stub::construct_from(&stub);
     }

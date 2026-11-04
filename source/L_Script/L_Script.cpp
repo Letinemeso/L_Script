@@ -74,6 +74,22 @@ void L_Script::run()
 
 
 
+ON_VALUES_ASSIGNED_IMPLEMENTATION(L_Script_Stub)
+{
+    update_source_code_str();
+}
+
+
+
+void L_Script_Stub::update_source_code_str()
+{
+    source_code_str.clear();
+    for(unsigned int i = 0; i < source_code.size(); ++i)
+        source_code_str += source_code[i];
+}
+
+
+
 BUILDER_STUB_DEFAULT_CONSTRUCTION_FUNC(L_Script_Stub)
 
 BUILDER_STUB_INITIALIZATION_FUNC(L_Script_Stub)
@@ -84,5 +100,5 @@ BUILDER_STUB_INITIALIZATION_FUNC(L_Script_Stub)
     Compiler compiler;
 
     compiler.set_target(product);
-    compiler.compile(source_code);
+    compiler.compile(source_code_str);
 }
