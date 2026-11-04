@@ -362,6 +362,9 @@ void Compiler::M_parse_compound_statement(Compound_Statement& _compound_statemen
 
         _compound_statement.add_operation(parse_result.operation);
         offset = parse_result.offset_after;
+
+        while(_source[offset] == ';')
+            ++offset;
     }
 }
 
@@ -462,9 +465,6 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(const std
     unsigned int next_word_size = after_name_offset - name_offset;
     std::string name = _source.substr(name_offset, next_word_size);
 
-    M_print_debug_error_message(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration,
-                                _source, after_name_offset, 1, "Unable to declare a function inside a function");
-
     Variable_Creation* operation = new Variable_Creation;
     operation->set_variable_type(_type);
     operation->set_variable_name(name);
@@ -473,6 +473,14 @@ Compiler::Operation_Parse_Result Compiler::M_parse_dynamic_declaration(const std
     {
         operation->set_debug_info(M_parse_line(_source, name_offset), M_calculate_line_number(_source, name_offset));
     });
+
+    unsigned int symbol_after_name_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_name_offset, _max_size);
+    L_ASSERT(symbol_after_name_index < _max_size);
+    if( _source[symbol_after_name_index] == '.' )
+        return M_parse_member_access(operation, _source, symbol_after_name_index, _max_size);
+
+    M_print_debug_error_message(M_function_or_variable_declaration(_source, after_name_offset) == Expression_Goal::Variable_Declaration,
+                                _source, after_name_offset, 1, "Unable to declare a function inside a function");
 
     Operation_Parse_Result result;
     result.operation = operation;
@@ -570,7 +578,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const s
 
             if(expression_goal == Expression_Goal::Unknown)
             {
-                Operation* operation = M_construct_variable_extraction_operation(first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation* operation = M_construct_variable_extraction_operation(first_word, argument, 0, after_first_word_offset);
                 operations.push(operation);
             }
             else if(expression_goal == Expression_Goal::Member_Access)

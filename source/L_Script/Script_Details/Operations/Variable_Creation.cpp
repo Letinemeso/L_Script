@@ -29,5 +29,5 @@ Variable* Variable_Creation::process(Context* _context)
 
     _context->add_variable(m_variable_name, variable);
 
-    return nullptr;
+    return variable;
 }

@@ -63,36 +63,21 @@ namespace LScript
         inline static L_Script_Registration_Manager& instance() { static L_Script_Registration_Manager s_instance; return s_instance; }
 
     public:
-        template <typename _Owner_Class, typename _Return_Type, typename... _Arg_Types>
+        template <typename _Owner_Class, typename _Function_Type>
         void queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
-                                const std::string& _arg_types, _Return_Type(_Owner_Class::*_function_ptr)(_Arg_Types...));
-        template <typename _Owner_Class, typename _Return_Type, typename... _Arg_Types>
-        void queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
-                                const std::string& _arg_types, _Return_Type(_Owner_Class::*_function_ptr)(_Arg_Types...) const);
+                                const std::string& _arg_types, _Function_Type _function_ptr);
 
         void register_all();
 
     };
 
 
-    template <typename _Owner_Class, typename _Return_Type, typename... _Arg_Types>
+    template <typename _Owner_Class, typename _Function_Type>
     void L_Script_Registration_Manager::queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
-                                                           const std::string& _arg_types, _Return_Type(_Owner_Class::*_function_ptr)(_Arg_Types...))
+                                                           const std::string& _arg_types, _Function_Type _function_ptr)
     {
-        using Function_Type = decltype(_function_ptr);
-
         LDS::Vector<std::string> arguments_types = __construct_args_string_vec(_arg_types);
-        m_helpers.push( new L_Script_Registration_Helper_Typed<_Owner_Class, Function_Type>(_owner_class_name, _return_type, _member_function_name, LST::move(arguments_types), _function_ptr) );
-    }
-
-    template <typename _Owner_Class, typename _Return_Type, typename... _Arg_Types>
-    void L_Script_Registration_Manager::queue_registration(const std::string& _owner_class_name, const std::string& _return_type, const std::string& _member_function_name,
-                                                           const std::string& _arg_types, _Return_Type(_Owner_Class::*_function_ptr)(_Arg_Types...) const)
-    {
-        using Function_Type = decltype(_function_ptr);
-
-        LDS::Vector<std::string> arguments_types = __construct_args_string_vec(_arg_types);
-        m_helpers.push( new L_Script_Registration_Helper_Typed<_Owner_Class, Function_Type>(_owner_class_name, _return_type, _member_function_name, LST::move(arguments_types), _function_ptr) );
+        m_helpers.push( new L_Script_Registration_Helper_Typed<_Owner_Class, _Function_Type>(_owner_class_name, _return_type, _member_function_name, LST::move(arguments_types), _function_ptr) );
     }
 
 }
