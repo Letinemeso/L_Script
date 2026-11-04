@@ -83,6 +83,7 @@ namespace LScript
         [[nodiscard]] Operation_Parse_Result M_parse_dynamic_declaration(const std::string& _type, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         [[nodiscard]] Operation_Parse_Result M_parse_member_access(Operation* _variable_extractor, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
         [[nodiscard]] Compiler::Operation_Parse_Result M_parse_function_call(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
+        [[nodiscard]] Operation* M_parse_argument(const std::string& _source, const std::string& _arg, unsigned int _args_offset) const;
         [[nodiscard]] LDS::Vector<Operation*> M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const;
         LDS::Vector<std::string> M_parse_passed_arguments(const std::string& _source, unsigned int _begin, unsigned int _end) const;
         std::string M_deduce_rvalue_type(const std::string& _rvalue) const;

@@ -21,7 +21,6 @@ namespace LScript
 {
     constexpr const char* String_Type_Name = "string";
     constexpr const char* Void_Type_Name = "void";
-    constexpr const char* Bool_Type_Name = "bool";
 
     constexpr const char* If_Expression = "if";
     constexpr const char* Else_Expression = "else";
@@ -543,6 +542,66 @@ Compiler::Operation_Parse_Result Compiler::M_parse_function_call(const std::stri
     return result;
 }
 
+Operation* Compiler::M_parse_argument(const std::string& _source, const std::string& _arg, unsigned int _args_offset) const
+{
+    std::string first_word = M_parse_first_word(_arg, 0, Unlimited_Size);
+    unsigned int after_first_word_offset = M_skip_past_first_word(_arg, 0, Unlimited_Size);
+
+    Expression_Type expression_type = M_get_expression_type(first_word);
+
+    if(expression_type == Expression_Type::Unknown)     //  treat this as a possible r-value
+    {
+        RValue_Getter* operation = M_construct_rvalue_getter(_arg);
+        return operation;
+    }
+    else if(expression_type == Expression_Type::Variable_Name)
+    {
+        Expression_Goal expression_goal = M_member_access_or_function_call(_arg, after_first_word_offset);
+
+        if(expression_goal == Expression_Goal::Unknown)
+        {
+            Operation* operation = M_construct_variable_extraction_operation(first_word, _arg, 0, after_first_word_offset);
+
+            L_DEBUG_FUNC_NOARG([&]()
+            {
+                unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, after_first_word_offset, _arg.size());
+                M_print_debug_error_message(next_symbol_index == _arg.size(), _source, _source.find(_arg, _args_offset), _arg.size(), "Unexpected expression type as an argument");
+            });
+
+            return operation;
+        }
+        else if(expression_goal == Expression_Goal::Member_Access)
+        {
+            Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, _arg, 0, after_first_word_offset);
+            Operation_Parse_Result parse_result = M_parse_member_access(variable_extractor, _arg, after_first_word_offset, Unlimited_Size);
+
+            L_DEBUG_FUNC_NOARG([&]()
+            {
+                unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, parse_result.offset_after, _arg.size());
+                M_print_debug_error_message(next_symbol_index == _arg.size(), _source, _source.find(_arg, _args_offset), _arg.size(), "Unexpected expression type as an argument");
+            });
+
+            return parse_result.operation;
+        }
+        else if(expression_goal == Expression_Goal::Function_Call)
+        {
+            Operation_Parse_Result parse_result = M_parse_function_call(first_word, _arg, after_first_word_offset, Unlimited_Size);
+
+            L_DEBUG_FUNC_NOARG([&]()
+            {
+                unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, parse_result.offset_after, _arg.size());
+                M_print_debug_error_message(next_symbol_index == _arg.size(), _source, _source.find(_arg, _args_offset), _arg.size(), "Unexpected expression type as an argument");
+            });
+
+            return parse_result.operation;
+        }
+    }
+
+    M_print_debug_error_message(false, _source, _source.find(_arg, _args_offset), _arg.size(), "Unexpected expression type as an argument");
+
+    return nullptr;
+}
+
 LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const std::string& _source, unsigned int _args_begin, unsigned int _args_end) const
 {
     LDS::Vector<std::string> arguments = M_parse_passed_arguments(_source, _args_begin, _args_end);
@@ -555,54 +614,8 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const s
     for(unsigned int i = 0; i < arguments.size(); ++i)
     {
         std::string& argument = arguments[i];
-
-        std::string first_word = M_parse_first_word(argument, 0, Unlimited_Size);
-        unsigned int after_first_word_offset = M_skip_past_first_word(argument, 0, Unlimited_Size);
-
-        Expression_Type expression_type = M_get_expression_type(first_word);
-
-        if(expression_type == Expression_Type::Unknown)     //  treat this as a possible r-value
-        {
-            RValue_Getter* operation = M_construct_rvalue_getter(argument);
-            operations.push(operation);
-        }
-        else if(expression_type == Expression_Type::Variable_Name)
-        {
-            Expression_Goal expression_goal = M_member_access_or_function_call(argument, after_first_word_offset);
-
-            if(expression_goal == Expression_Goal::Unknown)
-            {
-                Operation* operation = M_construct_variable_extraction_operation(first_word, argument, 0, after_first_word_offset);
-                operations.push(operation);
-            }
-            else if(expression_goal == Expression_Goal::Member_Access)
-            {
-                Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, argument, 0, after_first_word_offset);
-                Operation_Parse_Result parse_result = M_parse_member_access(variable_extractor, argument, after_first_word_offset, Unlimited_Size);
-                operations.push(parse_result.operation);
-
-                L_DEBUG_FUNC_NOARG([&]()
-                {
-                    unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, parse_result.offset_after, argument.size());
-                    M_print_debug_error_message(next_symbol_index == argument.size(), _source, _source.find(argument, _args_begin), argument.size(), "Unexpected expression type as an argument");
-                });
-            }
-            else if(expression_goal == Expression_Goal::Function_Call)
-            {
-                Operation_Parse_Result parse_result = M_parse_function_call(first_word, argument, after_first_word_offset, Unlimited_Size);
-                operations.push(parse_result.operation);
-
-                L_DEBUG_FUNC_NOARG([&]()
-                {
-                    unsigned int next_symbol_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, parse_result.offset_after, argument.size());
-                    M_print_debug_error_message(next_symbol_index == argument.size(), _source, _source.find(argument, _args_begin), argument.size(), "Unexpected expression type as an argument");
-                });
-            }
-        }
-        else
-        {
-            M_print_debug_error_message(false, _source, _source.find(argument, _args_begin), argument.size(), "Unexpected expression type as an argument");
-        }
+        Operation* operation = M_parse_argument(_source, argument, _args_begin);
+        operations.push(operation);
     }
 
     return operations;
@@ -714,9 +727,12 @@ Compiler::Operation_Parse_Result Compiler::M_parse_return(const std::string& _ex
     }
     else
     {
-        Operation_Parse_Result subexpression_result = M_parse_subexpression(_source, offset, _max_size);
-        result.offset_after = M_skip_past_semicolon(_source, subexpression_result.offset_after, _max_size);
-        return_operation->set_operation(subexpression_result.operation);
+        result.offset_after = M_skip_until_symbol_met(_source, ';', true, offset, _max_size);
+
+        std::string arg = _source.substr(offset, result.offset_after - offset);
+        Operation* operation = M_parse_argument(_source, arg, offset);
+
+        return_operation->set_operation(operation);
     }
 
     return result;
