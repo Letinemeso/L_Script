@@ -577,7 +577,7 @@ LDS::Vector<Operation*> Compiler::M_construct_argument_getter_operations(const s
             }
             else if(expression_goal == Expression_Goal::Member_Access)
             {
-                Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, argument, after_first_word_offset, Unlimited_Size);
+                Operation* variable_extractor = M_construct_variable_extraction_operation(first_word, argument, 0, after_first_word_offset);
                 Operation_Parse_Result parse_result = M_parse_member_access(variable_extractor, argument, after_first_word_offset, Unlimited_Size);
                 operations.push(parse_result.operation);
 
