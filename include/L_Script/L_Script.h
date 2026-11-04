@@ -16,6 +16,8 @@ namespace LScript
     private:
         Context m_global_context;
 
+        Compound_Statement m_initialization;
+
         using Functions_Map = LDS::Map<std::string, Function*>;
         Functions_Map m_functions;
 
@@ -26,6 +28,8 @@ namespace LScript
     public:
         inline Context& global_context() { return m_global_context; }
         inline const Context& global_context() const { return m_global_context; }
+
+        inline Compound_Statement& initialization_compound_statement() { return m_initialization; }
 
     public:
         void set_context_object(const std::string& _type_as_string, const std::string& _name, void* _ptr) override;

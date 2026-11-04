@@ -216,6 +216,9 @@ void Compiler::M_parse_global_space(const std::string& _source) const
     while(offset < _source.size())
     {
         offset = M_parse_global_expression(_source, offset);
+
+        while(_source[offset] == ';')
+            ++offset;
     }
 }
 
@@ -247,30 +250,21 @@ unsigned int Compiler::M_parse_global_expression(const std::string& _source, uns
     if(expression_goal == Expression_Goal::Function_Declaration)
         return M_parse_function_declaration(_source, first_word, second_word, after_second_word_offset, _max_size);
     else if(expression_goal == Expression_Goal::Variable_Declaration)
-        return M_parse_global_variable_declaration(_source, first_word, second_word, after_second_word_offset);
+        return M_parse_global_variable_declaration(_source, first_word, after_first_word_offset, after_second_word_offset);
 
     return Unlimited_Size;
 }
 
-unsigned int Compiler::M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const
+unsigned int Compiler::M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, unsigned int _offset_after_type, unsigned int _offset_after_name) const
 {
-    Context& global_context = m_script_target->global_context();
-
     M_print_debug_error_message(_type != Void_Type_Name, _source, _offset_after_name, Unlimited_Size, "Unable to create variable with type \"void\"");
-    M_print_debug_error_message(global_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
+    // M_print_debug_error_message(global_context.get_local_variable(_name) == nullptr, _source, _offset_after_name - _name.size(), _name.size(), "Variable with name \"" + _name + "\" already exist");
 
-    Variable_Container* variable = new Variable_Container;
-    LV::Type_Utility::Allocate_Result allocated_data = LV::Type_Manager::allocate(_type, 1);
-    variable->set_type(_type);
-    variable->set_data(allocated_data.ptr);
+    Operation_Parse_Result parse_result = M_parse_dynamic_declaration(_type, _source, _offset_after_type, Unlimited_Size);
 
-    global_context.add_variable(_name, variable);
+    m_script_target->initialization_compound_statement().add_operation(parse_result.operation);
 
-    unsigned int semicolon_index = M_skip_until_symbol_met(_source, Empty_Symbols, false, _offset_after_name);
-    M_print_debug_error_message(semicolon_index != Unlimited_Size, _source, _offset_after_name, 1, "Expected \";\"");
-    M_print_debug_error_message(_source[semicolon_index] == ';', _source, semicolon_index, 1, "Expected \";\"");
-
-    return semicolon_index + 1;
+    return parse_result.offset_after;
 }
 
 unsigned int Compiler::M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name, unsigned int _max_size) const
@@ -1067,7 +1061,7 @@ Compiler::Expression_Goal Compiler::M_function_or_variable_declaration(const std
 
     if(next_symbol == '(')
         return Expression_Goal::Function_Declaration;
-    if(next_symbol == ';')
+    if(next_symbol == ';' || next_symbol == '.')
         return Expression_Goal::Variable_Declaration;
 
     return Expression_Goal::Unknown;

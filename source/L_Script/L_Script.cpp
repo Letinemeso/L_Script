@@ -63,11 +63,16 @@ Function* L_Script::get_function(const std::string& _name) const
 
 void L_Script::run()
 {
+    Variable* initialization_result = m_initialization.process(&m_global_context);
+    L_ASSERT(!initialization_result || !initialization_result->is_temporary());
+
     Function* main_func = get_function("main");
     L_ASSERT(main_func);
 
     Variable* main_result = main_func->call(&m_global_context, {});
     L_ASSERT(!main_result);
+
+    m_global_context.clear();
 }
 
 

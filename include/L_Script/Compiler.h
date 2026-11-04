@@ -71,7 +71,7 @@ namespace LScript
         void M_parse_global_space(const std::string& _source) const;
 
         unsigned int M_parse_global_expression(const std::string& _source, unsigned int _offset, unsigned int _max_size = Unlimited_Size) const;
-        unsigned int M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name) const;
+        unsigned int M_parse_global_variable_declaration(const std::string& _source, const std::string& _type, unsigned int _offset_after_type, unsigned int _offset_after_name) const;
         unsigned int M_parse_function_declaration(const std::string& _source, const std::string& _type, const std::string& _name, unsigned int _offset_after_name, unsigned int _max_size) const;
 
         [[nodiscard]] Operation* M_construct_variable_extraction_operation(const std::string& _name, const std::string& _source, unsigned int _offset, unsigned int _max_size) const;
