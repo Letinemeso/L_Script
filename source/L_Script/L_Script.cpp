@@ -81,6 +81,9 @@ void L_Script::run()
     Variable* main_result = main_func->call(&m_global_context, {});
     L_ASSERT(!main_result);
 
+    for(Context_Objects_Map::Iterator it = m_context_objects.iterator(); !it.end_reached(); ++it)
+        Variable* discard_var = m_global_context.extract_variable(it.key());
+
     m_global_context.clear();
 }
 
