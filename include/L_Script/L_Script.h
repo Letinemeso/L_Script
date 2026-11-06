@@ -14,6 +14,9 @@ namespace LScript
         INIT_VARIABLE(LScript::L_Script, LScript::Script)
 
     private:
+        using Context_Objects_Map = LDS::Map<std::string, Variable*>;
+        Context_Objects_Map m_context_objects;
+
         Context m_global_context;
 
         Compound_Statement m_initialization;

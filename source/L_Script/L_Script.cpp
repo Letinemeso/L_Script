@@ -20,18 +20,24 @@ L_Script::~L_Script()
 
 void L_Script::set_context_object(const std::string& _type_as_string, const std::string& _name, void* _ptr)
 {
-    Variable* variable = m_global_context.get_variable(_name);
-    if(variable)
-    {
-        variable = m_global_context.extract_variable(_name);
-        delete variable;
-    }
+    // Variable* variable = m_global_context.get_variable(_name);
+    // if(variable)
+    // {
+    //     variable = m_global_context.extract_variable(_name);
+    //     delete variable;
+    // }
+
+    Context_Objects_Map::Iterator co_it = m_context_objects.find(_name);
+    if(co_it.is_ok())
+        delete *co_it;
+    else
+        co_it = m_context_objects.insert_and_get_iterator(_name, nullptr);
 
     Variable_Reference* pointer_variable = new Variable_Reference;
     pointer_variable->set_type(_type_as_string);
     pointer_variable->set_data(_ptr);
 
-    m_global_context.add_variable(_name, pointer_variable);
+    *co_it = pointer_variable;
 }
 
 
@@ -63,6 +69,9 @@ Function* L_Script::get_function(const std::string& _name) const
 
 void L_Script::run()
 {
+    for(Context_Objects_Map::Iterator it = m_context_objects.iterator(); !it.end_reached(); ++it)
+        m_global_context.add_variable(it.key(), *it);
+
     Variable* initialization_result = m_initialization.process(&m_global_context);
     L_ASSERT(!initialization_result || !initialization_result->is_temporary());
 
